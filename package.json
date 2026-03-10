@@ -1,0 +1,20 @@
+{
+  "name": "@rcpch/digital-pews",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RCPCH Digital PEWS - National Paediatric Early Warning System",
+  "scripts": {
+    "serve": "bash scripts/serve",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.0",
+    "@storybook/addon-links": "^8.6.0",
+    "@storybook/html": "^8.6.0",
+    "@storybook/html-vite": "^8.6.0",
+    "storybook": "^8.6.0",
+    "vite": "^6.0.0"
+  }
+}
