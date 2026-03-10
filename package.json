@@ -6,7 +6,7 @@
   "description": "RCPCH Digital PEWS - National Paediatric Early Warning System",
   "scripts": {
     "serve": "bash scripts/serve",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "bash scripts/storybook",
     "build-storybook": "storybook build"
   },
   "devDependencies": {

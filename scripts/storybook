@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Start Storybook in development mode.
+# Usage: scripts/storybook [port]
+# Default port: 6006
+
+set -euo pipefail
+
+PORT="${1:-6006}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [ ! -f "$ROOT/package.json" ]; then
+  echo "Error: package.json not found at $ROOT" >&2
+  exit 1
+fi
+
+if [ ! -d "$ROOT/node_modules" ]; then
+  echo "node_modules not found - running npm install first..."
+  npm --prefix "$ROOT" install
+fi
+
+echo "Starting Storybook on http://localhost:$PORT"
+npm --prefix "$ROOT" exec -- storybook dev -p "$PORT"
