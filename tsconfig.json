@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/types" },
+    { "path": "packages/errors" },
+    { "path": "packages/logger" },
+    { "path": "packages/config" },
+    { "path": "packages/clinical-engine" },
+    { "path": "packages/smart" },
+    { "path": "apps/api" },
+    { "path": "apps/web" }
+  ]
+}

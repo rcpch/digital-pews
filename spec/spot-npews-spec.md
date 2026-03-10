@@ -9,15 +9,15 @@ We have used the MOSCOW rating system to assess the priority of each requirement
 - **Must** - Any SPOT / NPEWS solution **must** meet all of these requirements. When undergoing a procurement exercise no solution **should** be selected that fails one or more Musts.
 - **Should** - Ideally a SPOT / NPEWS solution would have all the Shoulds as well as all the musts. There may be some shoulds that don't apply to certain solutions, or some suppliers may do the majority of the Shoulds but miss one or two. Missing a **should** is not a barrier to a successful procurement but would be a useful comparison to make between competing suppliers to pick the one best suited.
 - **Could** - A **could** is a nice to have, these are often future looking or ideal features that it is understood many or most suppliers won't deliver yet, but may have on roadmaps. A lack of coulds **should** not be a barrier to supplier selection, but where several suppliers are similar in their ability to meet Musts and Shoulds whether they meet Coulds is a useful measure for differentiation.
-- Won't - This is used to call out something we explicitely wont be doing. No solution **should** do this feature as to do so would be an error. We include some won'ts to avoid assumptions that might be made otherwise
+- Won't - This is used to call out something we explicitly won't be doing. No solution **should** do this feature as to do so would be an error. We include some won'ts to avoid assumptions that might be made otherwise
 
 ## Breakdown by clinical and technical requirements
 
-Owing to the differing nature of and review process for we've broken apart the requirements into a clinical section (identified by IDs beginning with C) and a technical section (identified by IDs beginning with T). This has been done to help trusts assign the right areas to the right members of staff when they're assessing bids and to help suppliers with the focus of their responses. The designation of an item as either clinical or technical doesn't affect its importance, both sides have equal weighting. Due to the nature of the system there are some requirements that **could** sit in either side of the specification. For ease of use we have just selected one or the other to place them in, but you may as a result see a few requirements that straddle the two sides. The format used for assessment has been the same regardless of the requirements categorisation so either side **should** be readable in the same way.
+Owing to the differing nature of and review process for these requirements, we've broken apart the requirements into a clinical section (identified by IDs beginning with C) and a technical section (identified by IDs beginning with T). This has been done to help trusts assign the right areas to the right members of staff when they're assessing bids and to help suppliers with the focus of their responses. The designation of an item as either clinical or technical doesn't affect its importance, both sides have equal weighting. Due to the nature of the system there are some requirements that **could** sit in either side of the specification. For ease of use we have just selected one or the other to place them in, but you may as a result see a few requirements that straddle the two sides. The format used for assessment has been the same regardless of the requirements categorisation so either side **should** be readable in the same way.
 
 ## Usage of this document by Integrated Care Systems (ICSs) and Trusts
 
-The purpose of this document is to form a baseline for the SPOT / NPEWS solution for any ICS or trust who needs to procure a SPOT / NPEWS solution. This document is intended to be the national baseline, so as such it would be expected that any solution procured **must** meet all of the **Must** requirements that are included.   Given that this is a national document it is understood that we will be unable to reflect any locally specific requirements. As such it is expected that the trust add these to the requirements list before going out to procurement. For example we can add generic statements about integration, but the Trust may want to add a list of systems that they have that the solution **must** integrate with. There may also be some of the Shoulds or Coulds that change locally, for instance we might have included a **could** that just isn't relevant in your local environment so you can take it out. Alternatively one of our Shoulds may be a **Must** in your local area, so you **should** feel free to upgrade it's status. This is a baseline so we are more than happy for Trusts to increase the classification of items and aim at a higher standard. In terms of downgrades, care **must** be given before downgrading a **Must**, as you may find that your system isn't compliant with national standards, however there may be limited situations where you need to replace a generic **must** with a more specific one reflecting local realities.
+The purpose of this document is to form a baseline for the SPOT / NPEWS solution for any ICS or trust who needs to procure a SPOT / NPEWS solution. This document is intended to be the national baseline, so as such it would be expected that any solution procured **must** meet all of the **Must** requirements that are included.   Given that this is a national document it is understood that we will be unable to reflect any locally specific requirements. As such it is expected that the trust add these to the requirements list before going out to procurement. For example we can add generic statements about integration, but the Trust may want to add a list of systems that they have that the solution **must** integrate with. There may also be some of the Shoulds or Coulds that change locally, for instance we might have included a **could** that just isn't relevant in your local environment so you can take it out. Alternatively one of our Shoulds may be a **Must** in your local area, so you **should** feel free to upgrade its status. This is a baseline so we are more than happy for Trusts to increase the classification of items and aim at a higher standard. In terms of downgrades, care **must** be given before downgrading a **Must**, as you may find that your system isn't compliant with national standards, however there may be limited situations where you need to replace a generic **must** with a more specific one reflecting local realities.
 Requirements from this document are being shared with suppliers in the SPOT / NPEWS market for comment and review so using this baseline **should** assist your procurements as suppliers will already have sight of it. It is hoped that by including shoulds and coulds into this specification we can help to inform suppliers roadmaps to resolve those issues where they might be diverging from the expected standard.
 
 ## Key definitions
@@ -36,11 +36,11 @@ Clinicians is our generally used term to refer to staff working with the SPOT / 
 
 ### ICS/Trust
 
-The Integrated Care Systems (ICSs) and Trusts are used interchangeably through this document. Depending on the area purchasing of systems may be done at the ICS or at the Trust level and so both are used throughout. If the procurement is being done at ICS level requirements that refer to the Trust **should** be seen to refer to the ICS and visa versa.
+The Integrated Care Systems (ICSs) and Trusts are used interchangeably through this document. Depending on the area purchasing of systems may be done at the ICS or at the Trust level and so both are used throughout. If the procurement is being done at ICS level requirements that refer to the Trust **should** be seen to refer to the ICS and vice versa.
 
 ### Standards and datasets
 
-When standards and datasets are listed it is assumed that the current version as of the date of procurement publication is to be used. Version numbers have not be used in this document to avoid creating an overhead in terms of updating them, but trusts are welcome to include them in their procurement documents. Any new datasets will be included as part of the regular updates to this document.
+When standards and datasets are listed it is assumed that the current version as of the date of procurement publication is to be used. Version numbers have not been used in this document to avoid creating an overhead in terms of updating them, but trusts are welcome to include them in their procurement documents. Any new datasets will be included as part of the regular updates to this document.
 
 ### Patient
 
@@ -52,7 +52,7 @@ We've used carer to refer to the carer or parent responsible for the child or yo
 
 ### Form
 
-We've used Form generically to describe the interface used to input observation data on the PEWS system, in a similar way to the paper version being called a form. We understand that different supplier solutions may use different terms like interface, app or workflow, and in their systems "form" may mean something different. For our purposes we are using the term in it's generic plain English form and do not preclude different ways that suppliers may implement the described interface in their systems
+We've used Form generically to describe the interface used to input observation data on the PEWS system, in a similar way to the paper version being called a form. We understand that different supplier solutions may use different terms like interface, app or workflow, and in their systems "form" may mean something different. For our purposes we are using the term in its generic plain English form and do not preclude different ways that suppliers may implement the described interface in their systems
 
 ### Training Requirements
 
@@ -60,19 +60,19 @@ This specification refers to supplier led training (typically expected to be of 
 
 ### Compliance with the standard
 
-For a trust or a supplier to claim that they are compliant with the National PEWS standard in communications or advertising their solution **must** meet all of the **must** requirements in the specifications. A failure to meet any **must** have requirement will mean that the trust or supplier will not be allowed to claim to be compliant with PEWS.
+For a trust or a supplier to claim that they are compliant with the National PEWS standard in communications or advertising their solution **must** meet all of the **must** requirements in the specifications. A failure to meet any **must-have** requirement will mean that the trust or supplier will not be allowed to claim to be compliant with PEWS.
 
 ## Clinical Requirements
 
 ### General Clinical Requirements
-- [ ] **C1.1**: The solution **must** support bidirectional integration with Electronic Patient Records so that the patients details can be pulled into the form, and the form be attached to the record when used. This **must** ensure entries are only made once.
+- [ ] **C1.1**: The solution **must** support bidirectional integration with Electronic Patient Records so that the patient's details can be pulled into the form, and the form be attached to the record when used. This **must** ensure entries are only made once.
 - [ ] **C1.2**: The solution **must** include banding for the different levels of each measure of observation. These bandings **must** score for PEWS and be coloured coded. The colours and scores **must** be White - 0 Points, Yellow - 1 Point, Orange - 2 Points, Pink - 4 Points.
 - [ ] **C1.3**: The solution **must** allow the banding levels for each observation to change as new guidance is issued by NHSE
 - [ ] **C1.4**: The solution **must** use the higher of two possible bandings if due to an unexpected level of specificity a score would fall between them on the scale outlined as part of configuration
 - [ ] **C1.5**: The solution **should** interface with other hospital communication systems to create wider alerts in an emergency
 - [ ] **C1.6**: The solution **should** allow a clinician to mark the periods when a patient is absent for theatre or scans and highlight this on the form
 - [ ] **C1.7**: The solution **must** be developed in such a way that requirements can be fulfilled and updates implemented as directed by this specification and any updates to it. Suppliers will not be able to use the implementation of other early warning systems (e.g. NEWS, MEWS) as an excuse to deviate from requirements contained in this specification. While suppliers are welcome to develop systems in such a way that permit reuse of assets this **must** not be at the expense of being able to implement core PEWS features.
-- [ ] **C1.8** (MOSCOW: Won't): The solution wont stop a clinician inputting a single observation into an overarching system (like an EPR). The full set will only be expected when doing a PEWS observation that would then score
+- [ ] **C1.8** (MOSCOW: Won't): The solution won't stop a clinician inputting a single observation into an overarching system (like an EPR). The full set will only be expected when doing a PEWS observation that would then score
 
 ### Form Creation and Selection Requirements
 
@@ -83,17 +83,17 @@ For a trust or a supplier to claim that they are compliant with the National PEW
 
 ### Viewing and Recording Observations Requirements
 
-- [ ] **C3.1**: The solution **must** show at least the previous 24 hour's observations, unless there is less then 24 hours recorded then it **must** show all the observations. This can use scrolling, but may not be implemented by having to load a different non continuous view
-- [ ] **C3.2**: The solution **should** show more than 24 hours observations. The solution **should** be able to show the previous 96 hours observations on one screen. This can use scrolling, but may not be implemented by having to load a different non continuous view
+- [ ] **C3.1**: The solution **must** show at least the previous 24 hours' observations, unless there is less than 24 hours recorded then it **must** show all the observations. This can use scrolling, but may not be implemented by having to load a different non-continuous view
+- [ ] **C3.2**: The solution **should** show more than 24 hours observations. The solution **should** be able to show the previous 96 hours observations on one screen. This can use scrolling, but may not be implemented by having to load a different non-continuous view
 - [ ] **C3.3**: The solution **must** show at least 12 observations when they are infrequent enough that there have been less than ten in a 24 hour period.
-- [ ] **C3.4**: The solution **must** allow regular observations to take place and expand to allow as many observations as take place in a rolling 24 hour period. This can use scrolling, but may not be implemented by having to load a different non continuous view
-- [ ] **C3.5**: The solution **should** allow regular observations to take place and expand to allow as many observations as take place is a rolling 96 hour period. This can use scrolling, but may not be implemented by having to load a different non continuous view
+- [ ] **C3.4**: The solution **must** allow regular observations to take place and expand to allow as many observations as take place in a rolling 24 hour period. This can use scrolling, but may not be implemented by having to load a different non-continuous view
+- [ ] **C3.5**: The solution **should** allow regular observations to take place and expand to allow as many observations as take place in a rolling 96 hour period. This can use scrolling, but may not be implemented by having to load a different non-continuous view
 - [ ] **C3.6**: The solution **must** allow a clinician to start observations at whatever time the patient is admitted to the ward
 - [ ] **C3.7**: The solution **must** allow the clinician to record the date time and frequency of observations, the date and time **must** default to the current date and time
 - [ ] **C3.8**: The solution **must** allow a clinician to record observations up to ten minutes in the past and still incur a PEWS score and escalate appropriately
 - [ ] **C3.9**: The solution **should** when recording observations in the past offer the option of "already escalated" to show times where an escalation has already taken place and observations are being put in afterwards. This option would suppress any implemented automatic alerts
 - [ ] **C3.10**: The solution **must** be able to report on retroactive observations so that trends on when observations are input can be detected
-- [ ] **C3.11** (MOSCOW: Won't): The solution wont interfere with the ability for a wider system (e.g. an EPR) to take one or more observations at whatever time they are input (according to that systems rules). The restriction on time for input only applies to observations that incur a PEWS score.
+- [ ] **C3.11** (MOSCOW: Won't): The solution won't interfere with the ability for a wider system (e.g. an EPR) to take one or more observations at whatever time they are input (according to that system's rules). The restriction on time for input only applies to observations that incur a PEWS score.
 - [ ] **C3.12**: The solution **must** allow a clinician to go back and view older observations or previous forms and admissions for the history of the patient
 - [ ] **C3.13**: The solution **must** make it clear to clinicians that they are viewing older observations to ensure that clinicians are clear what they are observing
 - [ ] **C3.14**: The solution **should** take automated observations from monitoring systems
@@ -187,7 +187,7 @@ For a trust or a supplier to claim that they are compliant with the National PEW
 
 - [ ] **C13.1**: The solution **must** allow the clinician to record the response to the carer question so that it can be used for triggering an escalation
 - [ ] **C13.2**: The solution **should** allow the clinician to select options around carer questions and automatically calculate if an escalation is needed
-- [ ] **C16.3**: The solution **must** include Worse, Same, Better, Parent/Carer Asleep, Unavailable, and Skip as option for the carer question
+- [ ] **C16.3**: The solution **must** include Worse, Same, Better, Parent/Carer Asleep, Unavailable, and Skip as options for the carer question
 - [ ] **C16.4**: The solution **could** include "Parent/Carer is not sure" as an option for carer question
 
 ### Disability and Exposure Requirements
@@ -198,7 +198,7 @@ For a trust or a supplier to claim that they are compliant with the National PEW
 - [ ] **C14.4**: The solution **must** allow clinicians to record which pain score category or method they used.
 - [ ] **C14.5**: The solution **must** allow the Trust to set a default pain score category or method to save time for clinicians
 - [ ] **C14.6**: The solution **must** allow the clinician to record if they have a suspicion of the patient having a new occurrence of sepsis or septic shock
-- [ ] **C14.7**: The solution **must** allow the clinician to escalate to on a new suspicion of sepsis or escalate on a new suspicion of septic shock. These two conditions will have their own escalation levels under the specific concern section.
+- [ ] **C14.7**: The solution **must** allow the clinician to escalate on a new suspicion of sepsis or on a new suspicion of septic shock. These two conditions will have their own escalation levels under the specific concern section.
 - [ ] **C14.8**: The solution **must** allow you to skip AVPU if you mark that a Glasgow Coma Score Sheet (GCS) is being completed
 
 ### Temperature Requirements
@@ -239,13 +239,13 @@ For a trust or a supplier to claim that they are compliant with the National PEW
 - [ ] **C19.1**: The solution **could** allow the capture of alarm limits directly from digital monitors.
 - [ ] **C19.2**: The solution **should** allow the clinician to record any additional risk factors. This **should** allow the clinician to tick one or more options that apply and add comments to it. The default position **should** be "Not Applicable".
 - [ ] **C19.3**: The solution **should** allow the clinician to record what the patient's normal value is for each of the life signs. At this stage these **should** not affect PEWS scoring.
-- [ ] **C19.4** (MOSCOW: Won't): The solution wont change the PEWS scoring based on additional risk factors or patient normal levels
+- [ ] **C19.4** (MOSCOW: Won't): The solution won't change the PEWS scoring based on additional risk factors or patient normal levels
 - [ ] **C19.5**: The solution **could** auto populate risk factors based on other EPR data where available.
 
 ### Guidance Requirements
 
 - [ ] **C20.1**: The supplier **must** be able to implement updated guidance as regularly issued by NHS England
-- [ ] **C20.2** (MOSCOW: Won't): The solution wont allow the local users or Trust to amend the guidance on escalations. This will be set centrally by NHS England
+- [ ] **C20.2** (MOSCOW: Won't): The solution won't allow the local users or Trust to amend the guidance on escalations. This will be set centrally by NHS England
 - [ ] **C20.3**: The solution **must** display guidance on the various PEWS escalation steps to the clinician so they can see which applies and use this to inform decision making.
 - [ ] **C20.4**: The solution **must** show additional decision support guidance on the form relevant to clinical care
 - [ ] **C20.5**: The solution **must** allow the additional decision support guidance to be updated based on new guidance from NHSE
@@ -277,7 +277,7 @@ For a trust or a supplier to claim that they are compliant with the National PEW
 
 ### Environment Requirements
 
-- [ ] **T4.1**: The supplier **must** supply training on the PEWS system for the clinicial teams. The minimum standard for this **must** be train the trainer type training, though suppliers are encouraged to go beyond this where practical
+- [ ] **T4.1**: The supplier **must** supply training on the PEWS system for the clinical teams. The minimum standard for this **must** be train the trainer type training, though suppliers are encouraged to go beyond this where practical
 - [ ] **T4.2**: The supplier **must** supply a training environment so that training can be conducted without risk to patient data
 - [ ] **T4.3**: The supplier **must** equip the training environment with training patient data so that training can take place in the same way it would on real patients
 - [ ] **T4.4**: The supplier **must** ensure that the training environment is kept up to date so that it is in line with the live environment. A change **could** be deployed to training first to allow training on an update, but the training environment **must** not be behind the live environment
@@ -299,7 +299,7 @@ For a trust or a supplier to claim that they are compliant with the National PEW
 - [ ] **T5.5**: The supplier **should** confirm that certification to ISO 9001 has been achieved and has been accredited towards ISO 27001 international security management standards for all its business operations with the system complying with all NHS security requirements.
 - [ ] **T5.6**: Data **must** be retained as set out in the Records Management Code of Practice for Health and Social Care (2016) .  Those responsible for storing records **must** also ensure that disposal takes place in accordance with current retention schedules, and that disposals occur promptly and consistently.  Regular disposal of records (including electronic records) in accordance with the retention schedule is vital to ensure that information is not retained for longer than is necessary for the purpose for which it was recorded to comply with Data Protection requirements. These guidelines apply to NHS records, including records of NHS patients treated on behalf of the NHS in the private healthcare sector and public health records, regardless of the media on which they are held.  This includes records of staff, complaints, corporate records and any other records held in any format including both paper and digital records.  The guidelines also apply to Adult Social Care records where these are integrated with NHS patient records. The solution **must** be able to process a right to be forgotten where this would legally apply under the GDPR
 - [ ] **T5.7**: The Supplier **must** confirm that the proposed system allows for the implementation of the NHS Digital National Opt Out.
-- [ ] **T5.8**: The solution **must** be certified as a medical device (ISO134852016) and legally registered with the MHRA to allow it offer guidance based on the observations and PEWS Scores.
+- [ ] **T5.8**: The solution **must** be certified as a medical device (ISO134852016) and legally registered with the MHRA to allow it to offer guidance based on the observations and PEWS Scores.
 
 ### Interoperability Requirements
 

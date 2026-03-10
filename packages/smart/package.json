@@ -1,0 +1,15 @@
+{
+  "name": "@digital-pews/smart",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@digital-pews/errors": "workspace:*",
+    "@digital-pews/types": "workspace:*"
+  }
+}
