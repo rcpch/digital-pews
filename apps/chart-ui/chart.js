@@ -1,5 +1,5 @@
 /* ============================================================
-   NPEWS Chart Engine - chart.js
+   RCPCH NPEWS Chart Engine - chart.js
    Plain JS, no build step, no dependencies.
 
    Responsibilities:
@@ -16,6 +16,18 @@
 
 // ---- Colour helpers ----------------------------------------
 
+// Returns the resolved value of a CSS custom property.
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// Returns the chart font stack from --font, for use in ctx.font assignments.
+// Canvas ctx.font doesn't read CSS variables directly, so we resolve it here.
+function chartFont(size, weight) {
+  const stack = cssVar('--font') || 'Lato, sans-serif';
+  return weight ? `${weight} ${size} ${stack}` : `${size} ${stack}`;
+}
+
 function getBandColour(bandName) {
   const s = getComputedStyle(document.documentElement);
   return {
@@ -24,11 +36,6 @@ function getBandColour(bandName) {
     orange: s.getPropertyValue('--band-orange').trim() || '#f47738',
     pink:   s.getPropertyValue('--band-pink').trim()   || '#e5007d',
   }[bandName] || '#ffffff';
-}
-
-// Returns CSS var resolved value
-function cssVar(name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
 // ---- Time helpers ------------------------------------------
@@ -81,7 +88,7 @@ function drawBands(ctx, bands, yMin, yMax, x0, x1, chartHeight, padTop, padBot) 
 
 function drawYAxis(ctx, yMin, yMax, step, chartHeight, padTop, padBot, padLeft, padRight, rightLabels) {
   ctx.save();
-  ctx.font = '11px -apple-system, sans-serif';
+  ctx.font = chartFont('11px');
   ctx.fillStyle = '#505a5f';
   ctx.textBaseline = 'middle';
 
@@ -123,28 +130,110 @@ function drawYAxis(ctx, yMin, yMax, step, chartHeight, padTop, padBot, padLeft, 
   ctx.restore();
 }
 
+// ---- Temperature zone overlays -----------------------------
+//
+// Draws coloured border rectangles over the hot/cold zones on a temperature
+// chart, matching the red/blue boxes on the NHS NPEWS paper form.
+//
+// overlays: array of { min, max, color, edgeLabel }
+//   min/max are data values (°C). color is the stroke colour for the box.
+//   edgeLabel (optional): text to show at the chart extremity instead of the
+//   axis value (e.g. ">39" at the top of the red box, "<34.5" at the bottom
+//   of the blue box).
+//
+// Call AFTER drawYAxis so the coloured labels paint on top of the grey ones.
+
+function drawTemperatureOverlays(ctx, overlays, yMin, yMax, chartHeight, padTop, padBot, padLeft, padRight) {
+  if (!overlays || overlays.length === 0) return;
+
+  const W = ctx.canvas.width / (window.devicePixelRatio || 1);
+  const drawW = W - padLeft - padRight;
+
+  overlays.forEach(ov => {
+    const zoneMin = Math.max(ov.min, yMin);
+    const zoneMax = Math.min(ov.max, yMax);
+    if (zoneMin >= zoneMax) return;
+
+    const yTop = valueToY(zoneMax, yMin, yMax, chartHeight, padTop, padBot);
+    const yBot = valueToY(zoneMin, yMin, yMax, chartHeight, padTop, padBot);
+
+    // Coloured border rectangle - stroke only, no fill
+    ctx.save();
+    ctx.strokeStyle = ov.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(padLeft, yTop, drawW, yBot - yTop);
+    ctx.restore();
+
+    // Recolour the boundary tick labels and the edge label in the zone colour.
+    ctx.save();
+    ctx.font = chartFont('11px');
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    function paintLabel(text, yValue) {
+      const y = valueToY(yValue, yMin, yMax, chartHeight, padTop, padBot);
+      // White knockout over the grey label already drawn, then coloured text
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(text, padLeft - 4, y);
+      ctx.fillStyle = ov.color;
+      ctx.fillText(text, padLeft - 8, y);
+    }
+
+    // Colour the bottom boundary tick (ov.min, clamped to yMin)
+    if (ov.min > yMin) {
+      paintLabel(String(ov.min % 1 === 0 ? Math.round(ov.min) : ov.min), ov.min);
+    }
+
+    // Colour the top boundary tick (ov.max, clamped to yMax)
+    if (ov.max < yMax) {
+      paintLabel(String(ov.max % 1 === 0 ? Math.round(ov.max) : ov.max), ov.max);
+    }
+
+    // Edge label at chart top (when zone extends to/beyond yMax)
+    if (ov.max >= yMax && ov.edgeLabel) {
+      paintLabel(ov.edgeLabel, yMax);
+    }
+
+    // Edge label at chart bottom (when zone extends to/below yMin)
+    if (ov.min <= yMin && ov.edgeLabel) {
+      paintLabel(ov.edgeLabel, yMin);
+    }
+
+    ctx.restore();
+  });
+}
+
+// ---- Hour grid helpers -------------------------------------
+
+// Returns an array of ms timestamps for each whole hour within [viewStart, viewEnd].
+// Used to drive fixed grid lines and the time axis, independent of observations.
+function hourTicks(viewStart, viewEnd) {
+  const ticks = [];
+  // Start at the first whole hour at or after viewStart
+  const d = new Date(viewStart);
+  d.setMinutes(0, 0, 0);
+  if (d.getTime() < viewStart) d.setHours(d.getHours() + 1);
+  while (d.getTime() <= viewEnd) {
+    ticks.push(d.getTime());
+    d.setHours(d.getHours() + 1);
+  }
+  return ticks;
+}
+
 // ---- X-axis (time) labels ----------------------------------
 
-function drawXAxis(ctx, timestamps, xPositions, chartHeight, padTop, padBot, padLeft) {
+// Draws vertical grid lines at fixed hourly positions across the full canvas height.
+// xPositions: array of pixel x values for each hourly tick.
+function drawXAxis(ctx, xPositions, chartHeight) {
   ctx.save();
-  ctx.font = '11px -apple-system, sans-serif';
-  ctx.fillStyle = '#505a5f';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  
-  // Draw prominent vertical grid lines at each observation time
-  ctx.strokeStyle = 'rgba(0,0,0,0.2)';  // More visible than horizontal grid lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.18)';
   ctx.lineWidth = 1;
 
-  timestamps.forEach((ts, i) => {
-    const x = xPositions[i];
-    // Vertical grid line extending through entire chart
+  xPositions.forEach(x => {
     ctx.beginPath();
-    ctx.moveTo(x, padTop);
-    ctx.lineTo(x, chartHeight - padBot);
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, chartHeight);
     ctx.stroke();
-    // Label
-    ctx.fillText(fmtTime(ts), x, chartHeight - padBot + 4);
   });
   ctx.restore();
 }
@@ -243,7 +332,7 @@ function drawBPPoints(ctx, bpPoints) {
 
 function drawValueLabels(ctx, points, unit) {
   ctx.save();
-  ctx.font = 'bold 10px -apple-system, sans-serif';
+  ctx.font = chartFont('10px', 'bold');
   ctx.fillStyle = '#0b0c0c';
   ctx.textAlign = 'center';
 
@@ -262,6 +351,90 @@ function drawValueLabels(ctx, points, unit) {
     ctx.fillText(label, p.x, ly + 10);
   });
   ctx.restore();
+}
+
+// ---- Categorical row rendering -----------------------------
+// Renders a thin row of coloured cells with text labels at each observation time.
+// Used for: Respiratory Distress, AVPU, CRT
+
+/**
+ * renderCategoricalRow(canvas, config)
+ * config: {
+ *   observations: array
+ *   getCell: fn(obs) => { label, color, textColor } | null
+ *   viewStart, viewEnd
+ * }
+ */
+function renderCategoricalRow(canvas, config) {
+  const { observations, getCell, viewStart, viewEnd } = config;
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 800;
+  const H = canvas.offsetHeight || 30;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const PAD_LEFT  = 55;
+  const PAD_RIGHT = 50;
+  const drawW = W - PAD_LEFT - PAD_RIGHT;
+  const range = viewEnd - viewStart;
+
+  function tsToX(ts) {
+    return PAD_LEFT + ((parseTs(ts) - viewStart) / range) * drawW;
+  }
+
+  const inView = observations.filter(o => {
+    const t = parseTs(o.timestamp);
+    return t >= viewStart && t <= viewEnd;
+  });
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(PAD_LEFT, 0, drawW, H);
+
+  // Draw cells between consecutive observation columns
+  inView.forEach((o, i) => {
+    const cell = getCell(o);
+    const x = tsToX(o.timestamp);
+    const nextObs = inView[i + 1];
+    const xEnd = nextObs ? tsToX(nextObs.timestamp) : W - PAD_RIGHT;
+    const cellW = xEnd - x;
+
+    // Background fill
+    ctx.fillStyle = (cell && cell.color) ? cell.color : '#ffffff';
+    ctx.fillRect(x, 1, cellW - 1, H - 2);
+
+    // Label centred in cell
+    if (cell && cell.label) {
+      ctx.save();
+      ctx.font = chartFont('10px', 'bold');
+      ctx.fillStyle = cell.textColor || '#0b0c0c';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(cell.label, x + cellW / 2, H / 2);
+      ctx.restore();
+    }
+  });
+
+  // Vertical grid lines at fixed hourly positions
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 1;
+  hourTicks(viewStart, viewEnd).forEach(t => {
+    const x = PAD_LEFT + ((t - viewStart) / range) * drawW;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  });
+
+  // Border around draw area
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 0.75;
+  ctx.strokeRect(PAD_LEFT, 0.5, drawW, H - 1);
 }
 
 // ---- Main chart render function ----------------------------
@@ -299,8 +472,8 @@ function renderChart(canvas, config) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  const PAD_LEFT   = 55;  // Increased from 38 to position Y-axis labels clearly outside
-  const PAD_RIGHT  = config.rightLabels ? 50 : 12;  // More space if right labels present
+  const PAD_LEFT   = 55;
+  const PAD_RIGHT  = 50;  // Fixed width on both sides so vertical grid lines align across all rows
   const PAD_TOP    = 10;
   const PAD_BOTTOM = 28;
 
@@ -314,7 +487,7 @@ function renderChart(canvas, config) {
 
   if (inView.length === 0) {
     ctx.fillStyle = '#505a5f';
-    ctx.font = '12px sans-serif';
+    ctx.font = chartFont('12px');
     ctx.fillText('No observations in range', PAD_LEFT + 8, H / 2);
     return;
   }
@@ -331,9 +504,15 @@ function renderChart(canvas, config) {
   // Grid + y-axis
   drawYAxis(ctx, yMin, yMax, step, H, PAD_TOP, PAD_BOTTOM, PAD_LEFT, PAD_RIGHT, config.rightLabels);
 
-  // X axis ticks
-  const xPositions = inView.map(o => tsToX(o.timestamp));
-  drawXAxis(ctx, inView.map(o => o.timestamp), xPositions, H, PAD_TOP, PAD_BOTTOM, PAD_LEFT);
+  // Temperature zone overlays (red hot box, blue cold box) - drawn after y-axis so labels sit on top
+  if (config.tempOverlays) {
+    drawTemperatureOverlays(ctx, config.tempOverlays, yMin, yMax, H, PAD_TOP, PAD_BOTTOM, PAD_LEFT, PAD_RIGHT);
+  }
+
+  // X axis grid lines at fixed hourly positions
+  const ticks = hourTicks(viewStart, viewEnd);
+  const hourXPositions = ticks.map(t => PAD_LEFT + ((t - viewStart) / range) * drawW);
+  drawXAxis(ctx, hourXPositions, H);
 
   if (bpMode) {
     // Blood pressure: no horizontal trend lines (U11.7), draw inward arrows
@@ -403,7 +582,7 @@ function renderChart(canvas, config) {
 
     if (showValues) {
       ctx.save();
-      ctx.font = 'bold 10px -apple-system, sans-serif';
+      ctx.font = chartFont('10px', 'bold');
       ctx.textAlign = 'center';
       segments.flat().forEach(p => {
         const label = `${p.value}${p.unit === 'L/min' ? 'L' : '%'}`;
@@ -474,15 +653,24 @@ function getChartHeight() {
   return LAYOUT_CHART_HEIGHTS[getLayout()] ?? 140;
 }
 
+const LAYOUT_CATEGORICAL_HEIGHTS = {
+  landscape: 28,
+  portrait:  24,
+  mobile:    20,
+};
+
+function getCategoricalHeight() {
+  return LAYOUT_CATEGORICAL_HEIGHTS[getLayout()] ?? 28;
+}
+
 function computeDefaultView(observations) {
-  // Default: show last 6 hours of data or all if less (U3.2)
+  // Default: show last 24 hours of data (minimum visible window)
   const times = observations.map(o => parseTs(o.timestamp));
-  const first = Math.min(...times);
   const last  = Math.max(...times);
-  const sixH = 6 * 60 * 60 * 1000;
+  const twentyFourH = 24 * 60 * 60 * 1000;
   return {
-    start: Math.max(first, last - sixH),
-    end:   last + 30 * 60 * 1000, // 30 min padding on right
+    start: last - twentyFourH + 30 * 60 * 1000, // place latest obs near right edge
+    end:   last + 30 * 60 * 1000,                // 30 min padding on right
   };
 }
 
@@ -515,7 +703,8 @@ function applyQuickRange(range, observations) {
 function zoomIn(observations) {
   const mid = (viewState.start + viewState.end) / 2;
   const half = (viewState.end - viewState.start) / 2;
-  const newHalf = Math.max(half * 0.6, 30 * 60 * 1000); // min 30 mins
+  const minHalf = 12 * 60 * 60 * 1000; // min window = 24h (half = 12h)
+  const newHalf = Math.max(half * 0.6, minHalf);
   viewState.start = mid - newHalf;
   viewState.end   = mid + newHalf;
 }
@@ -528,11 +717,50 @@ function zoomOut(observations) {
   viewState.end   = mid + newHalf;
 }
 
+// ---- Categorical row cell definitions ----------------------
+
+function getRespiratoryDistressCell(obs) {
+  const v = obs.respiratoryDistress;
+  if (v == null) return { label: '—', color: '#f0f0f0', textColor: '#888' };
+  const map = {
+    none:     { label: 'None',     color: getBandColour('white'),  textColor: '#0b0c0c' },
+    mild:     { label: 'Mild',     color: getBandColour('yellow'), textColor: '#0b0c0c' },
+    moderate: { label: 'Moderate', color: getBandColour('orange'), textColor: '#0b0c0c' },
+    severe:   { label: 'Severe',   color: getBandColour('pink'),   textColor: '#0b0c0c' },
+  };
+  return map[v] || { label: v, color: '#ffffff', textColor: '#0b0c0c' };
+}
+
+function getCRTCell(obs) {
+  const v = obs.capillaryRefill;
+  if (v == null) return { label: '—', color: '#f0f0f0', textColor: '#888' };
+  // CRT <= 2s = 0 (white), 3s = 2 (orange), >= 4s = 4 (pink)
+  let color;
+  if (v <= 2)      color = getBandColour('white');
+  else if (v <= 3) color = getBandColour('orange');
+  else             color = getBandColour('pink');
+  return { label: `${v}s`, color, textColor: '#0b0c0c' };
+}
+
+function getAVPUCell(obs) {
+  const v = obs.avpu;
+  if (v == null) return { label: '—', color: '#f0f0f0', textColor: '#888' };
+  // A = 0 (white), V = 2 (orange), P/U = 4 (pink)
+  const map = {
+    A: { label: 'A', color: getBandColour('white'),  textColor: '#0b0c0c' },
+    V: { label: 'V', color: getBandColour('orange'), textColor: '#0b0c0c' },
+    P: { label: 'P', color: getBandColour('pink'),   textColor: '#0b0c0c' },
+    U: { label: 'U', color: getBandColour('pink'),   textColor: '#0b0c0c' },
+  };
+  return map[v] || { label: v, color: '#ffffff', textColor: '#0b0c0c' };
+}
+
 // ---- Chart panel definitions --------------------------------
 
 function getChartDefs() {
   const cfg = CHART_CONFIG;
   return [
+    // --- Airway and Breathing ---
     {
       id:    'respiratoryRate',
       title: 'Respiratory Rate',
@@ -542,16 +770,15 @@ function getChartDefs() {
       yMin: cfg.respiratoryRate.yMin,
       yMax: cfg.respiratoryRate.yMax,
       step: cfg.respiratoryRate.step,
+      section: 'airway',
     },
     {
-      id:    'heartRate',
-      title: 'Heart Rate',
-      unit:  cfg.heartRate.unit,
-      field: 'heartRate',
-      bands: SCORING_BANDS.heartRate,
-      yMin: cfg.heartRate.yMin,
-      yMax: cfg.heartRate.yMax,
-      step: cfg.heartRate.step,
+      id:         'respiratoryDistress',
+      title:      'Respiratory Distress',
+      unit:       '',
+      categorical: true,
+      getCell:    getRespiratoryDistressCell,
+      section: 'airway',
     },
     {
       id:    'oxygenSaturation',
@@ -562,6 +789,7 @@ function getChartDefs() {
       yMin: cfg.oxygenSaturation.yMin,
       yMax: cfg.oxygenSaturation.yMax,
       step: cfg.oxygenSaturation.step,
+      section: 'airway',
     },
     {
       id:    'oxygenDelivery',
@@ -573,8 +801,6 @@ function getChartDefs() {
       yMax: cfg.oxygenDelivery.yMax,
       step: cfg.oxygenDelivery.step,
       isO2Delivery: true,
-      // Left axis = FiO2 %. Right axis = L/min equivalent positions with device labels.
-      // L/min values are mapped to the display axis via *5 multiplier (same as plotting).
       rightLabels: [
         { value: 100, label: '20 L' },
         { value: 75,  label: '15 L' },
@@ -584,6 +810,19 @@ function getChartDefs() {
         { value: 10,  label: '2 L'  },
         { value: 5,   label: '1 L'  },
       ],
+      section: 'airway',
+    },
+    // --- Circulation ---
+    {
+      id:    'heartRate',
+      title: 'Heart Rate',
+      unit:  cfg.heartRate.unit,
+      field: 'heartRate',
+      bands: SCORING_BANDS.heartRate,
+      yMin: cfg.heartRate.yMin,
+      yMax: cfg.heartRate.yMax,
+      step: cfg.heartRate.step,
+      section: 'circulation',
     },
     {
       id:    'bloodPressure',
@@ -595,6 +834,24 @@ function getChartDefs() {
       yMax: cfg.bloodPressureSystolic.yMax,
       step: cfg.bloodPressureSystolic.step,
       bpMode: true,
+      section: 'circulation',
+    },
+    {
+      id:         'capillaryRefill',
+      title:      'Capillary Refill Time',
+      unit:       'seconds',
+      categorical: true,
+      getCell:    getCRTCell,
+      section: 'circulation',
+    },
+    // --- Disability and Exposure ---
+    {
+      id:         'avpu',
+      title:      'AVPU / Neurological',
+      unit:       '',
+      categorical: true,
+      getCell:    getAVPUCell,
+      section: 'disability',
     },
     {
       id:    'temperature',
@@ -605,149 +862,340 @@ function getChartDefs() {
       yMin: cfg.temperature.yMin,
       yMax: cfg.temperature.yMax,
       step: cfg.temperature.step,
+      section: 'disability',
+      // Red box around hot zone (>=38), blue box around cold zone (<36).
+      // min/max are the data-value boundaries of the coloured rectangle.
+      // edgeLabel: text shown at the chart-edge extremity (e.g. ">39" at chart top).
+      tempOverlays: [
+        { min: 38, max: cfg.temperature.yMax, color: '#d4351c', edgeLabel: '>39' }, // red - hot
+        { min: cfg.temperature.yMin, max: 36,  color: '#1d70b8' },                  // blue - cold
+      ],
     },
   ];
 }
 
 // ---- DOM building & wiring ---------------------------------
 
-function buildParameterSidebar(container) {
-  // Sidebar content derived from the NHS NPEWS PDF reference charts.
-  // Each entry aligns with one chart panel row (same order as getChartDefs).
-  const sidebarDefs = [
-    {
-      title: 'Respiratory Rate',
-      unit: 'breaths/min',
-      description: 'Count chest movements for 60 seconds',
-      extra: null,
-    },
-    {
-      title: 'Heart Rate',
-      unit: 'bpm',
-      description: 'Record pulse rate beats per minute',
-      extra: null,
-    },
-    {
-      title: 'O\u2082 Saturation',
-      unit: 'SpO\u2082 %',
-      description: 'Peripheral oxygen saturation. Record probe site.',
-      extra: '\u2265 95% = Normal | 92\u201394% = Low concern | \u2264 91% = High concern',
-    },
-    {
-      title: 'O\u2082 Delivery',
-      unit: 'FiO\u2082 % / L/min',
-      description: 'Device codes: HF = High Flow \u2022 BiPAP/CPAP \u2022 NP = Nasal Prongs \u2022 FM = Face Mask \u2022 HB = Head Box \u2022 NMR = Non-rebreather',
-      extra: 'Left axis = FiO\u2082 %. Right axis = L/min flow rate.',
-    },
-    {
-      title: 'Blood Pressure',
-      unit: 'mmHg',
-      description: 'Record position: LA = Left Arm \u2022 RA = Right Arm \u2022 LL = Left Leg \u2022 RL = Right Leg',
-      extra: 'Derogation code if not attempted (NC = No Concern). \u25be = Systolic \u25b4 = Diastolic',
-    },
-    {
-      title: 'Temperature',
-      unit: '\u00b0C',
-      description: 'Record route: Tympanic \u2022 Axillary \u2022 Rectal',
-      extra: null,
-    },
-  ];
+// ---- Unified chart grid builder ----------------------------
+// Emits one grid row per parameter: [sidebar-cell | canvas-cell].
+// Both cells share the same CSS grid row so their heights are always equal -
+// no JS height-syncing needed.
 
-  sidebarDefs.forEach(def => {
-    const item = document.createElement('div');
-    item.className = 'parameter-sidebar__item';
+const SIDEBAR_META = {
+  respiratoryRate:  { unit: 'breaths/min', description: 'Count chest movements for 60 seconds', extra: null },
+  oxygenSaturation: { unit: 'SpO\u2082 %', description: 'Peripheral O\u2082 saturation. Record probe site.', extra: '\u2265 95% normal | 92\u201394% low concern | \u2264 91% high concern' },
+  oxygenDelivery:   { unit: 'FiO\u2082 % / L/min', description: 'HF = High Flow \u2022 BiPAP/CPAP \u2022 NP = Nasal Prongs \u2022 FM = Face Mask \u2022 HB = Head Box \u2022 NMR = Non-rebreather', extra: 'Left = FiO\u2082 % | Right = L/min' },
+  heartRate:        { unit: 'bpm', description: 'Record pulse rate in beats per minute', extra: null },
+  bloodPressure:    { unit: 'mmHg', description: 'Position: LA \u2022 RA \u2022 LL \u2022 RL. Derogation code if not attempted (NC).', extra: '\u25be systolic \u25b4 diastolic' },
+  temperature:      { unit: '\u00b0C', description: 'Route: Tympanic \u2022 Axillary \u2022 Rectal', extra: null },
+};
 
-    let html = `<div class="parameter-sidebar__title">${def.title}</div>`;
-    html += `<div class="parameter-sidebar__unit">${def.unit}</div>`;
-    html += `<div class="parameter-sidebar__description">${def.description}</div>`;
-    if (def.extra) {
-      html += `<div class="parameter-sidebar__codes">${def.extra}</div>`;
+const SECTION_META = {
+  airway:      { label: 'Airway and Breathing',    color: '#003087' },
+  circulation: { label: 'Circulation',              color: '#003087' },
+  disability:  { label: 'Disability and Exposure',  color: '#003087' },
+};
+
+function buildChartGrid(gridEl) {
+  const defs = getChartDefs();
+
+  // Count how many rows each section spans
+  const sectionSpans = {};
+  defs.forEach(d => {
+    sectionSpans[d.section] = (sectionSpans[d.section] || 0) + 1;
+  });
+
+  // Three-column grid: section-label | param-label | canvas
+  // We emit cells in DOM order: for rows belonging to the first section, the
+  // section-span cell is emitted first (col 1, span N), then each row's col-2
+  // and col-3 cells.  CSS grid auto-placement handles the rest.
+  let currentSection = null;
+  let rowIndex = 1; // 1-based CSS grid row
+
+  // Map section -> start row (so we can explicitly place the section span)
+  const sectionStartRow = {};
+  let r = 1;
+  defs.forEach(d => {
+    if (!(d.section in sectionStartRow)) sectionStartRow[d.section] = r;
+    r++;
+  });
+  // time axis row at the end
+  const timeRow = r;
+
+  defs.forEach((def, i) => {
+    const isFirst = i === 0;
+    const row = i + 1;
+
+    // Emit section cell on section change (placed explicitly into col 1)
+    if (def.section !== currentSection) {
+      currentSection = def.section;
+      const span = sectionSpans[def.section];
+      const startRow = sectionStartRow[def.section];
+      const meta = SECTION_META[def.section] || {};
+
+      const sectionCell = document.createElement('div');
+      sectionCell.className = 'chart-grid__section';
+      sectionCell.style.gridColumn = '1';
+      sectionCell.style.gridRow = `${startRow} / span ${span}`;
+      sectionCell.innerHTML = `<span class="chart-grid__section-text">${meta.label || ''}</span>`;
+      gridEl.appendChild(sectionCell);
     }
 
-    item.innerHTML = html;
-    container.appendChild(item);
+    // --- Param label cell (column 2) ---
+    const label = document.createElement('div');
+    label.style.gridColumn = '2';
+    label.style.gridRow = String(row);
+    if (def.categorical) {
+      label.className = 'chart-grid__label chart-grid__label--categorical';
+      label.innerHTML = `<span class="chart-grid__label-title chart-grid__label-title--cat">${def.title}</span>`;
+    } else {
+      label.className = 'chart-grid__label';
+      if (isFirst) label.classList.add('chart-grid__label--first');
+      const meta = SIDEBAR_META[def.id] || {};
+      let html = `<span class="chart-grid__label-title">${def.title}</span>`;
+      if (meta.unit)        html += `<span class="chart-grid__label-unit">${meta.unit}</span>`;
+      if (meta.description) html += `<span class="chart-grid__label-desc">${meta.description}</span>`;
+      if (meta.extra)       html += `<span class="chart-grid__label-codes">${meta.extra}</span>`;
+      label.innerHTML = html;
+    }
+
+    // --- Canvas cell (column 3) ---
+    const cell = document.createElement('div');
+    cell.style.gridColumn = '3';
+    cell.style.gridRow = String(row);
+    cell.className = def.categorical ? 'chart-grid__cell chart-grid__cell--categorical' : 'chart-grid__cell';
+    if (isFirst) cell.classList.add('chart-grid__cell--first');
+
+    const h = def.categorical ? getCategoricalHeight() : getChartHeight();
+    cell.innerHTML = `
+      <canvas class="chart-canvas" id="canvas-${def.id}" style="width:100%;height:${h}px;"></canvas>
+      <div class="obs-tooltip" id="tip-${def.id}"></div>
+    `;
+
+    gridEl.appendChild(label);
+    gridEl.appendChild(cell);
   });
+
+  // --- PEWS row (inside grid so canvas x-coordinates align with charts) ---
+  const pewsRow = timeRow;       // PEWS is the next row after parameter rows
+  const axisRow = timeRow + 1;   // time axis follows PEWS
+
+  const pewsSectionCell = document.createElement('div');
+  pewsSectionCell.className = 'chart-grid__section chart-grid__section--pews';
+  pewsSectionCell.style.gridColumn = '1';
+  pewsSectionCell.style.gridRow = String(pewsRow);
+  gridEl.appendChild(pewsSectionCell);
+
+  const pewsLabel = document.createElement('div');
+  pewsLabel.className = 'chart-grid__label chart-grid__label--pews';
+  pewsLabel.style.gridColumn = '2';
+  pewsLabel.style.gridRow = String(pewsRow);
+  pewsLabel.innerHTML = '<span class="chart-grid__label-title">PEWS Total</span>';
+
+  const pewsCell = document.createElement('div');
+  pewsCell.className = 'chart-grid__cell chart-grid__cell--pews';
+  pewsCell.style.gridColumn = '3';
+  pewsCell.style.gridRow = String(pewsRow);
+  pewsCell.innerHTML = `<canvas class="chart-canvas" id="canvas-pews" style="width:100%;height:44px;"></canvas>`;
+
+  gridEl.appendChild(pewsLabel);
+  gridEl.appendChild(pewsCell);
+
+  // --- Time axis row ---
+  const timeSectionCell = document.createElement('div');
+  timeSectionCell.className = 'chart-grid__section chart-grid__section--time';
+  timeSectionCell.style.gridColumn = '1';
+  timeSectionCell.style.gridRow = String(axisRow);
+  gridEl.appendChild(timeSectionCell);
+
+  const timeLabel = document.createElement('div');
+  timeLabel.className = 'chart-grid__label chart-grid__label--time';
+  timeLabel.style.gridColumn = '2';
+  timeLabel.style.gridRow = String(axisRow);
+
+  const timeCell = document.createElement('div');
+  timeCell.className = 'chart-grid__cell chart-grid__cell--time chart-grid__cell--last';
+  timeCell.style.gridColumn = '3';
+  timeCell.style.gridRow = String(axisRow);
+  timeCell.innerHTML = `<canvas class="chart-canvas" id="canvas-time-axis" style="width:100%;height:28px;"></canvas>`;
+
+  gridEl.appendChild(timeLabel);
+  gridEl.appendChild(timeCell);
 }
 
-function buildChartPanels(container) {
-  const defs = getChartDefs();
-  const panels = {};
-  defs.forEach(def => {
-    const panel = document.createElement('div');
-    panel.className = 'chart-panel';
-    panel.innerHTML = `
-      <div class="chart-panel__body">
-        <canvas class="chart-canvas" id="canvas-${def.id}" style="width:100%;height:${getChartHeight()}px;"></canvas>
-        <div class="obs-tooltip" id="tip-${def.id}"></div>
-      </div>
-    `;
-    container.appendChild(panel);
-    panels[def.id] = panel;
+// ---- PEWS canvas row (inside chart grid, aligned with parameter rows) ------
+
+function renderPewsCanvas() {
+  const canvas = document.getElementById('canvas-pews');
+  if (!canvas) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 800;
+  const H = canvas.offsetHeight || 44;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const PAD_LEFT  = 55;
+  const PAD_RIGHT = 50;
+  const drawW = W - PAD_LEFT - PAD_RIGHT;
+  const range = viewState.end - viewState.start;
+
+  const inView = OBSERVATIONS.filter(o => {
+    const t = parseTs(o.timestamp);
+    return t >= viewState.start && t <= viewState.end;
   });
-  return panels;
+
+  // White background for the draw area
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(PAD_LEFT, 0, drawW, H);
+
+  // Escalation level -> background colour
+  function escColor(level) {
+    if (!level) return '#ffffff';
+    return cssVar(`--esc-${level}`) || '#ffffff';
+  }
+
+  // Text colour: medium uses dark text, all others white
+  function escTextColor(level) {
+    if (level === 'medium') return cssVar('--esc-medium-text') || '#0b0c0c';
+    if (level) return '#ffffff';
+    return '#0b0c0c';
+  }
+
+  // Draw coloured column for each observation, extending to next observation
+  inView.forEach((o, i) => {
+    const x = PAD_LEFT + ((parseTs(o.timestamp) - viewState.start) / range) * drawW;
+    const nextObs = inView[i + 1];
+    const xEnd = nextObs
+      ? PAD_LEFT + ((parseTs(nextObs.timestamp) - viewState.start) / range) * drawW
+      : W - PAD_RIGHT;
+    const colW = xEnd - x;
+
+    const level = o.escalationLevel || null;
+    const score = o.pewsTotal;
+
+    // Background fill
+    ctx.fillStyle = escColor(level);
+    ctx.fillRect(x, 0, colW, H);
+
+    // Score number centred in the column
+    ctx.save();
+    ctx.font = chartFont('16px', 'bold');
+    ctx.fillStyle = escTextColor(level);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    if (score != null) {
+      ctx.fillText(String(score), x + colW / 2, H / 2);
+    }
+    ctx.restore();
+  });
+
+  // Vertical grid lines at fixed hourly positions
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 1;
+  hourTicks(viewState.start, viewState.end).forEach(t => {
+    const x = PAD_LEFT + ((t - viewState.start) / range) * drawW;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  });
+
+  // Border around draw area
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 0.75;
+  ctx.strokeRect(PAD_LEFT, 0.5, drawW, H - 1);
+}
+
+// ---- Time axis (dedicated row below all chart panels) ------
+
+function renderTimeAxis() {
+  const canvas = document.getElementById('canvas-time-axis');
+  if (!canvas) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 800;
+  const H = canvas.offsetHeight || 28;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const PAD_LEFT  = 55;
+  const PAD_RIGHT = 50;  // Use widest right-pad (O2 delivery) to keep x positions consistent
+  const drawW = W - PAD_LEFT - PAD_RIGHT;
+  const range = viewState.end - viewState.start;
+
+  // Background
+  ctx.fillStyle = '#f8f8f8';
+  ctx.fillRect(0, 0, W, H);
+
+  // Tick marks and HH:00 labels at fixed hourly positions
+  ctx.font = chartFont('11px');
+  ctx.fillStyle = '#505a5f';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+  ctx.lineWidth = 1;
+
+  hourTicks(viewState.start, viewState.end).forEach(t => {
+    const x = PAD_LEFT + ((t - viewState.start) / range) * drawW;
+    // Short tick from top of this canvas (= continuation of the column line)
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, 6);
+    ctx.stroke();
+    // Format as HH:00
+    const d = new Date(t);
+    const label = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    ctx.fillText(label, x, 8);
+  });
 }
 
 function renderAll() {
   const defs = getChartDefs();
   const h = getChartHeight();
+  const hCat = getCategoricalHeight();
   defs.forEach(def => {
     const canvas = document.getElementById(`canvas-${def.id}`);
     if (!canvas) return;
-    // Sync canvas CSS height to current layout before drawing
-    canvas.style.height = `${h}px`;
-    renderChart(canvas, {
-      observations: OBSERVATIONS,
-      field:        def.field,
-      bands:        def.bands,
-      yMin:         def.yMin,
-      yMax:         def.yMax,
-      step:         def.step,
-      unit:         def.unit,
-      viewStart:    viewState.start,
-      viewEnd:      viewState.end,
-      showValues:   viewState.showValues,
-      bpMode:       def.bpMode || false,
-      isO2Delivery: def.isO2Delivery || false,
-      rightLabels:  def.rightLabels || null,
-    });
+
+    if (def.categorical) {
+      canvas.style.height = `${hCat}px`;
+      renderCategoricalRow(canvas, {
+        observations: OBSERVATIONS,
+        getCell:      def.getCell,
+        viewStart:    viewState.start,
+        viewEnd:      viewState.end,
+      });
+    } else {
+      canvas.style.height = `${h}px`;
+      renderChart(canvas, {
+        observations: OBSERVATIONS,
+        field:        def.field,
+        bands:        def.bands,
+        yMin:         def.yMin,
+        yMax:         def.yMax,
+        step:         def.step,
+        unit:         def.unit,
+        viewStart:    viewState.start,
+        viewEnd:      viewState.end,
+        showValues:   viewState.showValues,
+        bpMode:       def.bpMode || false,
+        isO2Delivery: def.isO2Delivery || false,
+        rightLabels:  def.rightLabels || null,
+        tempOverlays: def.tempOverlays || null,
+      });
+    }
   });
-}
-
-// ---- PEWS score row ----------------------------------------
-
-function buildPewsRow(container) {
-  const panel = document.createElement('div');
-  panel.className = 'pews-row';
-  panel.id = 'pews-row';
-
-  const header = document.createElement('div');
-  header.className = 'pews-row__header';
-  header.textContent = 'PEWS Total Score';
-  panel.appendChild(header);
-
-  const scores = document.createElement('div');
-  scores.className = 'pews-row__scores';
-  scores.id = 'pews-scores';
-  panel.appendChild(scores);
-  container.appendChild(panel);
-}
-
-function renderPewsRow() {
-  const container = document.getElementById('pews-scores');
-  if (!container) return;
-  container.innerHTML = '';
-  OBSERVATIONS.forEach(o => {
-    const t = parseTs(o.timestamp);
-    if (t < viewState.start || t > viewState.end) return;
-    const cell = document.createElement('div');
-    const level = o.escalationLevel || (o.pewsTotal === 0 ? null : 'low');
-    cell.className = `pews-score-cell${level ? ` pews-score-cell--${level}` : ''}`;
-    cell.innerHTML = `
-      <div class="pews-score-cell__time">${fmtTime(o.timestamp)}</div>
-      <div class="pews-score-cell__value">${o.pewsTotal}</div>
-    `;
-    container.appendChild(cell);
-  });
+  renderTimeAxis();
+  renderPewsCanvas();
 }
 
 // ---- Escalation banner -------------------------------------
@@ -814,8 +1262,9 @@ function attachTooltip(canvasId, field, unit, bpMode, isO2Delivery) {
     if (!inView.length) return;
 
     const range = viewState.end - viewState.start;
-    const PAD_LEFT = 55;  // Match renderChart padding
-    const drawW    = canvas.offsetWidth - PAD_LEFT - 12;
+    const PAD_LEFT = 55;
+    const PAD_RIGHT = 50;
+    const drawW    = canvas.offsetWidth - PAD_LEFT - PAD_RIGHT;
 
     let nearest = null;
     let nearestDist = Infinity;
@@ -843,6 +1292,54 @@ function attachTooltip(canvasId, field, unit, bpMode, isO2Delivery) {
     }
 
     tip.textContent = `${fmtTime(nearest.timestamp)}: ${label}`;
+    tip.style.display = 'block';
+    tip.style.left = `${e.clientX - rect.left + 8}px`;
+    tip.style.top  = `${e.clientY - rect.top - 24}px`;
+  });
+
+  canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+}
+
+// ---- Categorical row tooltip --------------------------------
+
+function attachCategoricalTooltip(canvasId, getCell) {
+  const canvas = document.getElementById(canvasId);
+  const tip    = document.getElementById(`tip-${canvasId.replace('canvas-', '')}`);
+  if (!canvas || !tip) return;
+
+  const PAD_LEFT  = 55;
+  const PAD_RIGHT = 50;
+
+  canvas.addEventListener('mousemove', e => {
+    const rect   = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+
+    const inView = OBSERVATIONS.filter(o => {
+      const t = parseTs(o.timestamp);
+      return t >= viewState.start && t <= viewState.end;
+    });
+    if (!inView.length) { tip.style.display = 'none'; return; }
+
+    const range = viewState.end - viewState.start;
+    const drawW = canvas.offsetWidth - PAD_LEFT - PAD_RIGHT;
+
+    // Find which cell the mouse is over
+    let found = null;
+    for (let i = 0; i < inView.length; i++) {
+      const o    = inView[i];
+      const x    = PAD_LEFT + ((parseTs(o.timestamp) - viewState.start) / range) * drawW;
+      const next = inView[i + 1];
+      const xEnd = next
+        ? PAD_LEFT + ((parseTs(next.timestamp) - viewState.start) / range) * drawW
+        : canvas.offsetWidth - PAD_RIGHT;
+      if (mouseX >= x && mouseX < xEnd) { found = o; break; }
+    }
+
+    if (!found) { tip.style.display = 'none'; return; }
+
+    const cell = getCell(found);
+    const label = cell ? cell.label : '—';
+    tip.textContent = `${fmtTime(found.timestamp)}: ${label}`;
     tip.style.display = 'block';
     tip.style.left = `${e.clientX - rect.left + 8}px`;
     tip.style.top  = `${e.clientY - rect.top - 24}px`;
@@ -901,17 +1398,17 @@ function initLayout() {
 function wireToolbar() {
   // Zoom buttons
   document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
-    zoomIn(OBSERVATIONS); renderAll(); renderPewsRow(); renderEscalationBanner();
+    zoomIn(OBSERVATIONS); renderAll(); renderEscalationBanner();
   });
   document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
-    zoomOut(OBSERVATIONS); renderAll(); renderPewsRow(); renderEscalationBanner();
+    zoomOut(OBSERVATIONS); renderAll(); renderEscalationBanner();
   });
 
   // Quick range buttons
   ['today', 'week', 'month'].forEach(range => {
     document.getElementById(`btn-${range}`)?.addEventListener('click', () => {
       applyQuickRange(range, OBSERVATIONS);
-      renderAll(); renderPewsRow(); renderEscalationBanner();
+      renderAll(); renderEscalationBanner();
       updateActiveBtn(range);
     });
   });
@@ -919,7 +1416,7 @@ function wireToolbar() {
   // Jump to present
   document.getElementById('btn-present')?.addEventListener('click', () => {
     applyQuickRange('present', OBSERVATIONS);
-    renderAll(); renderPewsRow(); renderEscalationBanner();
+    renderAll(); renderEscalationBanner();
     updateActiveBtn('present');
   });
 
@@ -994,23 +1491,22 @@ function init() {
   // Set age band banner color
   renderAgeBandBanner();
 
-  // Build sidebar and charts
-  const sidebar = document.getElementById('parameter-sidebar');
-  if (sidebar) buildParameterSidebar(sidebar);
+  // Build chart grid (sidebar labels + canvases as a single CSS grid)
+  const gridEl = document.getElementById('chart-grid');
+  if (gridEl) buildChartGrid(gridEl);
 
-  const container = document.getElementById('charts-container');
-  if (container) buildChartPanels(container);
-
-  buildPewsRow(container);
   wireToolbar();
 
   // Tooltips
   getChartDefs().forEach(def => {
-    attachTooltip(`canvas-${def.id}`, def.field, def.unit, def.bpMode || false, def.isO2Delivery || false);
+    if (def.categorical) {
+      attachCategoricalTooltip(`canvas-${def.id}`, def.getCell);
+    } else {
+      attachTooltip(`canvas-${def.id}`, def.field, def.unit, def.bpMode || false, def.isO2Delivery || false);
+    }
   });
 
   renderAll();
-  renderPewsRow();
   renderEscalationBanner();
   renderFooter();
 }
