@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPEWS Chart UI - Alex Thompson</title>
+  <!--
+    Lato is used as the closest freely available substitute for Frutiger.
+    Implementers with a Frutiger license can remove this <link> and override
+    the --font CSS variable in their own stylesheet instead:
+      :root { --font: 'Frutiger', 'Frutiger LT Std', Lato, sans-serif; }
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<!-- data-layout: landscape | portrait | mobile (set by JS on load, overridable by user)  -->
+<!-- data-lock-layout: present to disable the user toggle in production deployments       -->
+<body>
+<div class="app-layout">
+
+  <!-- Patient header (sticky) -->
+  <header class="patient-header" role="banner">
+    <!-- Age band indicator banner (colored bar, populated by JS) -->
+    <div class="age-band-banner"></div>
+    <div class="patient-header__inner">
+      <span class="patient-header__name">Alex Thompson</span>
+      <div class="patient-header__meta">
+        <span><strong>DOB:</strong> 14 Mar 2017</span>
+        <span><strong>Age:</strong> 7 years</span>
+        <span><strong>NHS:</strong> 943 476 5210</span>
+        <span><strong>Ward:</strong> Paediatric B</span>
+        <span><strong>Bed:</strong> 12</span>
+        <span><strong>Consultant:</strong> Dr S. Patel</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Escalation banner (rendered by JS) -->
+  <div id="escalation-banner" class="escalation-banner" style="display:none;" role="alert" aria-live="polite"></div>
+
+  <!-- Toolbar -->
+  <div class="toolbar" role="toolbar" aria-label="Chart controls">
+    <div class="toolbar__inner">
+
+      <!-- Zoom -->
+      <div class="toolbar__group" aria-label="Zoom">
+        <span class="toolbar__label">Zoom</span>
+        <button class="btn btn--icon" id="btn-zoom-in"  title="Zoom in"  aria-label="Zoom in">+</button>
+        <button class="btn btn--icon" id="btn-zoom-out" title="Zoom out" aria-label="Zoom out">-</button>
+      </div>
+
+      <!-- Quick ranges -->
+      <div class="toolbar__group" aria-label="Quick date range">
+        <span class="toolbar__label">Range</span>
+        <button class="btn" id="btn-today"   aria-pressed="false">Today</button>
+        <button class="btn" id="btn-week"    aria-pressed="false">This Week</button>
+        <button class="btn" id="btn-month"   aria-pressed="false">This Month</button>
+        <button class="btn btn--active" id="btn-present" aria-pressed="true">Jump to Present</button>
+      </div>
+
+      <div class="toolbar__spacer"></div>
+
+      <!-- Layout toggle (hidden when data-lock-layout is set on <body>) -->
+      <div class="toolbar__group layout-toggle-group" aria-label="Layout">
+        <span class="toolbar__label">Layout</span>
+        <button class="btn btn--icon" id="btn-layout-landscape" title="Landscape" aria-label="Landscape layout" aria-pressed="false">&#9644;</button>
+        <button class="btn btn--icon" id="btn-layout-portrait"  title="Portrait"  aria-label="Portrait layout"  aria-pressed="false">&#9645;</button>
+        <button class="btn btn--icon" id="btn-layout-mobile"    title="Mobile"    aria-label="Mobile layout"    aria-pressed="false">&#9647;</button>
+      </div>
+
+      <!-- Value visibility -->
+      <label class="cb-toggle" title="Always show exact observation values on chart">
+        <input type="checkbox" id="toggle-values" checked />
+        Show values
+      </label>
+
+      <!-- Colour-blind mode -->
+      <label class="cb-toggle" title="Colour-blind friendly mode">
+        <input type="checkbox" id="toggle-cb" />
+        Colour-blind mode
+      </label>
+
+    </div>
+  </div>
+
+  <!-- Main chart area -->
+  <main class="main-content" role="main" aria-label="Observation charts">
+
+    <!-- Shared band colour legend -->
+    <div class="shared-legend" aria-label="Scoring band colours">
+      <div class="shared-legend__inner">
+        <span class="shared-legend__label">Scoring bands:</span>
+        <div class="legend__item"><div class="legend__swatch legend__swatch--white"></div> 0 - Normal</div>
+        <div class="legend__item"><div class="legend__swatch legend__swatch--yellow"></div> 1 - Low concern</div>
+        <div class="legend__item"><div class="legend__swatch legend__swatch--orange"></div> 2 - Moderate concern</div>
+        <div class="legend__item"><div class="legend__swatch legend__swatch--pink"></div> 4 - High concern</div>
+      </div>
+    </div>
+
+    <div class="charts-layout">
+      <!-- Two-column grid: sidebar labels (col 1) + canvases (col 2), one row per parameter.
+           Both cells in each row share the same grid row so heights are always in sync. -->
+      <div class="chart-grid" id="chart-grid" role="table" aria-label="Observation charts"></div>
+    </div>
+  </main>
+
+  <!-- Sticky footer (rendered by JS) -->
+  <footer class="sticky-footer" id="sticky-footer" role="contentinfo" aria-label="Current PEWS score and escalation status">
+  </footer>
+
+</div><!-- /.app-layout -->
+
+<!-- Load data first, then chart engine -->
+<script src="data.js"></script>
+<script src="chart.js"></script>
+</body>
+</html>
