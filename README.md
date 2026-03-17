@@ -1,83 +1,49 @@
 # Digital PEWS - NPEWS Chart UI
 
-Plain HTML/CSS/JS implementation of the NHS National Paediatric Early Warning System (NPEWS) observation chart. No framework, no build step, dependencies.
+Plain HTML/CSS/JS implementation of the NHS National Paediatric Early Warning System (NPEWS) observation chart. No framework, no build step, no dependencies.
 
 ## Prerequisites
 
-To serve the chart locally you need any local webserver.
-
-To run Storybook you need:
-
-- **Node.js** (v18+) and **npm**
+- **Docker** and **Docker Compose** (for running services)
 
 ## Quick start
 
-### Chart dev server
+### Using Docker Compose (recommended)
 
 ```bash
-npm run serve            # serves on http://localhost:3000
-npm run serve -- 8765    # custom port
+# Start both demo app and Storybook
+s/up
+
+# Start only the demo app (http://localhost:8000)
+s/up demo
+
+# Start only Storybook (http://localhost:6006)
+s/up storybook
 ```
 
-Then open `http://localhost:3000` in your browser.
+Press Ctrl+C to stop the services. Docker Compose will automatically clean up containers.
 
-The script (`scripts/serve`) tries python3, then python, then npx in order and exits with an error if none are available.
+### Demo app
+- Serves at http://localhost:8000
+- Live-reload enabled for `apps/chart-ui/` changes
 
 ### Storybook
+- Serves at http://localhost:6006
+- Live-reload enabled for `.storybook/` changes
 
-```bash
-npm run storybook            # opens http://localhost:6006
-npm run storybook -- 6007    # custom port
-```
-
-`npm install` is run automatically by the script if `node_modules` is missing.
-
-To build a static Storybook for deployment:
-
-```bash
-npm run build-storybook  # output in storybook-static/
-```
-
-## File structure
-
-```
-digital-pews/
-├── apps/chart-ui/
-│   ├── index.html                  # entry point - open this via the dev server
-│   ├── chart.js                    # all rendering logic (~1500 lines)
-│   ├── styles.css                  # CSS variables, layout modes, colour tokens
-│   ├── data.js                     # fictional patient + observations, age band configs
-│   ├── AgeBands.stories.js         # Storybook age band stories
-│   ├── Documentation.stories.js    # Storybook documentation stories
-│   └── README.md                   # data model documentation
-├── .storybook/
-│   ├── main.ts
-│   └── preview.ts
-├── spec/                           # reference only - do not modify
-│   ├── spot-npews-ui-spec.md
-│   ├── npews-scoring.md
-│   └── escalation.md
-├── reference-sources/
-│   └── images/
-│       ├── chart-5-12-years-1.png  # primary visual reference
-│       ├── chart-0-11-months-1.png
-│       ├── chart-1-4-years-1.png
-│       └── chart-13-years-1.png
-├── test-output/
-│   └── VISUAL_COMPARISON.md        # visual fidelity checklist
-├── scripts/
-│   ├── serve                       # chart dev server
-│   └── storybook                   # Storybook dev server
-└── package.json
-```
 
 ## How the chart works
 
-`index.html` loads `data.js`, `chart.js`, and `styles.css` directly - no bundler or transpiler involved. The chart is rendered on `<canvas>` elements. Open the file through the dev server (not `file://`) so ES module imports resolve correctly.
+`index.html` loads the following scripts in order:
+1. `npews-scoring-config.js` - age bands and scoring thresholds
+2. `demo-data.js` - fictional patient and observations
+3. `data.js` - compatibility layer (SCORING_BANDS, CHART_CONFIG)
+4. `chart.js` - rendering logic
+5. `styles.css` - styling
 
-`chart.js` exports nothing to the global scope. All rendering is kicked off by `renderAll()` which is called from `index.html` after the DOM is ready.
+The chart is rendered on `<canvas>` elements. All rendering is kicked off by `renderAll()` which is called from `index.html` after the DOM is ready.
 
-`data.js` contains fictional test data only. Patient details and observations are invented for development and testing purposes.
+Data files use global scope (not ES6 modules) and must load in the specific order shown above.
 
 ## Layout modes
 
@@ -102,7 +68,7 @@ Four age bands are defined, each with different y-axis ranges, scoring threshold
 | `5-12y` | 5-12 Years | Yellow |
 | `13+y` | 13+ Years | Grey |
 
-Currently only `5-12y` has a complete fictional data scenario in `data.js`. The other three age bands have placeholder Storybook stories that need data.
+Currently only `5-12y` has a complete fictional data scenario in `demo-data.js`. The other three age bands have placeholder Storybook stories that need data.
 
 ## Visual reference
 
@@ -150,7 +116,9 @@ Storybook auto-detects `.stories.js` files and hot-reloads on save.
 
 ## Specs and reference materials
 
-- `spec/` - read-only reference specifications (scoring rules, escalation levels, UI spec)
+- `spec/data-model.md` - data model documentation (Patient, Observation, AgeBand, etc.)
+- `spec/spot-npews-ui-spec.md` - UI specification
+- `spec/npews-scoring.md` - scoring rules
+- `spec/escalation.md` - escalation levels
 - `reference-sources/images/` - PNG exports of the NHS NPEWS paper charts for each age band
-- `apps/chart-ui/README.md` - data model documentation
-- `test-output/VISUAL_COMPARISON.md` - visual fidelity checklist against the PDFs
+- `reference-sources/*.pdf` - source PDFs and specifications
