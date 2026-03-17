@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Serve the chart-ui app and Storybook using Docker Compose.
+# Usage: s/serve [service]
+# Services: demo (port 8000), storybook (port 6006), or both (default)
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+SERVICE="${1:-}"
+
+if [ ! -f "docker-compose.yml" ]; then
+  echo "Error: docker-compose.yml not found at $ROOT" >&2
+  exit 1
+fi
+
+# Check if docker compose is available
+if ! command -v docker &>/dev/null; then
+  echo "Error: docker is not installed or not in PATH" >&2
+  exit 1
+fi
+
+# Function to handle cleanup on exit
+cleanup() {
+  echo ""
+  echo "Stopping services..."
+  if [ -n "$SERVICE" ]; then
+    docker compose down "$SERVICE"
+  else
+    docker compose down
+  fi
+}
+
+trap cleanup EXIT INT TERM
+
+# Start the services
+case "$SERVICE" in
+  demo)
+    echo "Starting demo app on http://localhost:8000"
+    docker compose up demo
+    ;;
+  storybook)
+    echo "Starting Storybook on http://localhost:6006"
+    docker compose up storybook
+    ;;
+  "")
+    echo "Starting demo app on http://localhost:8000"
+    echo "Starting Storybook on http://localhost:6006"
+    docker compose up
+    ;;
+  *)
+    echo "Error: unknown service '$SERVICE'" >&2
+    echo "Available services: demo, storybook" >&2
+    exit 1
+    ;;
+esac
