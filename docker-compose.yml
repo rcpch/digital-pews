@@ -1,0 +1,32 @@
+services:
+  # Static demo app server (pews-chart) using live-server
+  demo:
+    image: node:alpine
+    working_dir: /app
+    command: sh -c "npm install -g live-server && live-server --port=8000 --host=0.0.0.0 --no-browser"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./pews-chart:/app
+    container_name: digital-pews-demo
+    restart: unless-stopped
+
+  # Storybook development server
+  storybook:
+    image: node:alpine
+    working_dir: /app
+    command: sh -c "npm install && npx storybook dev -p 6006 --host 0.0.0.0 --no-open"
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./.storybook:/app/.storybook
+      - ./pews-chart:/app/pews-chart
+      - ./package.json:/app/package.json
+      - storybook_node_modules:/app/node_modules
+    container_name: digital-pews-storybook
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+
+volumes:
+  storybook_node_modules:
