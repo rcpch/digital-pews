@@ -18,7 +18,7 @@ function createChartFrame(dataFile) {
   iframe.style.width = '100%';
   iframe.style.height = '900px';
   iframe.style.border = 'none';
-  iframe.src = `/apps/chart-ui/index.html?data=${dataFile}`;
+  iframe.src = `/pews-chart/index.html?data=${dataFile}`;
   return iframe;
 }
 
@@ -34,7 +34,7 @@ export const AgeBand_5_12_Years = {
         </p>
       </div>
       <iframe 
-        src="/apps/chart-ui/index.html" 
+        src="/pews-chart/index.html" 
         style="width: 100%; height: 800px; border: none; display: block;"
         title="NPEWS Chart - 5-12 Years">
       </iframe>

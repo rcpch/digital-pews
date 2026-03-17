@@ -1,8 +1,8 @@
 import type { StorybookConfig } from '@storybook/html-vite';
 
 const config: StorybookConfig = {
-  stories: ['../apps/chart-ui/**/*.stories.@(js|ts)'],
-  staticDirs: [{ from: '../apps/chart-ui', to: '/apps/chart-ui' }],
+  stories: ['../pews-chart/**/*.stories.@(js|ts)'],
+  staticDirs: [{ from: '../pews-chart', to: '/pews-chart' }],
   addons: [
     '@storybook/addon-essentials',
     '@storybook/addon-links',
