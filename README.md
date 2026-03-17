@@ -25,11 +25,13 @@ Press Ctrl+C to stop the services. Docker Compose will automatically clean up co
 
 ### Demo app
 - Serves at http://localhost:8000
-- Live-reload enabled for `apps/chart-ui/` changes
+- Uses live-server for automatic reload
+- Volume-mounted from `pews-chart/`
 
 ### Storybook
 - Serves at http://localhost:6006
-- Live-reload enabled for `.storybook/` changes
+- Volume-mounted from `.storybook/`
+- Node modules cached in Docker volume for faster restarts
 
 
 ## How the chart works
@@ -90,7 +92,7 @@ Canvas text rendering uses the `chartFont(size, weight)` helper in `chart.js`, w
 
 ## Adding a Storybook story
 
-1. Create a `.stories.js` file in `apps/chart-ui/`
+1. Create a `.stories.js` file in `pews-chart/`
 2. Export a default object with a `title`:
 
 ```javascript
@@ -103,7 +105,7 @@ export const MyStory = {
     const container = document.createElement('div');
     container.innerHTML = `
       <iframe
-        src="/apps/chart-ui/index.html"
+        src="/pews-chart/index.html"
         style="width: 100%; height: 800px; border: none;">
       </iframe>
     `;
