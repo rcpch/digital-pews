@@ -349,7 +349,7 @@ Metadata for the four escalation levels that trigger based on total PEWS score.
 
 ## Data Files
 
-The data model is split across three files:
+The data model is split across two files:
 
 1. **`npews-scoring-config.js`** - Contains `AGE_BANDS` and `ESCALATION_META`
    - Age-specific scoring thresholds
@@ -361,10 +361,7 @@ The data model is split across three files:
    - 18 observation sets spanning 24 hours
    - Demonstrates normal -> deterioration -> recovery scenario
 
-3. **`data.js`** - Main entry point
-   - Imports from the above files
-   - Exports all data for backward compatibility
-   - Provides helper constants `SCORING_BANDS` and `CHART_CONFIG` (derived from patient's age band)
+The `chart.js` file derives `SCORING_BANDS` and `CHART_CONFIG` directly from `AGE_BANDS[PATIENT.ageBand]` at runtime.
 
 ---
 

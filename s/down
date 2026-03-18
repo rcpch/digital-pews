@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Stop and remove Docker Compose services.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+SERVICE="${1:-}"
+
+if [ ! -f "docker-compose.yml" ]; then
+  echo "Error: docker-compose.yml not found at $ROOT" >&2
+  exit 1
+fi
+
+# Check if docker compose is available
+if ! command -v docker &>/dev/null; then
+  echo "Error: docker is not installed or not in PATH" >&2
+  exit 1
+fi
+
+# Stop the services
+case "$SERVICE" in
+  demo)
+    echo "Stopping demo app..."
+    docker compose down demo
+    ;;
+  storybook)
+    echo "Stopping Storybook..."
+    docker compose down storybook
+    ;;
+  "")
+    echo "Stopping all services..."
+    docker compose down
+    ;;
+  *)
+    echo "Error: unknown service '$SERVICE'" >&2
+    echo "Available services: demo, storybook" >&2
+    exit 1
+    ;;
+esac
+
+echo "Services stopped."

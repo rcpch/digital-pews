@@ -39,9 +39,8 @@ Press Ctrl+C to stop the services. Docker Compose will automatically clean up co
 `index.html` loads the following scripts in order:
 1. `npews-scoring-config.js` - age bands and scoring thresholds
 2. `demo-data.js` - fictional patient and observations
-3. `data.js` - compatibility layer (SCORING_BANDS, CHART_CONFIG)
-4. `chart.js` - rendering logic
-5. `styles.css` - styling
+3. `chart.js` - rendering logic (includes age-specific config selection)
+4. `styles.css` - styling
 
 The chart is rendered on `<canvas>` elements. All rendering is kicked off by `renderAll()` which is called from `index.html` after the DOM is ready.
 

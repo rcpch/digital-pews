@@ -177,8 +177,12 @@ export const Specifications = {
           </thead>
           <tbody>
             <tr>
-              <td><code>data.js</code></td>
-              <td>Patient data, observations, age band configurations, scoring thresholds</td>
+              <td><code>npews-scoring-config.js</code></td>
+              <td>Age band configurations, scoring thresholds, escalation metadata</td>
+            </tr>
+            <tr>
+              <td><code>demo-data.js</code></td>
+              <td>Patient data and observations for demo/testing</td>
             </tr>
             <tr>
               <td><code>chart.js</code></td>

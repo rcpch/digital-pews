@@ -14,6 +14,16 @@
    - Colour-blind mode (U1.1)
    ============================================================ */
 
+// ---- Module-level data references --------------------------
+//
+// These are set by init() and used by all rendering functions.
+// When loaded via <script src> in index.html, init() falls back to the
+// window globals (PATIENT, OBSERVATIONS, AGE_BANDS) defined by the data
+// scripts that load before chart.js. Stories and other callers pass data
+// directly: NPEWSChart.init(patient, observations, ageBands).
+
+let _patient, _observations, _ageBands;
+
 // ---- Colour helpers ----------------------------------------
 
 // Returns the resolved value of a CSS custom property.
@@ -443,7 +453,7 @@ function renderCategoricalRow(canvas, config) {
  * renderChart(canvas, config)
  *
  * config: {
- *   observations: OBSERVATIONS array (from data.js)
+ *   observations: OBSERVATIONS array (from demo-data.js)
  *   field: string - which field to chart (e.g. 'respiratoryRate')
  *   bands: array of band objects from SCORING_BANDS
  *   yMin, yMax, step: axis range
@@ -758,7 +768,11 @@ function getAVPUCell(obs) {
 // ---- Chart panel definitions --------------------------------
 
 function getChartDefs() {
-  const cfg = CHART_CONFIG;
+  // Get age-specific configuration based on patient's age band
+  const ageBand = _patient.ageBand || '5-12y';
+  const SCORING_BANDS = _ageBands[ageBand]?.scoringBands || _ageBands['5-12y'].scoringBands;
+  const cfg = _ageBands[ageBand]?.chartConfig || _ageBands['5-12y'].chartConfig;
+  
   return [
     // --- Airway and Breathing ---
     {
@@ -1044,7 +1058,7 @@ function renderPewsCanvas() {
   const drawW = W - PAD_LEFT - PAD_RIGHT;
   const range = viewState.end - viewState.start;
 
-  const inView = OBSERVATIONS.filter(o => {
+  const inView = _observations.filter(o => {
     const t = parseTs(o.timestamp);
     return t >= viewState.start && t <= viewState.end;
   });
@@ -1169,7 +1183,7 @@ function renderAll() {
     if (def.categorical) {
       canvas.style.height = `${hCat}px`;
       renderCategoricalRow(canvas, {
-        observations: OBSERVATIONS,
+        observations: _observations,
         getCell:      def.getCell,
         viewStart:    viewState.start,
         viewEnd:      viewState.end,
@@ -1177,7 +1191,7 @@ function renderAll() {
     } else {
       canvas.style.height = `${h}px`;
       renderChart(canvas, {
-        observations: OBSERVATIONS,
+        observations: _observations,
         field:        def.field,
         bands:        def.bands,
         yMin:         def.yMin,
@@ -1205,9 +1219,9 @@ function renderEscalationBanner() {
   if (!banner) return;
 
   // Always use the globally latest observation - zoom must not affect PEWS score display
-  if (OBSERVATIONS.length === 0) { banner.style.display = 'none'; return; }
+  if (_observations.length === 0) { banner.style.display = 'none'; return; }
 
-  const latest = OBSERVATIONS[OBSERVATIONS.length - 1];
+  const latest = _observations[_observations.length - 1];
   if (!latest.escalationLevel) { banner.style.display = 'none'; return; }
 
   const meta = ESCALATION_META[latest.escalationLevel];
@@ -1226,7 +1240,7 @@ function renderFooter() {
   const footer = document.getElementById('sticky-footer');
   if (!footer) return;
 
-  const latest = OBSERVATIONS[OBSERVATIONS.length - 1];
+  const latest = _observations[_observations.length - 1];
   const level  = latest.escalationLevel;
   const meta   = level ? ESCALATION_META[level] : null;
 
@@ -1255,7 +1269,7 @@ function attachTooltip(canvasId, field, unit, bpMode, isO2Delivery) {
     const mouseX = e.clientX - rect.left;
 
     // Find nearest observation in view
-    const inView = OBSERVATIONS.filter(o => {
+    const inView = _observations.filter(o => {
       const t = parseTs(o.timestamp);
       return t >= viewState.start && t <= viewState.end;
     });
@@ -1314,7 +1328,7 @@ function attachCategoricalTooltip(canvasId, getCell) {
     const rect   = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
 
-    const inView = OBSERVATIONS.filter(o => {
+    const inView = _observations.filter(o => {
       const t = parseTs(o.timestamp);
       return t >= viewState.start && t <= viewState.end;
     });
@@ -1398,16 +1412,16 @@ function initLayout() {
 function wireToolbar() {
   // Zoom buttons
   document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
-    zoomIn(OBSERVATIONS); renderAll(); renderEscalationBanner();
+    zoomIn(_observations); renderAll(); renderEscalationBanner();
   });
   document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
-    zoomOut(OBSERVATIONS); renderAll(); renderEscalationBanner();
+    zoomOut(_observations); renderAll(); renderEscalationBanner();
   });
 
   // Quick range buttons
   ['today', 'week', 'month'].forEach(range => {
     document.getElementById(`btn-${range}`)?.addEventListener('click', () => {
-      applyQuickRange(range, OBSERVATIONS);
+      applyQuickRange(range, _observations);
       renderAll(); renderEscalationBanner();
       updateActiveBtn(range);
     });
@@ -1415,7 +1429,7 @@ function wireToolbar() {
 
   // Jump to present
   document.getElementById('btn-present')?.addEventListener('click', () => {
-    applyQuickRange('present', OBSERVATIONS);
+    applyQuickRange('present', _observations);
     renderAll(); renderEscalationBanner();
     updateActiveBtn('present');
   });
@@ -1470,8 +1484,8 @@ function renderAgeBandBanner() {
   const banner = document.querySelector('.age-band-banner');
   if (!banner) return;
   
-  const ageBand = PATIENT.ageBand || '5-12y';
-  const config = AGE_BANDS[ageBand];
+  const ageBand = _patient.ageBand || '5-12y';
+  const config = _ageBands[ageBand];
   if (config && config.headerColor) {
     banner.style.background = config.headerColor;
     banner.setAttribute('aria-label', `Age band: ${config.label}`);
@@ -1480,8 +1494,22 @@ function renderAgeBandBanner() {
 
 // ---- Init --------------------------------------------------
 
-function init() {
-  const def = computeDefaultView(OBSERVATIONS);
+/**
+ * Initialise the chart.
+ *
+ * When called without arguments (e.g. from index.html's DOMContentLoaded),
+ * falls back to the window globals PATIENT, OBSERVATIONS, AGE_BANDS defined
+ * by the data scripts loaded before chart.js.
+ *
+ * Storybook stories and integration tests pass data directly:
+ *   NPEWSChart.init(patient, observations, ageBands)
+ */
+function init(patient, observations, ageBands) {
+  _patient      = patient      || window.PATIENT;
+  _observations = observations || window.OBSERVATIONS;
+  _ageBands     = ageBands     || window.AGE_BANDS;
+
+  const def = computeDefaultView(_observations);
   viewState.start = def.start;
   viewState.end   = def.end;
 
@@ -1511,4 +1539,9 @@ function init() {
   renderFooter();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// When loaded as a plain <script> in index.html, auto-init on DOMContentLoaded
+// using window globals. Storybook stories call NPEWSChart.init() directly.
+document.addEventListener('DOMContentLoaded', () => init());
+
+// Public API - allows callers outside index.html to mount the chart
+window.NPEWSChart = { init };

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Serve the chart-ui app and Storybook using Docker Compose.
-# Usage: s/serve [service]
-# Services: demo (port 8000), storybook (port 6006), or both (default)
+
 
 set -euo pipefail
 
@@ -34,19 +33,55 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
+# Function to open browser (cross-platform)
+open_browser() {
+  local url="$1"
+  if command -v xdg-open &>/dev/null; then
+    xdg-open "$url" &>/dev/null &
+  elif command -v open &>/dev/null; then
+    open "$url" &>/dev/null &
+  elif command -v wslview &>/dev/null; then
+    wslview "$url" &>/dev/null &
+  fi
+}
+
+# Function to wait for service and open browser
+wait_and_open() {
+  local url="$1"
+  local max_wait=30
+  local count=0
+  
+  # Wait in background for service to be ready
+  (
+    while [ $count -lt $max_wait ]; do
+      if curl -s -o /dev/null "$url" 2>/dev/null; then
+        sleep 1  # Give it one more second to fully initialize
+        open_browser "$url"
+        exit 0
+      fi
+      sleep 1
+      count=$((count + 1))
+    done
+  ) &
+}
+
 # Start the services
 case "$SERVICE" in
   demo)
     echo "Starting demo app on http://localhost:8000"
+    wait_and_open "http://localhost:8000"
     docker compose up demo
     ;;
   storybook)
     echo "Starting Storybook on http://localhost:6006"
+    wait_and_open "http://localhost:6006"
     docker compose up storybook
     ;;
   "")
     echo "Starting demo app on http://localhost:8000"
     echo "Starting Storybook on http://localhost:6006"
+    wait_and_open "http://localhost:8000"
+    wait_and_open "http://localhost:6006"
     docker compose up
     ;;
   *)

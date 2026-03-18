@@ -263,3 +263,6 @@ const ESCALATION_META = {
   high:      { label: 'High',      color: '#f47738', textColor: '#fff', pewsRange: '9-12',  action: 'Rapid Review within 15 minutes. Call Nurse in Charge immediately.' },
   emergency: { label: 'Emergency', color: '#d4351c', textColor: '#fff', pewsRange: '13+',   action: 'Call 2222 immediately: "Paediatric Medical Emergency". Inform consultant urgently.' },
 };
+
+window.AGE_BANDS = AGE_BANDS;
+window.ESCALATION_META = ESCALATION_META;

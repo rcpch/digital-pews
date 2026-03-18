@@ -119,7 +119,8 @@ User can override auto-detection via toolbar toggle. Implementers can lock layou
 
 ## Implementation Files
 
-- `data.js` - Patient data, observations, age band configurations, scoring bands
+- `npews-scoring-config.js` - Age band configurations, scoring bands, escalation metadata
+- `demo-data.js` - Patient data and observations for demo/testing
 - `chart.js` - Chart rendering engine, scoring calculation, layout switching
 - `styles.css` - Design tokens, band colors, layout mode styles
 - `index.html` - Page structure, patient header, toolbar, charts container

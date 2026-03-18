@@ -1,6 +1,6 @@
 # Escalation Guidance
 
-> Source: Configuration Document for SPOT NPEWS (NHS England)
+> Source: [Configuration Document for SPOT NPEWS (NHS England)](reference-sources/Configuration%20Document%20for%20SPOT%20NPEWS.pdf)
 
 ---
 
