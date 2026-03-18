@@ -167,35 +167,63 @@ const OBSERVATIONS_5_12 = [
   { id: 'obs-12', timestamp: '2025-01-10T22:00:00', respiratoryRate: 20, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 89, bloodPressureSystolic: 99, bloodPressureDiastolic: 62, capillaryRefill: 2, avpu: 'A', temperature: 37.0, pewsTotal: 0, escalationLevel: null },
 ];
 
-// -- 0-11 months -----------------------------------------------------------
-// Normal RR: 25-60, HR: 110-160, BP sys: 70-89
+// -- 0-11 months: febrile convulsion scenario (Zara Okafor, 9 months) ------
+// Admitted 02:00 with 1st tonic-clonic seizure. 2nd seizure at 04:00.
+// Full recovery by 10:00. 24-hour observation to 02:00 next day.
+// Normal RR: 30-49, HR: 110-149, BP sys: 70-89
 
 const PATIENT_0_11M = {
-  name: 'Baby Rivera',
-  dob: '2025-06-01',
-  age: '6 months',
+  name: 'Zara Okafor',
+  dob: '2025-06-18',
+  age: '9 months',
   ageBracket: '0-11m',
   ageBand: '0-11m',
-  nhsNumber: '502 184 7391',
+  nhsNumber: '614 827 3059',
   ward: 'Paediatric Ward A',
-  bed: '4',
+  bed: '3',
   consultant: 'Dr A. Okafor',
-  admittedAt: '2025-12-10T06:00:00',
+  admittedAt: '2026-03-18T02:00:00',
 };
 
+// Febrile convulsion scenario: admitted 02:00 post-1st seizure (AVPU=V, PEWS 9),
+// 2nd seizure at 04:00 (AVPU=P, PEWS 19), recovery to normal by 10:00.
+// O2 support: NP → FM (during 2nd seizure) → NP → air (off by 08:00).
+// Modality change NP% → FM% at obs-4 causes chart trend line break (spec U9.7).
 const OBSERVATIONS_0_11M = [
-  { id: 'obs-n1', timestamp: '2025-12-10T00:00:00', respiratoryRate: 38, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 130, bloodPressureSystolic: 78, bloodPressureDiastolic: 50, capillaryRefill: 2, avpu: 'A', temperature: 36.8, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-n2', timestamp: '2025-12-10T02:00:00', respiratoryRate: 36, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 128, bloodPressureSystolic: 77, bloodPressureDiastolic: 49, capillaryRefill: 2, avpu: 'A', temperature: 36.8, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-n3', timestamp: '2025-12-10T04:00:00', respiratoryRate: 38, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 132, bloodPressureSystolic: 79, bloodPressureDiastolic: 51, capillaryRefill: 2, avpu: 'A', temperature: 36.9, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-1',  timestamp: '2025-12-10T06:00:00', respiratoryRate: 40, respiratoryDistress: 'none', oxygenSaturation: 98, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 135, bloodPressureSystolic: 80, bloodPressureDiastolic: 52, capillaryRefill: 2, avpu: 'A', temperature: 37.0, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-2',  timestamp: '2025-12-10T07:00:00', respiratoryRate: 44, respiratoryDistress: 'none', oxygenSaturation: 97, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 140, bloodPressureSystolic: 82, bloodPressureDiastolic: 54, capillaryRefill: 2, avpu: 'A', temperature: 37.5, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-3',  timestamp: '2025-12-10T08:00:00', respiratoryRate: 50, respiratoryDistress: 'mild', oxygenSaturation: 95, oxygenDevice: 'NP', oxygenDelivery: { value: 20, unit: '%' }, heartRate: 148, bloodPressureSystolic: 84, bloodPressureDiastolic: 55, capillaryRefill: 2, avpu: 'A', temperature: 38.0, pewsTotal: 2, escalationLevel: 'low' },
-  { id: 'obs-4',  timestamp: '2025-12-10T09:00:00', respiratoryRate: 55, respiratoryDistress: 'moderate', oxygenSaturation: 93, oxygenDevice: 'NP', oxygenDelivery: { value: 35, unit: '%' }, heartRate: 158, bloodPressureSystolic: 85, bloodPressureDiastolic: 56, capillaryRefill: 3, avpu: 'A', temperature: 38.5, pewsTotal: 5, escalationLevel: 'medium' },
-  { id: 'obs-5',  timestamp: '2025-12-10T09:30:00', respiratoryRate: 60, respiratoryDistress: 'severe', oxygenSaturation: 90, oxygenDevice: 'FM', oxygenDelivery: { value: 8, unit: 'L/min' }, heartRate: 165, bloodPressureSystolic: 88, bloodPressureDiastolic: 58, capillaryRefill: 3, avpu: 'A', temperature: 39.0, pewsTotal: 9, escalationLevel: 'high' },
-  { id: 'obs-6',  timestamp: '2025-12-10T11:00:00', respiratoryRate: 48, respiratoryDistress: 'mild', oxygenSaturation: 95, oxygenDevice: 'NP', oxygenDelivery: { value: 3, unit: 'L/min' }, heartRate: 150, bloodPressureSystolic: 82, bloodPressureDiastolic: 53, capillaryRefill: 2, avpu: 'A', temperature: 38.2, pewsTotal: 3, escalationLevel: 'low' },
-  { id: 'obs-7',  timestamp: '2025-12-10T13:00:00', respiratoryRate: 42, respiratoryDistress: 'none', oxygenSaturation: 97, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 138, bloodPressureSystolic: 80, bloodPressureDiastolic: 51, capillaryRefill: 2, avpu: 'A', temperature: 37.8, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-8',  timestamp: '2025-12-10T16:00:00', respiratoryRate: 38, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 132, bloodPressureSystolic: 78, bloodPressureDiastolic: 50, capillaryRefill: 2, avpu: 'A', temperature: 37.2, pewsTotal: 0, escalationLevel: null },
-  { id: 'obs-9',  timestamp: '2025-12-10T20:00:00', respiratoryRate: 36, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 128, bloodPressureSystolic: 76, bloodPressureDiastolic: 48, capillaryRefill: 2, avpu: 'A', temperature: 36.9, pewsTotal: 0, escalationLevel: null },
+  // --- Admission post-1st seizure ---
+  { id: 'obs-1',  timestamp: '2026-03-18T02:00:00', respiratoryRate: 48, respiratoryDistress: 'moderate', oxygenSaturation: 94, oxygenDevice: 'NP',  oxygenDelivery: { value: 20, unit: '%' }, heartRate: 165, bloodPressureSystolic: 74,   bloodPressureDiastolic: 48, capillaryRefill: 2, avpu: 'V', temperature: 39.2, pewsTotal: 9,  escalationLevel: 'high'      },
+  // --- Still postictal, improving ---
+  { id: 'obs-2',  timestamp: '2026-03-18T02:30:00', respiratoryRate: 44, respiratoryDistress: 'mild',     oxygenSaturation: 95, oxygenDevice: 'NP',  oxygenDelivery: { value: 20, unit: '%' }, heartRate: 162, bloodPressureSystolic: 72,   bloodPressureDiastolic: 47, capillaryRefill: 2, avpu: 'V', temperature: 39.0, pewsTotal: 7,  escalationLevel: 'medium'    },
+  // --- Alert, recognises mother ---
+  { id: 'obs-3',  timestamp: '2026-03-18T03:00:00', respiratoryRate: 40, respiratoryDistress: 'mild',     oxygenSaturation: 96, oxygenDevice: 'NP',  oxygenDelivery: { value: 20, unit: '%' }, heartRate: 158, bloodPressureSystolic: 74,   bloodPressureDiastolic: 47, capillaryRefill: 2, avpu: 'A', temperature: 39.0, pewsTotal: 5,  escalationLevel: 'medium'    },
+  // --- 2nd seizure, AVPU=P, SpO2 dips, FM 40% (LINE BREAK: NP% → FM%) ---
+  { id: 'obs-4',  timestamp: '2026-03-18T04:00:00', respiratoryRate: 52, respiratoryDistress: 'moderate', oxygenSaturation: 91, oxygenDevice: 'FM',  oxygenDelivery: { value: 40, unit: '%' }, heartRate: 170, bloodPressureSystolic: 70,   bloodPressureDiastolic: 45, capillaryRefill: 3, avpu: 'P', temperature: 39.6, pewsTotal: 19, escalationLevel: 'emergency' },
+  // --- Post-ictal, AVPU=V, FM weaned to 24% ---
+  { id: 'obs-5',  timestamp: '2026-03-18T04:30:00', respiratoryRate: 46, respiratoryDistress: 'moderate', oxygenSaturation: 93, oxygenDevice: 'FM',  oxygenDelivery: { value: 24, unit: '%' }, heartRate: 168, bloodPressureSystolic: 72,   bloodPressureDiastolic: 46, capillaryRefill: 2, avpu: 'V', temperature: 39.4, pewsTotal: 9,  escalationLevel: 'high'      },
+  // --- Alert, stepped down to NP (LINE BREAK: FM% → NP%) ---
+  { id: 'obs-6',  timestamp: '2026-03-18T05:00:00', respiratoryRate: 44, respiratoryDistress: 'mild',     oxygenSaturation: 93, oxygenDevice: 'NP',  oxygenDelivery: { value: 20, unit: '%' }, heartRate: 156, bloodPressureSystolic: 74,   bloodPressureDiastolic: 47, capillaryRefill: 2, avpu: 'A', temperature: 38.9, pewsTotal: 5,  escalationLevel: 'medium'    },
+  // --- Paracetamol working, temp down ---
+  { id: 'obs-7',  timestamp: '2026-03-18T06:00:00', respiratoryRate: 42, respiratoryDistress: 'mild',     oxygenSaturation: 95, oxygenDevice: 'NP',  oxygenDelivery: { value: 20, unit: '%' }, heartRate: 150, bloodPressureSystolic: 74,   bloodPressureDiastolic: 47, capillaryRefill: 2, avpu: 'A', temperature: 38.7, pewsTotal: 4,  escalationLevel: 'low'       },
+  // --- Temp 38.4°C, NP 15%, less distressed ---
+  { id: 'obs-8',  timestamp: '2026-03-18T07:00:00', respiratoryRate: 40, respiratoryDistress: 'mild',     oxygenSaturation: 96, oxygenDevice: 'NP',  oxygenDelivery: { value: 15, unit: '%' }, heartRate: 148, bloodPressureSystolic: 76,   bloodPressureDiastolic: 49, capillaryRefill: 2, avpu: 'A', temperature: 38.4, pewsTotal: 2,  escalationLevel: 'low'       },
+  // --- Off O2 (air), temp 38.2°C, accepting feeds ---
+  { id: 'obs-9',  timestamp: '2026-03-18T08:00:00', respiratoryRate: 38, respiratoryDistress: 'none',     oxygenSaturation: 97, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 142, bloodPressureSystolic: 76,   bloodPressureDiastolic: 49, capillaryRefill: 2, avpu: 'A', temperature: 38.2, pewsTotal: 1,  escalationLevel: null        },
+  // --- Ibuprofen given, temp 37.9°C, normal ---
+  { id: 'obs-10', timestamp: '2026-03-18T09:00:00', respiratoryRate: 36, respiratoryDistress: 'none',     oxygenSaturation: 98, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 138, bloodPressureSystolic: 76,   bloodPressureDiastolic: 49, capillaryRefill: 2, avpu: 'A', temperature: 37.9, pewsTotal: 0,  escalationLevel: null        },
+  // --- Fully settled, sleeping ---
+  { id: 'obs-11', timestamp: '2026-03-18T10:00:00', respiratoryRate: 34, respiratoryDistress: 'none',     oxygenSaturation: 98, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 130, bloodPressureSystolic: 78,   bloodPressureDiastolic: 50, capillaryRefill: 2, avpu: 'A', temperature: 37.6, pewsTotal: 0,  escalationLevel: null        },
+  // --- EEG done, BP skipped (procedure) ---
+  { id: 'obs-12', timestamp: '2026-03-18T11:00:00', respiratoryRate: 34, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 128, bloodPressureSystolic: null, bloodPressureSystolic_skipReason: 'procedure', bloodPressureDiastolic: null, capillaryRefill: 2, avpu: 'A', temperature: 37.4, pewsTotal: 0,  escalationLevel: null        },
+  // --- Stable, discharge planning ---
+  { id: 'obs-13', timestamp: '2026-03-18T12:00:00', respiratoryRate: 32, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 126, bloodPressureSystolic: 78,   bloodPressureDiastolic: 50, capillaryRefill: 2, avpu: 'A', temperature: 37.3, pewsTotal: 0,  escalationLevel: null        },
+  { id: 'obs-14', timestamp: '2026-03-18T14:00:00', respiratoryRate: 32, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 124, bloodPressureSystolic: 78,   bloodPressureDiastolic: 50, capillaryRefill: 2, avpu: 'A', temperature: 37.2, pewsTotal: 0,  escalationLevel: null        },
+  { id: 'obs-15', timestamp: '2026-03-18T16:00:00', respiratoryRate: 30, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 120, bloodPressureSystolic: 78,   bloodPressureDiastolic: 50, capillaryRefill: 2, avpu: 'A', temperature: 37.1, pewsTotal: 0,  escalationLevel: null        },
+  { id: 'obs-16', timestamp: '2026-03-18T18:00:00', respiratoryRate: 30, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 118, bloodPressureSystolic: 76,   bloodPressureDiastolic: 49, capillaryRefill: 2, avpu: 'A', temperature: 37.0, pewsTotal: 0,  escalationLevel: null        },
+  { id: 'obs-17', timestamp: '2026-03-18T20:00:00', respiratoryRate: 30, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 118, bloodPressureSystolic: 76,   bloodPressureDiastolic: 49, capillaryRefill: 2, avpu: 'A', temperature: 37.0, pewsTotal: 0,  escalationLevel: null        },
+  { id: 'obs-18', timestamp: '2026-03-18T22:00:00', respiratoryRate: 30, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 116, bloodPressureSystolic: 76,   bloodPressureDiastolic: 48, capillaryRefill: 2, avpu: 'A', temperature: 36.9, pewsTotal: 0,  escalationLevel: null        },
+  { id: 'obs-19', timestamp: '2026-03-19T00:00:00', respiratoryRate: 30, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 114, bloodPressureSystolic: 76,   bloodPressureDiastolic: 48, capillaryRefill: 2, avpu: 'A', temperature: 36.9, pewsTotal: 0,  escalationLevel: null        },
+  // --- 24-hour mark, stable, discharge in the morning ---
+  { id: 'obs-20', timestamp: '2026-03-19T02:00:00', respiratoryRate: 30, respiratoryDistress: 'none',     oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null,                     heartRate: 112, bloodPressureSystolic: 76,   bloodPressureDiastolic: 48, capillaryRefill: 2, avpu: 'A', temperature: 36.8, pewsTotal: 0,  escalationLevel: null        },
 ];
 
 // -- 1-4 years -------------------------------------------------------------
@@ -268,7 +296,7 @@ export const AgeBand_5_12_Years = {
   render: createStory(PATIENT_5_12, OBSERVATIONS_5_12),
 };
 
-export const AgeBand_0_11_Months = {
+export const AgeBand_0_11_Months_FebrileConvulsion = {
   render: createStory(PATIENT_0_11M, OBSERVATIONS_0_11M),
 };
 
