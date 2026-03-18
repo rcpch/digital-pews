@@ -469,3 +469,429 @@ const OBSERVATIONS = [
     escalationLevel: null,
   },
 ];
+
+// ---------------------------------------------------------------------------
+// 0-11 months: 9-month-old admitted with febrile convulsion at 02:00
+// 24-hour observation period covering two seizures and full recovery
+// Clinical arc: Emergency → High → Medium → Low → Normal
+// ---------------------------------------------------------------------------
+
+const PATIENT_FEBRILE_CONVULSION = {
+  name: 'Zara Okafor',
+  dob: '2025-06-18',
+  age: '9 months',
+  ageBracket: '0-11m',
+  ageBand: '0-11m',
+  nhsNumber: '614 827 3059',
+  ward: 'Paediatric Ward A',
+  bed: '3',
+  consultant: 'Dr A. Okafor',
+  admittedAt: '2026-03-18T02:00:00',
+};
+
+// Scoring reference (0-11m band):
+//   RR: <10=4, 10-19=2, 20-29=1, 30-49=0, 50-59=1, 60-69=2, 70+=4
+//   HR: <80=4, 80-89=2, 90-109=1, 110-149=0, 150-169=1, 170-179=2, 180+=4
+//   BP sys: <50=4, 50-59=2, 60-69=1, 70-89=0, 90-99=1, 100-109=2, 110+=4
+//   SpO2: <=91=4, 91.01-94.99=1, >=95=0
+//   Temp: <38=0, 38-38.99=1, 39-39.99=2, >=40=4
+//   O2 device: HF/BiP/CP=4 (overrides level); NP/FM/HB/NRB=0 (use level score)
+//   O2 level %: air/null=0, 16-29.99=1, 30-49.99=2, >=50=4
+//   O2 level L/min: air/null=0, 0.01-1.99=1, 2-5.99=2, >=6=4
+//   CRT: <=2=0, >=3=2
+//   AVPU: A=0, V=2, P=4, U=4
+
+const OBSERVATIONS_FEBRILE_CONVULSION = [
+  {
+    // Admission. Post-ictal following 1st tonic-clonic seizure (duration ~2 min, 01:45).
+    // Unresponsive to voice (AVPU=V). Moderate respiratory distress. SpO2 94% on NP 20%.
+    // Febrile 39.2°C. HR 165 (tachycardic). BP normal for age.
+    // Scoring: RR 48=0, distress moderate=2, SpO2 94=1, NP/20%=1, HR 165=1, BP 74=0, CRT 2=0, AVPU V=2, Temp 39.2=2 → PEWS 9
+    id: 'obs-1',
+    timestamp: '2026-03-18T02:00:00',
+    respiratoryRate: 48,
+    respiratoryDistress: 'moderate',
+    oxygenSaturation: 94,
+    oxygenDevice: 'NP',
+    oxygenDelivery: { value: 20, unit: '%' },
+    heartRate: 165,
+    bloodPressureSystolic: 74,
+    bloodPressureDiastolic: 48,
+    capillaryRefill: 2,
+    avpu: 'V',
+    temperature: 39.2,
+    pewsTotal: 9,
+    escalationLevel: 'high',
+  },
+  {
+    // 30 min post-admission. Still postictal but responding to name.
+    // Mild respiratory distress. SpO2 95% on NP 20%. HR improving slightly.
+    // Scoring: RR 44=0, distress mild=1, SpO2 95=0, NP/20%=1, HR 162=1, BP 72=0, CRT 2=0, AVPU V=2, Temp 39.0=2 → PEWS 7
+    id: 'obs-2',
+    timestamp: '2026-03-18T02:30:00',
+    respiratoryRate: 44,
+    respiratoryDistress: 'mild',
+    oxygenSaturation: 95,
+    oxygenDevice: 'NP',
+    oxygenDelivery: { value: 20, unit: '%' },
+    heartRate: 162,
+    bloodPressureDiastolic: 47,
+    bloodPressureSystolic: 72,
+    capillaryRefill: 2,
+    avpu: 'V',
+    temperature: 39.0,
+    pewsTotal: 7,
+    escalationLevel: 'medium',
+  },
+  {
+    // 03:00. Alert (AVPU A). Recognises mother. Mild distress ongoing. SpO2 96%.
+    // NP 20% continued. Temp 39.0°C, tachycardic.
+    // Scoring: RR 40=0, distress mild=1, SpO2 96=0, NP/20%=1, HR 158=1, BP 74=0, CRT 2=0, AVPU A=0, Temp 39.0=2 → PEWS 5
+    id: 'obs-3',
+    timestamp: '2026-03-18T03:00:00',
+    respiratoryRate: 40,
+    respiratoryDistress: 'mild',
+    oxygenSaturation: 96,
+    oxygenDevice: 'NP',
+    oxygenDelivery: { value: 20, unit: '%' },
+    heartRate: 158,
+    bloodPressureSystolic: 74,
+    bloodPressureDiastolic: 47,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 39.0,
+    pewsTotal: 5,
+    escalationLevel: 'medium',
+  },
+  {
+    // 04:00. 2nd seizure begins (focal → generalised, duration ~90 sec).
+    // AVPU=P (no response to pain during ictal phase). SpO2 dips to 91% despite face mask 40%.
+    // HR 170, CRT 3s (peripheral shutdown during seizure). Temp 39.6°C.
+    // Scoring: RR 52=1, distress moderate=2, SpO2 91=4, FM/40%=2, HR 170=2, BP 70=0, CRT 3=2, AVPU P=4, Temp 39.6=2 → PEWS 19 (Emergency)
+    id: 'obs-4',
+    timestamp: '2026-03-18T04:00:00',
+    respiratoryRate: 52,
+    respiratoryDistress: 'moderate',
+    oxygenSaturation: 91,
+    oxygenDevice: 'FM',
+    oxygenDelivery: { value: 40, unit: '%' },
+    heartRate: 170,
+    bloodPressureSystolic: 70,
+    bloodPressureDiastolic: 45,
+    capillaryRefill: 3,
+    avpu: 'P',
+    temperature: 39.6,
+    pewsTotal: 19,
+    escalationLevel: 'emergency',
+  },
+  {
+    // 04:30. Post-ictal. AVPU=V. Seizure self-terminated; buccal midazolam not required.
+    // Face mask maintained. SpO2 recovering to 93%. CRT now 2s. Still febrile.
+    // Scoring: RR 46=0, distress moderate=2, SpO2 93=1, FM/24%=1, HR 168=1, BP 72=0, CRT 2=0, AVPU V=2, Temp 39.4=2 → PEWS 9
+    id: 'obs-5',
+    timestamp: '2026-03-18T04:30:00',
+    respiratoryRate: 46,
+    respiratoryDistress: 'moderate',
+    oxygenSaturation: 93,
+    oxygenDevice: 'FM',
+    oxygenDelivery: { value: 24, unit: '%' },
+    heartRate: 168,
+    bloodPressureSystolic: 72,
+    bloodPressureDiastolic: 46,
+    capillaryRefill: 2,
+    avpu: 'V',
+    temperature: 39.4,
+    pewsTotal: 9,
+    escalationLevel: 'high',
+  },
+  {
+    // 05:00. Alert again. Crying — good sign of neurological recovery.
+    // IV paracetamol running. O2 stepped down to NP 20%. SpO2 93% (persistent mild hypoxia).
+    // Scoring: RR 44=0, distress mild=1, SpO2 93=1, NP/20%=1, HR 156=1, BP 74=0, CRT 2=0, AVPU A=0, Temp 38.9=1 → PEWS 5
+    id: 'obs-6',
+    timestamp: '2026-03-18T05:00:00',
+    respiratoryRate: 44,
+    respiratoryDistress: 'mild',
+    oxygenSaturation: 93,
+    oxygenDevice: 'NP',
+    oxygenDelivery: { value: 20, unit: '%' },
+    heartRate: 156,
+    bloodPressureSystolic: 74,
+    bloodPressureDiastolic: 47,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 38.9,
+    pewsTotal: 5,
+    escalationLevel: 'medium',
+  },
+  {
+    // 06:00. Temperature beginning to respond to paracetamol. SpO2 improved to 95%.
+    // Less distressed. HR still elevated.
+    // Scoring: RR 42=0, distress mild=1, SpO2 95=0, NP/20%=1, HR 150=1, BP 74=0, CRT 2=0, AVPU A=0, Temp 38.7=1 → PEWS 4
+    id: 'obs-7',
+    timestamp: '2026-03-18T06:00:00',
+    respiratoryRate: 42,
+    respiratoryDistress: 'mild',
+    oxygenSaturation: 95,
+    oxygenDevice: 'NP',
+    oxygenDelivery: { value: 20, unit: '%' },
+    heartRate: 150,
+    bloodPressureSystolic: 74,
+    bloodPressureDiastolic: 47,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 38.7,
+    pewsTotal: 4,
+    escalationLevel: 'low',
+  },
+  {
+    // 07:00. Temp 38.4°C. Tolerating NP 15%. SpO2 96%. Less irritable.
+    // Scoring: RR 40=0, distress mild=1, SpO2 96=0, NP/15%=0, HR 148=0, BP 76=0, CRT 2=0, AVPU A=0, Temp 38.4=1 → PEWS 2
+    id: 'obs-8',
+    timestamp: '2026-03-18T07:00:00',
+    respiratoryRate: 40,
+    respiratoryDistress: 'mild',
+    oxygenSaturation: 96,
+    oxygenDevice: 'NP',
+    oxygenDelivery: { value: 15, unit: '%' },
+    heartRate: 148,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 49,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 38.4,
+    pewsTotal: 2,
+    escalationLevel: 'low',
+  },
+  {
+    // 08:00. Temp 38.2°C. Now on air — NP removed after SpO2 stable >97% on room air.
+    // Playful, accepting milk feed.
+    // Scoring: RR 38=0, distress none=0, SpO2 97=0, air=0, HR 142=0, BP 76=0, CRT 2=0, AVPU A=0, Temp 38.2=1 → PEWS 1
+    id: 'obs-9',
+    timestamp: '2026-03-18T08:00:00',
+    respiratoryRate: 38,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 97,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 142,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 49,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 38.2,
+    pewsTotal: 1,
+    escalationLevel: null,
+  },
+  {
+    // 09:00. Temp 37.9°C. Ibuprofen given orally at 08:30. HR settling.
+    // Scoring: RR 36=0, distress none=0, SpO2 98=0, air=0, HR 138=0, BP 76=0, CRT 2=0, AVPU A=0, Temp 37.9=0 → PEWS 0
+    id: 'obs-10',
+    timestamp: '2026-03-18T09:00:00',
+    respiratoryRate: 36,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 98,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 138,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 49,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.9,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 10:00. Temperature 37.6°C. Fully settled, sleeping between obs.
+    // Scoring: RR 34=0, distress none=0, SpO2 98=0, air=0, HR 130=0, BP 78=0, CRT 2=0, AVPU A=0, Temp 37.6=0 → PEWS 0
+    id: 'obs-11',
+    timestamp: '2026-03-18T10:00:00',
+    respiratoryRate: 34,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 98,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 130,
+    bloodPressureSystolic: 78,
+    bloodPressureDiastolic: 50,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.6,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 11:00. EEG completed. No further seizure activity. Parents reassured.
+    // Scoring: RR 34=0, distress none=0, SpO2 99=0, air=0, HR 128=0, BP 78=0, CRT 2=0, AVPU A=0, Temp 37.4=0 → PEWS 0
+    id: 'obs-12',
+    timestamp: '2026-03-18T11:00:00',
+    respiratoryRate: 34,
+    respiratoryRate_skipReason: null,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 128,
+    bloodPressureSystolic: null,
+    bloodPressureSystolic_skipReason: 'procedure',
+    bloodPressureDiastolic: null,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.4,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 12:00. Resting comfortably. Good urine output.
+    // Scoring: RR 32=0, distress none=0, SpO2 99=0, air=0, HR 126=0, BP 78=0, CRT 2=0, AVPU A=0, Temp 37.3=0 → PEWS 0
+    id: 'obs-13',
+    timestamp: '2026-03-18T12:00:00',
+    respiratoryRate: 32,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 126,
+    bloodPressureSystolic: 78,
+    bloodPressureDiastolic: 50,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.3,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 14:00. Paediatric neurology reviewed. Diagnosis: simple febrile seizure (x2).
+    // Scoring: RR 32=0, distress none=0, SpO2 99=0, air=0, HR 124=0, BP 78=0, CRT 2=0, AVPU A=0, Temp 37.2=0 → PEWS 0
+    id: 'obs-14',
+    timestamp: '2026-03-18T14:00:00',
+    respiratoryRate: 32,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 124,
+    bloodPressureSystolic: 78,
+    bloodPressureDiastolic: 50,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.2,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 16:00. Ready for discharge planning. Feeding and sleeping normally.
+    // Scoring: RR 30=0, distress none=0, SpO2 99=0, air=0, HR 120=0, BP 78=0, CRT 2=0, AVPU A=0, Temp 37.1=0 → PEWS 0
+    id: 'obs-15',
+    timestamp: '2026-03-18T16:00:00',
+    respiratoryRate: 30,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 120,
+    bloodPressureSystolic: 78,
+    bloodPressureDiastolic: 50,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.1,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 18:00. Overnight observation plan confirmed — hourly obs until 06:00.
+    // Scoring: RR 30=0, distress none=0, SpO2 99=0, air=0, HR 118=0, BP 76=0, CRT 2=0, AVPU A=0, Temp 37.0=0 → PEWS 0
+    id: 'obs-16',
+    timestamp: '2026-03-18T18:00:00',
+    respiratoryRate: 30,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 118,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 49,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.0,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 20:00. Sleeping. Mum staying overnight.
+    // Scoring: PEWS 0
+    id: 'obs-17',
+    timestamp: '2026-03-18T20:00:00',
+    respiratoryRate: 30,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 118,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 49,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 37.0,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 22:00. Sleeping, settled.
+    // Scoring: PEWS 0
+    id: 'obs-18',
+    timestamp: '2026-03-18T22:00:00',
+    respiratoryRate: 30,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 116,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 48,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 36.9,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 00:00. Overnight check. Sleeping. No concerns.
+    // Scoring: PEWS 0
+    id: 'obs-19',
+    timestamp: '2026-03-19T00:00:00',
+    respiratoryRate: 30,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 114,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 48,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 36.9,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+  {
+    // 02:00. 24-hour mark since admission. Stable and well. Discharge planned for morning.
+    // Scoring: PEWS 0
+    id: 'obs-20',
+    timestamp: '2026-03-19T02:00:00',
+    respiratoryRate: 30,
+    respiratoryDistress: 'none',
+    oxygenSaturation: 99,
+    oxygenDevice: 'air',
+    oxygenDelivery: null,
+    heartRate: 112,
+    bloodPressureSystolic: 76,
+    bloodPressureDiastolic: 48,
+    capillaryRefill: 2,
+    avpu: 'A',
+    temperature: 36.8,
+    pewsTotal: 0,
+    escalationLevel: null,
+  },
+];
