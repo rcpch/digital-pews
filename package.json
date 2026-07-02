@@ -4,12 +4,19 @@
   "private": true,
   "type": "module",
   "description": "RCPCH Digital PEWS - National Paediatric Early Warning System",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "generate:scoring": "node scripts/generate-scoring.mjs",
+    "generate:scoring:check": "node scripts/generate-scoring.mjs --check"
+  },
   "devDependencies": {
-    "@storybook/addon-essentials": "^8.6.0",
-    "@storybook/addon-links": "^8.6.0",
-    "@storybook/html": "^8.6.0",
-    "@storybook/html-vite": "^8.6.0",
-    "storybook": "^8.6.0",
-    "vite": "^6.0.0"
+    "@storybook/html": "^10.4.6",
+    "@storybook/html-vite": "^10.4.6",
+    "storybook": "^10.4.6",
+    "vite": "^8.1.1",
+    "vitest": "^4.1.9"
   }
 }

@@ -31,3 +31,6 @@ Thumbs.db
 
 # Test output (screenshots etc - not source)
 test-output/screenshots/
+
+# Exclude dummy-pews-data for now
+dummy-pews-data/

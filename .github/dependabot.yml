@@ -1,0 +1,29 @@
+# Dependabot version updates.
+# House style: weekly cadence, a cooldown so releases can be noticed/yanked/superseded
+# before they land, and routine minor+patch noise batched into a single grouped PR.
+# Major updates stay separate (one PR each) so they get individual review.
+# Cooldown does NOT apply to security updates — urgent security fixes still arrive immediately.
+#
+# Only the `npm` ecosystem is present in this repo today. When CI workflows are added
+# under .github/workflows/, add a matching `github-actions` block (see house-style ci.md).
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 1
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 14
+    groups:
+      routine-minor-and-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
