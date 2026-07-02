@@ -1,0 +1,281 @@
+{
+  "resourceType": "Bundle",
+  "id": "pews-skip-reasons-0-11m",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-2",
+        "extension": [
+          {
+            "url": "https://rcpch.github.io/fhir/StructureDefinition/pews-age-band",
+            "valueCode": "0-11m"
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "614 827 3059"
+          }
+        ],
+        "name": [{ "text": "Zara Okafor" }],
+        "birthDate": "2025-06-18"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "encounter-2",
+        "status": "in-progress",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP"
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "period": { "start": "2026-03-18T02:00:00" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-rr",
+        "status": "final",
+        "extension": [
+          {
+            "url": "https://rcpch.github.io/fhir/StructureDefinition/pews-skip-reason",
+            "valueCode": "procedure"
+          }
+        ],
+        "code": {
+          "coding": [
+            { "system": "http://loinc.org", "code": "9279-1", "display": "Respiratory rate" }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "dataAbsentReason": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+              "code": "not-performed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-resp-distress",
+        "status": "final",
+        "extension": [
+          {
+            "url": "https://rcpch.github.io/fhir/StructureDefinition/pews-skip-reason",
+            "valueCode": "procedure"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "https://rcpch.github.io/fhir/CodeSystem/pews",
+              "code": "pews-resp-distress",
+              "display": "Respiratory distress"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "dataAbsentReason": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+              "code": "not-performed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-spo2",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            { "system": "http://loinc.org", "code": "59408-5", "display": "Oxygen saturation" }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueQuantity": { "value": 94, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-o2-device",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "https://rcpch.github.io/fhir/CodeSystem/pews",
+              "code": "pews-o2-device",
+              "display": "Oxygen delivery device"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "https://rcpch.github.io/fhir/CodeSystem/pews",
+              "code": "NP",
+              "display": "Nasal prongs"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-hr",
+        "status": "final",
+        "code": {
+          "coding": [
+            { "system": "http://loinc.org", "code": "8867-4", "display": "Heart rate" }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueQuantity": { "value": 130, "unit": "/min", "system": "http://unitsofmeasure.org", "code": "/min" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-bp",
+        "status": "final",
+        "extension": [
+          {
+            "url": "https://rcpch.github.io/fhir/StructureDefinition/pews-skip-reason",
+            "valueCode": "unable"
+          }
+        ],
+        "code": {
+          "coding": [
+            { "system": "http://loinc.org", "code": "55284-4", "display": "Blood pressure systolic and diastolic" }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "dataAbsentReason": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+              "code": "unable-to-perform"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-crt",
+        "status": "final",
+        "code": {
+          "coding": [
+            { "system": "http://loinc.org", "code": "44963-7", "display": "Capillary refill time" }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueQuantity": { "value": 2, "unit": "s", "system": "http://unitsofmeasure.org", "code": "s" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-avpu",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "https://rcpch.github.io/fhir/CodeSystem/pews",
+              "code": "pews-avpu",
+              "display": "AVPU"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "https://rcpch.github.io/fhir/CodeSystem/pews",
+              "code": "A",
+              "display": "Alert"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-temp",
+        "status": "final",
+        "code": {
+          "coding": [
+            { "system": "http://loinc.org", "code": "8310-5", "display": "Body temperature" }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueQuantity": { "value": 38.2, "unit": "Cel", "system": "http://unitsofmeasure.org", "code": "Cel" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs2-pews-total",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "https://rcpch.github.io/fhir/CodeSystem/pews",
+              "code": "pews-total",
+              "display": "PEWS total score"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/patient-2" },
+        "encounter": { "reference": "Encounter/encounter-2" },
+        "effectiveDateTime": "2026-03-18T02:00:00",
+        "valueInteger": 1
+      }
+    }
+  ]
+}
