@@ -80,7 +80,7 @@ The solution **must** be able to support a colour blindness friendly mode for cl
 
 #### U3.1
 
-The solution **must** allow the clinician to zoom in and out when viewing charts to see them in more or less detail as needed. This is to let them see fewer observations in more detail, or more observations in less detail. See also [RCPCH 1.1](spec/rcpch-implementation-spec.md#RCPCH1.1) for the requirement that the zoom level must not affect the PEWS score calculation
+The solution **must** allow the clinician to zoom in and out when viewing charts to see them in more or less detail as needed. This is to let them see fewer observations in more detail, or more observations in less detail. See also [RCPCH 1.1](spec/implementation-notes.md#RCPCH1.1) for the requirement that the zoom level must not affect the PEWS score calculation
 
 #### U3.2
 

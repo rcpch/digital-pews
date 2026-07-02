@@ -147,11 +147,25 @@ Escalation can also be triggered by Carer Question (W=Worse), Clinical Intuition
 
 ## Spec documents (read before making changes)
 
+**Reference (transcriptions of the SPOT-NPEWS `.xlsx`):**
 - `spec/spot-npews-ui-spec.md` — NHS SPOT/NPEWS UI specification (MOSCOW priorities). **Must** requirements are non-negotiable.
-- `spec/npews-scoring.md` — Scoring rules by age band
-- `spec/escalation.md` — Escalation level triggers and guidance
-- `spec/data-model.md` — Patient, Observation, AgeBand, ScoringBand data structures
-- `spec/observation-options.md` — Observation parameter definitions
+- `spec/spot-npews-spec.md` — NHS SPOT/NPEWS clinical/technical specification (`C*` IDs).
+
+**Scoring (JSON is the source of truth):**
+- `spec/npews-scoring-spec.json` — canonical numeric scoring spec; generates the runtime config + the table below (drift-tested).
+- `spec/npews-scoring-tables.generated.md` — generated unified reference table (do not hand-edit).
+- `spec/npews-scoring.md` — clinical narrative only (respiratory-distress descriptors, notes).
+
+**Clinical policy & data:**
+- `spec/escalation.md` — escalation levels, non-score triggers, sepsis, ISBAR.
+- `spec/data-model.md` — the two input shapes (Patient, Observation) + data-entry reference codes.
+- `spec/fhir.md` — FHIR adapter contract + conformance-testing approach.
+
+**Project:**
+- `spec/decisions.md` — durable decision log (ADR-style).
+- `spec/implementation-notes.md` — implementation clarifications + visual QA checklist.
+- `spec/react.md` — component-architecture decision (Web Component vs React).
+- `spec/roadmap.md` — forward-looking work.
 
 ---
 

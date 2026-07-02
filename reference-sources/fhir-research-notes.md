@@ -92,8 +92,8 @@ How confident are we that the current FHIR chart adapter spec is correct, and ha
 
 ## Suggested next steps
 
-1. Update `spec/fhir-uk-core-mapping-draft.md` to include explicit references to the Clinical Observations IG and caveat text about draft/discovery status.
-2. In `spec/fhir-chart-adapter.md`, add a short compatibility note on score component mapping from NPEWS1 examples.
+1. In `spec/fhir.md` (future-work appendix), keep explicit references to the Clinical Observations IG and caveat text about draft/discovery status.
+2. In `spec/fhir.md`, add a short compatibility note on score component mapping from NPEWS1 examples.
 3. Add adapter conformance tests that compare chart-model score fields against known PEWS/NPEWS fixture expectations.
 4. Keep this file as the running research log until a consolidated `docs/` structure is introduced.
 

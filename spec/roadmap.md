@@ -49,3 +49,16 @@ Create stories demonstrating:
 - Recovery scenarios
 
 ### Priority 4: Visual Regression Testing
+
+### Implementation follow-ups (from implementation notes)
+
+Forward-looking items moved out of implementation notes because they are not settled implementation decisions:
+
+- **Raw observation data in the demo harness** — show the input observation table alongside the chart and computed PEWS score. See `README.md` for the current demonstration harness behaviour.
+- **Plausible observation timing variation** — add or adjust scenarios so observations do not always occur exactly on the hour, while preserving proportional time spacing.
+- **Respiratory-support code handling** — complete support for respiratory-support codes where clinically required, beyond current label/sidebar display.
+- **Visual-regression PNG baselines** — pin canvas renders with browser automation, for example Playwright `toHaveScreenshot`, rather than a hosted SaaS.
+- **Side-by-side age-band comparison** — provide a clinical review view for comparing how thresholds differ across age bands.
+- **Scenario fixtures for automated checks** — reuse scenario objects as fixtures for unit tests and browser-driven checks.
+
+Already tracked elsewhere in this roadmap, so not repeated as new work here: organisational branding / NHS logo, interactive controls and edge-case stories.

@@ -166,9 +166,11 @@ sidebar hot-reloads on save (live-server).
 
 ## Specs and reference materials
 
-- `spec/data-model.md` - data model documentation (Patient, Observation, AgeBand, etc.)
-- `spec/spot-npews-ui-spec.md` - UI specification
-- `spec/npews-scoring.md` - scoring rules
-- `spec/escalation.md` - escalation levels
+- `spec/spot-npews-ui-spec.md` / `spec/spot-npews-spec.md` - NHS SPOT/NPEWS specification (transcribed from the reference `.xlsx`)
+- `spec/npews-scoring-spec.json` - canonical scoring spec (source of truth); `spec/npews-scoring-tables.generated.md` - generated reference table; `spec/npews-scoring.md` - clinical narrative
+- `spec/data-model.md` - the Patient + Observation input shapes and data-entry codes
+- `spec/escalation.md` - escalation levels, triggers, sepsis and ISBAR
+- `spec/fhir.md` - FHIR adapter + conformance testing
+- `spec/decisions.md` - durable decision log; `spec/implementation-notes.md` - implementation notes + QA checklist; `spec/roadmap.md` - roadmap
 - `reference-sources/images/` - PNG exports of the NHS NPEWS paper charts for each age band
 - `reference-sources/*.pdf` - source PDFs and specifications

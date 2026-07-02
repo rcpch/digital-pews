@@ -3,7 +3,7 @@
  *
  * Gate: round-trip
  * Status: all tests are .todo until fhir-adapter.js is implemented.
- * See spec/fhir-chart-adapter.md §8-9 for implementation guide.
+ * See spec/fhir.md for the implementation guide.
  */
 
 import { describe, it, expect } from 'vitest';

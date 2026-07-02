@@ -6,7 +6,7 @@
  *   fromChartModelToFhirBundle(patient, observations, context?) -> Bundle
  *
  * Status: Phase 1 skeleton — functions are stubbed.
- * Implement per spec/fhir-chart-adapter.md.
+ * Implement per spec/fhir.md.
  */
 
 // ---------------------------------------------------------------------------

@@ -21,7 +21,7 @@ const PATIENT = {
 };
 
 // Each observation set has a timestamp and values for each parameter.
-// null = skipped. skipReason codes from spec/observation-options.md
+// null = skipped. skipReason codes from spec/data-model.md (data-entry reference)
 // O2 delivery uses { value, unit: '%' | 'L/min' } - a unit change causes a chart line break
 // Data spans a full 24-hour admission day (00:00 - 23:00) to support the 24h default view.
 // The first 8 observations (00:00 - 07:00) represent a stable overnight period.
