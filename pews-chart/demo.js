@@ -3,18 +3,21 @@
    ES module. No build step.
 
    Drives the demonstration page: renders the scenario picker in the sidebar and,
-   when a scenario is chosen, mounts a fresh chart shell and hands the scenario to
-   the chart engine as props (patient + observations). This is the "component
-   takes props" boundary made concrete - the harness owns the data, chart.js owns
-   the rendering, and the two only meet through render({ patient, observations }).
+   when a scenario is chosen, feeds it to a single <npews-chart> Web Component as a
+   JSON object. The harness is now a plain *consumer* of the element - it owns the
+   scenario data and knows nothing about how the chart renders; the two meet only
+   through `chartEl.data = { patient, observations }`.
    ============================================================ */
 
-import { mountChartShell } from './chart-shell.js';
+import './npews-chart.js';
 import { SCENARIOS, scenarioById } from './scenarios.js';
-import { render } from './chart.js';
 
 const host = document.getElementById('chart-host');
 const list = document.getElementById('scenario-list');
+
+// One chart element for the whole harness; selecting a scenario re-feeds its data.
+const chartEl = document.createElement('npews-chart');
+host.appendChild(chartEl);
 
 // -- Build the sidebar scenario list -----------------------------------------
 list.innerHTML = SCENARIOS.map((s) => `
@@ -34,9 +37,7 @@ const buttons = () => Array.from(list.querySelectorAll('.scenario'));
 function select(id) {
   const scenario = scenarioById(id) || SCENARIOS[0];
 
-  // Fresh shell every time so the chart re-mounts cleanly into empty DOM.
-  mountChartShell(host);
-  render({ patient: scenario.patient, observations: scenario.observations });
+  chartEl.data = { patient: scenario.patient, observations: scenario.observations };
 
   buttons().forEach((btn) => {
     const active = btn.dataset.id === scenario.id;

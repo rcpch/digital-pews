@@ -413,3 +413,60 @@ bundler/transpiler") and the "Script load order" block.
 thresholds"*, but the Q9=CONFORMANT decision removed AVPU from the numeric total (it still
 drives escalation). These contradict. The scorer currently EXCLUDES AVPU from the total. Please
 confirm which is correct against the NHSE spec so I can align the scorer + docs.
+
+---
+
+## Session 3 addendum (2026-07-02): React discussion → framework-neutral Web Component
+
+**Decision — the chart is packaged as a framework-neutral `<npews-chart>` Web Component
+(not a React component).** After the `spec/react.md` discussion (grounded in the real RCPCH
+Digital Growth Charts library — Victory/SVG, Rollup, UMD+SRI CDN, typed props — versus our
+imperative canvas engine of ~1750 lines / ~280 `ctx.*` calls), Marcus chose the recommended
+Web Component route. Key reasoning: React helped the dGC because its rendering is *declarative
+SVG*; ours is *imperative canvas*, so React would wrap the shell but not simplify the hard 90%.
+A standards-based custom element gives the dGC ergonomics ("include an element, pass it data")
+without forcing a framework on NHS consumers — a stronger anti-lock-in story for the GESH pitch.
+
+**Answers Marcus gave at the end of `spec/react.md` that drove the build:**
+- First real consumer = **GESH on Oracle via SMART-on-FHIR** (embeds in its own EHR iframe, so
+  light DOM is sufficient for Phase 1 — the iframe already isolates styles/DOM).
+- "One stack with the dGC" is a nice-to-have, not a requirement → Web Components are fine.
+- A build step is acceptable **for distribution only** (Phase 2 CDN bundle), source stays unbuilt.
+- Softening the old "no framework" hard constraint to *framework-neutral core + optional
+  wrappers* = **yes**.
+
+**What was built (Phase 1).**
+- `pews-chart/npews-chart.js` — the `<npews-chart>` custom element. Light DOM, no engine
+  changes. `.data = { patient, observations }` property (plus `.patient` / `.observations`
+  convenience setters). Self-provisions `styles.css` (resolved via `import.meta.url`) + Lato
+  fonts so it is a genuine one-import drop-in.
+- `pews-chart/embed-example.html` — a minimal self-contained drop-in that links **no** chart
+  stylesheet and calls **no** rendering API; it just loads the module and sets `.data`.
+- `index.html` / `demo.js` / `demo.html` now consume the element; `styles.css` gets a
+  `display:block` rule for the element (custom elements default to `display:inline`).
+
+**Colour-race gotcha (fixed).** The engine reads the clinically-mandated band/escalation
+colours from CSS custom properties at *canvas render time*. The element injects `styles.css`
+asynchronously, so an early first paint drew with non-spec fallback colours (vivid magenta
+instead of `--band-pink`). Fixed: `ensureStyles()` returns a promise that resolves only after
+the stylesheet `<link>` has loaded (and `document.fonts.ready` settles, raced with a 1500 ms
+timeout); the element awaits it before mounting + rendering. Re-verified in headless Chrome —
+`index.html`, `embed-example.html` and the demo harness all draw the correct pastel bands and
+the full escalation-coloured PEWS row.
+
+**Phase 2 (deferred, tracked in `spec/roadmap.md`).** Shadow-DOM isolation, multiple instances
+per page (retire fixed DOM ids + the global resize listener), an NPM package + UMD/CDN bundle
+with Subresource Integrity (mirroring the dGC recipe), and published TypeScript prop types.
+
+**✅ Resolved — CLAUDE.md "script load order" staleness (the session-3 ❓ above).** Since the
+constraint was demonstrably false after the module conversion and I was already rewriting
+`index.html`/`CLAUDE.md` for the element, I reworded it factually rather than leave a false
+"never violate" rule: the "Script load order (must not change)" block is now a "Module
+dependency graph", hard-constraint #7 now describes the ES-module dependency order, #3 is
+softened to "keep the runtime framework-neutral", and #4 now allows a distribution-only build.
+Shout if you'd rather I phrase any of these differently.
+
+**❗ Still open — AVPU in the numeric PEWS total (unchanged from session 1).** `plan.md` says
+AVPU contributes to BOTH the numeric total AND escalation; the Q9=CONFORMANT decision + the
+current scorer EXCLUDE it from the numeric total (it still drives escalation). Please confirm
+against the NHSE spec so I can align scorer + docs.

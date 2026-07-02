@@ -80,6 +80,15 @@ button { cursor: pointer; font-family: inherit; }
   min-height: 100vh;
 }
 
+/* The <npews-chart> custom element is a drop-in host for .app-layout. Custom
+   elements default to display:inline, which would collapse the chart, so give it
+   block layout and let it fill (and shrink within) its container. */
+npews-chart {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 .main-content {
   flex: 1;
   padding: 0 0 5rem; /* space for sticky footer */

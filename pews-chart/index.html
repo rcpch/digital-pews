@@ -3,38 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NPEWS Chart UI - Alex Thompson</title>
-  <!--
-    Lato is used as the closest freely available substitute for Frutiger.
-    Implementers with a Frutiger license can remove this <link> and override
-    the --font CSS variable in their own stylesheet instead:
-      :root { --font: 'Frutiger', 'Frutiger LT Std', Lato, sans-serif; }
-  -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <title>NPEWS Chart</title>
 </head>
 <!-- data-layout: landscape | portrait | mobile (set by JS on load, overridable by user)  -->
 <!-- data-lock-layout: present to disable the user toggle in production deployments       -->
 <body>
 
-<!-- The chart shell is injected here by chart-shell.js so this standalone page
-     and the demo harness (demo.html) share one source of truth for the markup.
-     The patient header is populated by chart.js from the patient object at
-     render time - nothing about a specific patient is baked into this page. -->
-<div id="chart-host"></div>
+<!-- Standalone single chart, rendered by the <npews-chart> Web Component. The
+     element is a genuine drop-in: it self-provisions its own stylesheet and font
+     (relative to npews-chart.js) so this page needs no <link> tags of its own. -->
+<npews-chart id="chart"></npews-chart>
 
-<!-- Load as ES modules. demo-data.js publishes window.PATIENT / window.OBSERVATIONS;
-     the bootstrap below mounts the shared shell then renders the chart from those
-     globals. chart.js is the visualisation engine (imported by the bootstrap). -->
+<!-- Register the element, then feed it a JSON object. demo-data.js publishes
+     window.PATIENT / window.OBSERVATIONS (raw vitals only - scores are computed). -->
+<script type="module" src="npews-chart.js"></script>
 <script type="module" src="demo-data.js"></script>
 <script type="module">
-  import { mountChartShell } from './chart-shell.js';
-  import { render } from './chart.js';
-
-  mountChartShell(document.getElementById('chart-host'));
-  render({ patient: window.PATIENT, observations: window.OBSERVATIONS });
+  document.getElementById('chart').data = {
+    patient: window.PATIENT,
+    observations: window.OBSERVATIONS,
+  };
 </script>
 </body>
 </html>

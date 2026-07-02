@@ -57,6 +57,47 @@ Two entry points render the chart:
   patients from `scenarios.js`; selecting one mounts a fresh shell and passes the
   scenario to `render({ patient, observations })`. This replaced Storybook.
 
+## Use as a Web Component
+
+The chart is also packaged as a **framework-neutral `<npews-chart>` custom element**
+so it drops into any host — a plain page, React/Angular/Vue, or a SMART-on-FHIR
+app — with no framework dependency. The element self-provisions its stylesheet and
+fonts, so a consumer only loads one module and feeds it a JSON object:
+
+```html
+<script type="module" src="npews-chart.js"></script>
+
+<npews-chart id="chart"></npews-chart>
+
+<script type="module">
+  document.getElementById('chart').data = {
+    patient: {
+      name: 'Alex Thompson',
+      dob: '2017-03-14',
+      // ...nhsNumber, ward, bed, consultant
+    },
+    observations: [
+      // raw vitals only — no scores; the engine computes them
+      { timestamp: '2025-01-10T08:00:00Z', respiratoryRate: 20, spo2: 99, /* ... */ },
+      // ...
+    ],
+  };
+</script>
+```
+
+- Data is passed as a JS **property** (`.data`), not an attribute, because it is a
+  rich object. Convenience setters `.patient` and `.observations` are also available.
+- **Scores are always computed** from the patient's date of birth and the raw
+  observations — any score in the input is ignored (single source of truth).
+- See `pews-chart/embed-example.html` for a minimal, self-contained drop-in
+  (<http://localhost:8000/embed-example.html>). It links no chart stylesheet and
+  calls no rendering API — it just loads the module and sets `.data`.
+
+**Phase 1 limitation:** the engine uses fixed DOM ids, so one chart per document is
+supported today; embed additional charts in separate iframes. Shadow-DOM isolation,
+multiple instances per page, and an NPM/UMD + Subresource-Integrity CDN bundle with
+TypeScript prop types are Phase 2 (see `spec/roadmap.md`).
+
 ## Layout modes
 
 Three modes are supported, selectable via the toolbar toggle in the UI:

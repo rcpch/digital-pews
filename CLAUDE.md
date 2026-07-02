@@ -10,17 +10,27 @@ This is a **clinical safety tool**. Visual accuracy and spec compliance matter m
 
 ## Project stack
 
-- **Vanilla JS, HTML, CSS** — no framework, no transpilation
+- **Vanilla JS, HTML, CSS** — no runtime framework, no transpilation
 - **Canvas** — all chart rendering is done with the 2D Canvas API
+- **Web Component** — the chart is packaged as a framework-neutral `<npews-chart>` custom
+  element (`npews-chart.js`) that takes a JSON `{ patient, observations }` object via its
+  `.data` property. Works in plain HTML, React, Angular, Vue, or a SMART-on-FHIR app.
 - **ES modules** — `pews-chart/` loads as native ES modules (no bundler, no build step)
 - **Docker Compose** — local dev (`s/up` / `s/up demo`)
-- Demo app: http://localhost:8000 (`/demo.html` = scenario harness · `/` = single chart)
+- Demo app: http://localhost:8000 (`/demo.html` = scenario harness · `/` = single chart ·
+  `/embed-example.html` = minimal `<npews-chart>` drop-in)
 
-### Script load order (must not change)
+### Module dependency graph
 ```
-npews-scoring-config.js  →  demo-data.js  →  chart.js
+npews-scoring-config.js ─┐
+npews-scorer.js          ├─→ chart.js ─→ npews-chart.js  (<npews-chart> element)
+age-band.js              ┘        ▲
+chart-shell.js ───────────────────┘
 ```
-Files use global scope, not ES modules. They must load in this exact order.
+Files load as native ES modules and `import` their own dependencies — there is no fragile
+global-script load order to preserve. A host page just imports `npews-chart.js` (module) and
+feeds the `<npews-chart>` element its `{ patient, observations }` data. `demo-data.js` still
+exposes `window.PATIENT`/`window.OBSERVATIONS` for the zero-config single-chart `index.html`.
 
 ---
 
@@ -149,11 +159,21 @@ Escalation can also be triggered by Carer Question (W=Worse), Clinical Intuition
 
 1. **Do not change band colours** (`--band-*`). They are clinically mandated by the NHS NPEWS specification.
 2. **Do not change escalation colours** (`--esc-*`). Same reason.
-3. **Do not add a framework**. This is intentionally dependency-free.
-4. **Do not add a build step** to `pews-chart/`. It must stay plain HTML/CSS/JS loaded as native ES modules — no bundler, no transpiler.
+3. **Keep the runtime framework-neutral.** The chart core is plain HTML/CSS/JS packaged as a
+   standards-based `<npews-chart>` Web Component with **no runtime framework dependency** — so it
+   drops into any host (plain page, React, Angular, Vue, EHR/SMART-on-FHIR). Optional thin
+   framework *wrappers* (e.g. a React wrapper over the element) are allowed, but the core must
+   never require one. See `spec/react.md` for the decision.
+4. **Do not add a build step to the `pews-chart/` source.** The source must stay plain
+   HTML/CSS/JS loaded as native ES modules — no bundler, no transpiler in development. A
+   **distribution-only** bundle (NPM/UMD build for CDN publishing) is allowed as a separate
+   packaging step, provided the source itself keeps running unbuilt in the browser.
 5. **Do not break colour-blind mode**. Test any colour-adjacent change with `.cb-mode` on `<body>`.
 6. **Do not draw a line over a skipped observation** (spec U3.10). A skip must cause a break in the line.
-7. **Do not change script load order** in `index.html`.
+7. **Respect the ES-module dependency order.** `chart.js` imports its config/scorer/age-band
+   deps; `npews-chart.js` imports `chart-shell.js` + `chart.js`. Hosts render by feeding the
+   `<npews-chart>` element a `{ patient, observations }` object (or calling `render(...)`
+   directly) — never by relying on implicit global-script load order.
 
 ---
 

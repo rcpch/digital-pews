@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;npews-chart&gt; embed example</title>
+  <style>
+    /* This page deliberately links NO chart CSS - the <npews-chart> element
+       provides its own. Only this explanatory banner is styled here. */
+    .embed-note {
+      font-family: 'Lato', 'Trebuchet MS', Helvetica, Arial, sans-serif;
+      max-width: 60rem;
+      margin: 1.5rem auto 0;
+      padding: 0 1.5rem;
+      color: #0b0c0c;
+    }
+    .embed-note h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+    .embed-note p  { margin: 0.25rem 0; color: #505a5f; }
+    .embed-note code {
+      background: #f3f2f1; padding: 0.05rem 0.3rem; border-radius: 3px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="embed-note">
+    <h1>Embedding <code>&lt;npews-chart&gt;</code></h1>
+    <p>
+      The chart below is a single custom element fed a JSON object. This page
+      links no chart stylesheet and calls no rendering API &mdash; it just loads the
+      module, drops the element, and sets <code>.data</code>.
+    </p>
+  </div>
+
+  <npews-chart id="chart"></npews-chart>
+
+  <script type="module">
+    // 1. Register the element (self-provisions its stylesheet + font).
+    import './npews-chart.js';
+    // 2. Grab any patient + observations JSON. Here we borrow a demo scenario;
+    //    in production this is your ObservationsObject (e.g. mapped from FHIR).
+    import { SCENARIOS } from './scenarios.js';
+
+    const scenario = SCENARIOS[0];
+    document.getElementById('chart').data = {
+      patient: scenario.patient,
+      observations: scenario.observations,
+    };
+  </script>
+</body>
+</html>
