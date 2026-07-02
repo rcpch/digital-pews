@@ -1,6 +1,213 @@
 // NPEWS scoring configuration and age band parameters
-// Age band configurations - thresholds and display parameters vary by age
-// Extracted from reference PDFs: pews-observation-and-escalation-chart-[age-band]-updated.pdf
+//
+// Display configuration (axes, labels, header colours) is hand-authored here.
+//
+// The numeric SCORING bands are GENERATED from the canonical source of truth,
+// spec/npews-scoring-spec.json, by scripts/generate-scoring.mjs. Do not edit the
+// SCORING_BANDS_BY_AGE block below by hand — edit the JSON and run
+// `npm run generate:scoring`. test/scoring/config-matches-spec.test.js guards
+// against drift between this file and the spec.
+//
+// Conformance note: temperature and AVPU are NOT numerically scored (national
+// SPOT NPEWS conformance). Temperature still has DISPLAY config (hot/cold zones)
+// but no scoring band; AVPU is rendered as a categorical escalation cue.
+
+// <<< GENERATED SCORING BANDS START — do not edit by hand; run `npm run generate:scoring` >>>
+const SCORING_BANDS_BY_AGE = {
+  '0-11m': {
+    respiratoryRate: [
+      { min: 0, max: 9.99, score: 4, color: 'pink' },
+      { min: 10, max: 19.99, score: 2, color: 'orange' },
+      { min: 20, max: 29.99, score: 1, color: 'yellow' },
+      { min: 30, max: 49.99, score: 0, color: 'white' },
+      { min: 50, max: 59.99, score: 1, color: 'yellow' },
+      { min: 60, max: 69.99, score: 2, color: 'orange' },
+      { min: 70, max: 999, score: 4, color: 'pink' },
+    ],
+    heartRate: [
+      { min: 0, max: 79.99, score: 4, color: 'pink' },
+      { min: 80, max: 89.99, score: 2, color: 'orange' },
+      { min: 90, max: 109.99, score: 1, color: 'yellow' },
+      { min: 110, max: 149.99, score: 0, color: 'white' },
+      { min: 150, max: 169.99, score: 1, color: 'yellow' },
+      { min: 170, max: 179.99, score: 2, color: 'orange' },
+      { min: 180, max: 999, score: 4, color: 'pink' },
+    ],
+    bloodPressureSystolic: [
+      { min: 0, max: 49.99, score: 4, color: 'pink' },
+      { min: 50, max: 59.99, score: 2, color: 'orange' },
+      { min: 60, max: 69.99, score: 1, color: 'yellow' },
+      { min: 70, max: 89.99, score: 0, color: 'white' },
+      { min: 90, max: 99.99, score: 1, color: 'yellow' },
+      { min: 100, max: 109.99, score: 2, color: 'orange' },
+      { min: 110, max: 999, score: 4, color: 'pink' },
+    ],
+    oxygenSaturation: [
+      { min: 0, max: 91, score: 4, color: 'pink' },
+      { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
+      { min: 95, max: 100, score: 0, color: 'white' },
+    ],
+    oxygenDeliveryPercent: [
+      { min: 0, max: 15.99, score: 0, color: 'white' },
+      { min: 16, max: 29.99, score: 1, color: 'yellow' },
+      { min: 30, max: 49.99, score: 2, color: 'orange' },
+      { min: 50, max: 100, score: 4, color: 'pink' },
+    ],
+    oxygenDeliveryLpm: [
+      { min: 0, max: 0.009, score: 0, color: 'white' },
+      { min: 0.01, max: 1.99, score: 1, color: 'yellow' },
+      { min: 2, max: 5.99, score: 2, color: 'orange' },
+      { min: 6, max: 20, score: 4, color: 'pink' },
+    ],
+  },
+  '1-4y': {
+    respiratoryRate: [
+      { min: 0, max: 9.99, score: 4, color: 'pink' },
+      { min: 10, max: 19.99, score: 2, color: 'orange' },
+      { min: 20, max: 39.99, score: 0, color: 'white' },
+      { min: 40, max: 49.99, score: 1, color: 'yellow' },
+      { min: 50, max: 59.99, score: 2, color: 'orange' },
+      { min: 60, max: 999, score: 4, color: 'pink' },
+    ],
+    heartRate: [
+      { min: 0, max: 59.99, score: 4, color: 'pink' },
+      { min: 60, max: 69.99, score: 2, color: 'orange' },
+      { min: 70, max: 89.99, score: 1, color: 'yellow' },
+      { min: 90, max: 139.99, score: 0, color: 'white' },
+      { min: 140, max: 149.99, score: 1, color: 'yellow' },
+      { min: 150, max: 169.99, score: 2, color: 'orange' },
+      { min: 170, max: 999, score: 4, color: 'pink' },
+    ],
+    bloodPressureSystolic: [
+      { min: 0, max: 49.99, score: 4, color: 'pink' },
+      { min: 50, max: 59.99, score: 2, color: 'orange' },
+      { min: 60, max: 79.99, score: 1, color: 'yellow' },
+      { min: 80, max: 99.99, score: 0, color: 'white' },
+      { min: 100, max: 119.99, score: 1, color: 'yellow' },
+      { min: 120, max: 129.99, score: 2, color: 'orange' },
+      { min: 130, max: 999, score: 4, color: 'pink' },
+    ],
+    oxygenSaturation: [
+      { min: 0, max: 91, score: 4, color: 'pink' },
+      { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
+      { min: 95, max: 100, score: 0, color: 'white' },
+    ],
+    oxygenDeliveryPercent: [
+      { min: 0, max: 15.99, score: 0, color: 'white' },
+      { min: 16, max: 29.99, score: 1, color: 'yellow' },
+      { min: 30, max: 49.99, score: 2, color: 'orange' },
+      { min: 50, max: 100, score: 4, color: 'pink' },
+    ],
+    oxygenDeliveryLpm: [
+      { min: 0, max: 0.009, score: 0, color: 'white' },
+      { min: 0.01, max: 1.99, score: 1, color: 'yellow' },
+      { min: 2, max: 5.99, score: 2, color: 'orange' },
+      { min: 6, max: 20, score: 4, color: 'pink' },
+    ],
+  },
+  '5-12y': {
+    respiratoryRate: [
+      { min: 0, max: 9.99, score: 4, color: 'pink' },
+      { min: 10, max: 14.99, score: 2, color: 'orange' },
+      { min: 15, max: 19.99, score: 1, color: 'yellow' },
+      { min: 20, max: 24.99, score: 0, color: 'white' },
+      { min: 25, max: 39.99, score: 1, color: 'yellow' },
+      { min: 40, max: 49.99, score: 2, color: 'orange' },
+      { min: 50, max: 999, score: 4, color: 'pink' },
+    ],
+    heartRate: [
+      { min: 0, max: 59.99, score: 4, color: 'pink' },
+      { min: 60, max: 69.99, score: 2, color: 'orange' },
+      { min: 70, max: 79.99, score: 1, color: 'yellow' },
+      { min: 80, max: 119.99, score: 0, color: 'white' },
+      { min: 120, max: 139.99, score: 1, color: 'yellow' },
+      { min: 140, max: 159.99, score: 2, color: 'orange' },
+      { min: 160, max: 999, score: 4, color: 'pink' },
+    ],
+    bloodPressureSystolic: [
+      { min: 0, max: 69.99, score: 4, color: 'pink' },
+      { min: 70, max: 79.99, score: 2, color: 'orange' },
+      { min: 80, max: 89.99, score: 1, color: 'yellow' },
+      { min: 90, max: 109.99, score: 0, color: 'white' },
+      { min: 110, max: 119.99, score: 1, color: 'yellow' },
+      { min: 120, max: 129.99, score: 2, color: 'orange' },
+      { min: 130, max: 999, score: 4, color: 'pink' },
+    ],
+    oxygenSaturation: [
+      { min: 0, max: 91, score: 4, color: 'pink' },
+      { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
+      { min: 95, max: 100, score: 0, color: 'white' },
+    ],
+    oxygenDeliveryPercent: [
+      { min: 0, max: 15.99, score: 0, color: 'white' },
+      { min: 16, max: 29.99, score: 1, color: 'yellow' },
+      { min: 30, max: 49.99, score: 2, color: 'orange' },
+      { min: 50, max: 100, score: 4, color: 'pink' },
+    ],
+    oxygenDeliveryLpm: [
+      { min: 0, max: 0.009, score: 0, color: 'white' },
+      { min: 0.01, max: 1.99, score: 1, color: 'yellow' },
+      { min: 2, max: 5.99, score: 2, color: 'orange' },
+      { min: 6, max: 20, score: 4, color: 'pink' },
+    ],
+  },
+  '13+y': {
+    respiratoryRate: [
+      { min: 0, max: 9.99, score: 4, color: 'pink' },
+      { min: 10, max: 14.99, score: 1, color: 'yellow' },
+      { min: 15, max: 24.99, score: 0, color: 'white' },
+      { min: 25, max: 29.99, score: 1, color: 'yellow' },
+      { min: 30, max: 39.99, score: 2, color: 'orange' },
+      { min: 40, max: 999, score: 4, color: 'pink' },
+    ],
+    heartRate: [
+      { min: 0, max: 49.99, score: 4, color: 'pink' },
+      { min: 50, max: 59.99, score: 2, color: 'orange' },
+      { min: 60, max: 69.99, score: 1, color: 'yellow' },
+      { min: 70, max: 99.99, score: 0, color: 'white' },
+      { min: 100, max: 119.99, score: 1, color: 'yellow' },
+      { min: 120, max: 129.99, score: 2, color: 'orange' },
+      { min: 130, max: 999, score: 4, color: 'pink' },
+    ],
+    bloodPressureSystolic: [
+      { min: 0, max: 79.99, score: 4, color: 'pink' },
+      { min: 80, max: 89.99, score: 2, color: 'orange' },
+      { min: 90, max: 99.99, score: 1, color: 'yellow' },
+      { min: 100, max: 119.99, score: 0, color: 'white' },
+      { min: 120, max: 129.99, score: 1, color: 'yellow' },
+      { min: 130, max: 139.99, score: 2, color: 'orange' },
+      { min: 140, max: 999, score: 4, color: 'pink' },
+    ],
+    oxygenSaturation: [
+      { min: 0, max: 91, score: 4, color: 'pink' },
+      { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
+      { min: 95, max: 100, score: 0, color: 'white' },
+    ],
+    oxygenDeliveryPercent: [
+      { min: 0, max: 15.99, score: 0, color: 'white' },
+      { min: 16, max: 29.99, score: 1, color: 'yellow' },
+      { min: 30, max: 49.99, score: 2, color: 'orange' },
+      { min: 50, max: 100, score: 4, color: 'pink' },
+    ],
+    oxygenDeliveryLpm: [
+      { min: 0, max: 0.009, score: 0, color: 'white' },
+      { min: 0.01, max: 1.99, score: 1, color: 'yellow' },
+      { min: 2, max: 5.99, score: 2, color: 'orange' },
+      { min: 6, max: 20, score: 4, color: 'pink' },
+    ],
+  },
+};
+
+// Canonical age-in-years bounds per band (half-open [minAgeYears, maxAgeYears);
+// maxAgeYears null = open-ended). Used by pews-chart/age-band.js to select the
+// applicable band from a patient date of birth with calendar exactitude.
+const AGE_BAND_BOUNDS = {
+  '0-11m': { minAgeYears: 0, maxAgeYears: 1 },
+  '1-4y': { minAgeYears: 1, maxAgeYears: 5 },
+  '5-12y': { minAgeYears: 5, maxAgeYears: 13 },
+  '13+y': { minAgeYears: 13, maxAgeYears: null },
+};
+// <<< GENERATED SCORING BANDS END >>>
 
 const AGE_BANDS = {
   '0-11m': {
@@ -14,55 +221,7 @@ const AGE_BANDS = {
       temperature:          { label: 'Temperature',           unit: '°C',          yMin: 35, yMax: 41,  step: 1  },
       oxygenDelivery:       { label: 'O2 Delivery',           unit: '% / L/min',   yMin: 0,  yMax: 100, step: 20 },
     },
-    scoringBands: {
-      respiratoryRate: [
-        { min: 0,   max: 19.99,  score: 4, color: 'pink'   },
-        { min: 20,  max: 24.99,  score: 2, color: 'orange' },
-        { min: 25,  max: 60.99,  score: 0, color: 'white'  },
-        { min: 61,  max: 999,    score: 2, color: 'orange' },
-      ],
-      heartRate: [
-        { min: 0,   max: 89.99,  score: 4, color: 'pink'   },
-        { min: 90,  max: 99.99,  score: 2, color: 'orange' },
-        { min: 100, max: 109.99, score: 1, color: 'yellow' },
-        { min: 110, max: 160.99, score: 0, color: 'white'  },
-        { min: 161, max: 179.99, score: 1, color: 'yellow' },
-        { min: 180, max: 999,    score: 4, color: 'pink'   },
-      ],
-      bloodPressureSystolic: [
-        { min: 0,   max: 49.99,  score: 4, color: 'pink'   },
-        { min: 50,  max: 59.99,  score: 2, color: 'orange' },
-        { min: 60,  max: 69.99,  score: 1, color: 'yellow' },
-        { min: 70,  max: 89.99,  score: 0, color: 'white'  },
-        { min: 90,  max: 99.99,  score: 1, color: 'yellow' },
-        { min: 100, max: 109.99, score: 2, color: 'orange' },
-        { min: 110, max: 999,    score: 4, color: 'pink'   },
-      ],
-      oxygenSaturation: [
-        { min: 0,   max: 91,    score: 4, color: 'pink'   },
-        { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
-        { min: 95,  max: 100,   score: 0, color: 'white'   },
-      ],
-      temperature: [
-        { min: 0,    max: 35.99, score: 0, color: 'white'  },
-        { min: 36,   max: 37.99, score: 0, color: 'white'  },
-        { min: 38,   max: 38.99, score: 1, color: 'yellow' },
-        { min: 39,   max: 39.99, score: 2, color: 'orange' },
-        { min: 40,   max: 999,   score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryPercent: [
-        { min: 0,   max: 15.99,  score: 0, color: 'white'  },
-        { min: 16,  max: 29.99,  score: 1, color: 'yellow' },
-        { min: 30,  max: 49.99,  score: 2, color: 'orange' },
-        { min: 50,  max: 100,    score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryLpm: [
-        { min: 0,    max: 0.009, score: 0, color: 'white'  },
-        { min: 0.01, max: 1.99,  score: 1, color: 'yellow' },
-        { min: 2,    max: 5.99,  score: 2, color: 'orange' },
-        { min: 6,    max: 20,    score: 4, color: 'pink'   },
-      ],
-    }
+    scoringBands: SCORING_BANDS_BY_AGE['0-11m'],
   },
   '1-4y': {
     label: '1-4 Years',
@@ -75,55 +234,7 @@ const AGE_BANDS = {
       temperature:          { label: 'Temperature',           unit: '°C',          yMin: 35, yMax: 41,  step: 1  },
       oxygenDelivery:       { label: 'O2 Delivery',           unit: '% / L/min',   yMin: 0,  yMax: 100, step: 20 },
     },
-    scoringBands: {
-      respiratoryRate: [
-        { min: 0,   max: 14.99,  score: 4, color: 'pink'   },
-        { min: 15,  max: 19.99,  score: 2, color: 'orange' },
-        { min: 20,  max: 39.99,  score: 0, color: 'white'  },
-        { min: 40,  max: 999,    score: 2, color: 'orange' },
-      ],
-      heartRate: [
-        { min: 0,   max: 79.99,  score: 4, color: 'pink'   },
-        { min: 80,  max: 89.99,  score: 2, color: 'orange' },
-        { min: 90,  max: 99.99,  score: 1, color: 'yellow' },
-        { min: 100, max: 140.99, score: 0, color: 'white'  },
-        { min: 141, max: 159.99, score: 1, color: 'yellow' },
-        { min: 160, max: 999,    score: 4, color: 'pink'   },
-      ],
-      bloodPressureSystolic: [
-        { min: 0,   max: 59.99,  score: 4, color: 'pink'   },
-        { min: 60,  max: 69.99,  score: 2, color: 'orange' },
-        { min: 70,  max: 79.99,  score: 1, color: 'yellow' },
-        { min: 80,  max: 99.99,  score: 0, color: 'white'  },
-        { min: 100, max: 109.99, score: 1, color: 'yellow' },
-        { min: 110, max: 119.99, score: 2, color: 'orange' },
-        { min: 120, max: 999,    score: 4, color: 'pink'   },
-      ],
-      oxygenSaturation: [
-        { min: 0,   max: 91,    score: 4, color: 'pink'   },
-        { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
-        { min: 95,  max: 100,   score: 0, color: 'white'   },
-      ],
-      temperature: [
-        { min: 0,    max: 35.99, score: 0, color: 'white'  },
-        { min: 36,   max: 37.99, score: 0, color: 'white'  },
-        { min: 38,   max: 38.99, score: 1, color: 'yellow' },
-        { min: 39,   max: 39.99, score: 2, color: 'orange' },
-        { min: 40,   max: 999,   score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryPercent: [
-        { min: 0,   max: 15.99,  score: 0, color: 'white'  },
-        { min: 16,  max: 29.99,  score: 1, color: 'yellow' },
-        { min: 30,  max: 49.99,  score: 2, color: 'orange' },
-        { min: 50,  max: 100,    score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryLpm: [
-        { min: 0,    max: 0.009, score: 0, color: 'white'  },
-        { min: 0.01, max: 1.99,  score: 1, color: 'yellow' },
-        { min: 2,    max: 5.99,  score: 2, color: 'orange' },
-        { min: 6,    max: 20,    score: 4, color: 'pink'   },
-      ],
-    }
+    scoringBands: SCORING_BANDS_BY_AGE['1-4y'],
   },
   '5-12y': {
     label: '5-12 Years',
@@ -136,59 +247,7 @@ const AGE_BANDS = {
       temperature:          { label: 'Temperature',           unit: '°C',          yMin: 35, yMax: 41,  step: 1  },
       oxygenDelivery:       { label: 'O2 Delivery',           unit: '% / L/min',   yMin: 0,  yMax: 100, step: 20 },
     },
-    scoringBands: {
-      respiratoryRate: [
-        { min: 0,   max: 9.99,  score: 4, color: 'pink'   },
-        { min: 10,  max: 14.99, score: 2, color: 'orange'  },
-        { min: 15,  max: 19.99, score: 1, color: 'yellow'  },
-        { min: 20,  max: 24.99, score: 0, color: 'white'   },
-        { min: 25,  max: 39.99, score: 1, color: 'yellow'  },
-        { min: 40,  max: 49.99, score: 2, color: 'orange'  },
-        { min: 50,  max: 999,   score: 4, color: 'pink'    },
-      ],
-      heartRate: [
-        { min: 0,   max: 59.99,  score: 4, color: 'pink'   },
-        { min: 60,  max: 69.99,  score: 2, color: 'orange'  },
-        { min: 70,  max: 79.99,  score: 1, color: 'yellow'  },
-        { min: 80,  max: 119.99, score: 0, color: 'white'   },
-        { min: 120, max: 139.99, score: 1, color: 'yellow'  },
-        { min: 140, max: 159.99, score: 2, color: 'orange'  },
-        { min: 160, max: 999,    score: 4, color: 'pink'    },
-      ],
-      bloodPressureSystolic: [
-        { min: 0,   max: 69.99,  score: 4, color: 'pink'   },
-        { min: 70,  max: 79.99,  score: 2, color: 'orange'  },
-        { min: 80,  max: 89.99,  score: 1, color: 'yellow'  },
-        { min: 90,  max: 109.99, score: 0, color: 'white'   },
-        { min: 110, max: 119.99, score: 1, color: 'yellow'  },
-        { min: 120, max: 129.99, score: 2, color: 'orange'  },
-        { min: 130, max: 999,    score: 4, color: 'pink'    },
-      ],
-      oxygenSaturation: [
-        { min: 0,   max: 91,    score: 4, color: 'pink'   },
-        { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
-        { min: 95,  max: 100,   score: 0, color: 'white'   },
-      ],
-      temperature: [
-        { min: 0,    max: 35.99, score: 0, color: 'white'  },
-        { min: 36,   max: 37.99, score: 0, color: 'white'  },
-        { min: 38,   max: 38.99, score: 1, color: 'yellow' },
-        { min: 39,   max: 39.99, score: 2, color: 'orange' },
-        { min: 40,   max: 999,   score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryPercent: [
-        { min: 0,   max: 15.99,  score: 0, color: 'white'  },
-        { min: 16,  max: 29.99,  score: 1, color: 'yellow' },
-        { min: 30,  max: 49.99,  score: 2, color: 'orange' },
-        { min: 50,  max: 100,    score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryLpm: [
-        { min: 0,    max: 0.009, score: 0, color: 'white'  },
-        { min: 0.01, max: 1.99,  score: 1, color: 'yellow' },
-        { min: 2,    max: 5.99,  score: 2, color: 'orange' },
-        { min: 6,    max: 20,    score: 4, color: 'pink'   },
-      ],
-    }
+    scoringBands: SCORING_BANDS_BY_AGE['5-12y'],
   },
   '13+y': {
     label: '≥13 Years',
@@ -201,58 +260,7 @@ const AGE_BANDS = {
       temperature:          { label: 'Temperature',           unit: '°C',          yMin: 35, yMax: 41,  step: 1  },
       oxygenDelivery:       { label: 'O2 Delivery',           unit: '% / L/min',   yMin: 0,  yMax: 100, step: 20 },
     },
-    scoringBands: {
-      respiratoryRate: [
-        { min: 0,   max: 7.99,  score: 4, color: 'pink'   },
-        { min: 8,   max: 11.99, score: 1, color: 'yellow' },
-        { min: 12,  max: 20.99, score: 0, color: 'white'  },
-        { min: 21,  max: 24.99, score: 1, color: 'yellow' },
-        { min: 25,  max: 29.99, score: 2, color: 'orange' },
-        { min: 30,  max: 999,   score: 4, color: 'pink'   },
-      ],
-      heartRate: [
-        { min: 0,   max: 49.99,  score: 4, color: 'pink'   },
-        { min: 50,  max: 59.99,  score: 2, color: 'orange' },
-        { min: 60,  max: 69.99,  score: 1, color: 'yellow' },
-        { min: 70,  max: 110.99, score: 0, color: 'white'  },
-        { min: 111, max: 129.99, score: 1, color: 'yellow' },
-        { min: 130, max: 139.99, score: 2, color: 'orange' },
-        { min: 140, max: 999,    score: 4, color: 'pink'   },
-      ],
-      bloodPressureSystolic: [
-        { min: 0,   max: 79.99,  score: 4, color: 'pink'   },
-        { min: 80,  max: 89.99,  score: 2, color: 'orange' },
-        { min: 90,  max: 99.99,  score: 1, color: 'yellow' },
-        { min: 100, max: 119.99, score: 0, color: 'white'  },
-        { min: 120, max: 129.99, score: 1, color: 'yellow' },
-        { min: 130, max: 149.99, score: 2, color: 'orange' },
-        { min: 150, max: 999,    score: 4, color: 'pink'   },
-      ],
-      oxygenSaturation: [
-        { min: 0,   max: 91,    score: 4, color: 'pink'   },
-        { min: 91.01, max: 94.99, score: 1, color: 'yellow' },
-        { min: 95,  max: 100,   score: 0, color: 'white'   },
-      ],
-      temperature: [
-        { min: 0,    max: 35.99, score: 0, color: 'white'  },
-        { min: 36,   max: 37.99, score: 0, color: 'white'  },
-        { min: 38,   max: 38.99, score: 1, color: 'yellow' },
-        { min: 39,   max: 39.99, score: 2, color: 'orange' },
-        { min: 40,   max: 999,   score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryPercent: [
-        { min: 0,   max: 15.99,  score: 0, color: 'white'  },
-        { min: 16,  max: 29.99,  score: 1, color: 'yellow' },
-        { min: 30,  max: 49.99,  score: 2, color: 'orange' },
-        { min: 50,  max: 100,    score: 4, color: 'pink'   },
-      ],
-      oxygenDeliveryLpm: [
-        { min: 0,    max: 0.009, score: 0, color: 'white'  },
-        { min: 0.01, max: 1.99,  score: 1, color: 'yellow' },
-        { min: 2,    max: 5.99,  score: 2, color: 'orange' },
-        { min: 6,    max: 20,    score: 4, color: 'pink'   },
-      ],
-    }
+    scoringBands: SCORING_BANDS_BY_AGE['13+y'],
   },
 };
 
@@ -264,5 +272,12 @@ const ESCALATION_META = {
   emergency: { label: 'Emergency', color: '#d4351c', textColor: '#fff', pewsRange: '13+',   action: 'Call 2222 immediately: "Paediatric Medical Emergency". Inform consultant urgently.' },
 };
 
-window.AGE_BANDS = AGE_BANDS;
-window.ESCALATION_META = ESCALATION_META;
+// Browser global (chart engine uses window.AGE_BANDS)
+if (typeof window !== 'undefined') {
+  window.AGE_BANDS = AGE_BANDS;
+  window.AGE_BAND_BOUNDS = AGE_BAND_BOUNDS;
+  window.ESCALATION_META = ESCALATION_META;
+}
+
+// ES module export (test harness / scorer)
+export { AGE_BANDS, AGE_BAND_BOUNDS, ESCALATION_META };

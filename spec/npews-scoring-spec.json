@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "title": "NPEWS scoring — canonical machine-readable specification",
+    "source": "Configuration Document for SPOT NPEWS (NHS England)",
+    "verified": "Manually checked against the live NHS England NPEWS charts by Marcus Baw (GMC 4712729) on 2026-06-30.",
+    "note": "THIS FILE IS THE SINGLE SOURCE OF TRUTH for NPEWS numeric scoring. Edit this file, then run `npm run generate:scoring` to regenerate pews-chart/npews-scoring-config.js (the runtime bands) and spec/npews-scoring-tables.generated.md (the human-readable unified table). Do not hand-edit the generated regions. The clinical narrative (respiratory-distress descriptors, review annotations) lives in spec/npews-scoring.md.",
+    "conformance": "Conformant with the national SPOT NPEWS algorithm: temperature and AVPU are NOT numerically scored — they are escalation / sepsis / specific-concern triggers (see nonScoring below)."
+  },
+
+  "scoreColors": { "0": "white", "1": "yellow", "2": "orange", "4": "pink" },
+
+  "sentinels": {
+    "comment": "Open-ended top bands use these as an inclusive max so the bands form a closed, machine-comparable set.",
+    "rate": 999,
+    "percent": 100,
+    "litresPerMin": 20
+  },
+
+  "ageBands": ["0-11m", "1-4y", "5-12y", "13+y"],
+
+  "comment_ageBandBounds": "Canonical age-in-years bounds per band, as half-open intervals [minAgeYears, maxAgeYears). The upper bound is EXCLUSIVE; null means open-ended. All boundaries fall on an exact birthday (1st, 5th, 13th), so band selection uses calendar completed-years (see pews-chart/age-band.js) rather than a 365.25-day approximation. This is the single source of truth for which chart applies at a given age.",
+  "ageBandBounds": {
+    "0-11m": { "minAgeYears": 0,  "maxAgeYears": 1 },
+    "1-4y":  { "minAgeYears": 1,  "maxAgeYears": 5 },
+    "5-12y": { "minAgeYears": 5,  "maxAgeYears": 13 },
+    "13+y":  { "minAgeYears": 13, "maxAgeYears": null }
+  },
+
+  "ageBandDisplay": {
+    "0-11m": { "label": "0 to 11 months", "headerColor": "#FFB6C1" },
+    "1-4y":  { "label": "1-4 Years",      "headerColor": "#FFA500" },
+    "5-12y": { "label": "5-12 Years",     "headerColor": "#FFFF00" },
+    "13+y":  { "label": "\u226513 Years",  "headerColor": "#A9A9A9" }
+  },
+
+  "comment_bands": "Every band is [min, max, score]. Bands are inclusive of both ends; consecutive bands meet at x.99 boundaries by design. SpO2 and oxygen-delivery bands are identical across all age bands and are defined once under `shared`.",
+
+  "shared": {
+    "oxygenSaturation": [
+      [0, 91, 4],
+      [91.01, 94.99, 1],
+      [95, 100, 0]
+    ],
+    "oxygenDeliveryPercent": [
+      [0, 15.99, 0],
+      [16, 29.99, 1],
+      [30, 49.99, 2],
+      [50, 100, 4]
+    ],
+    "oxygenDeliveryLpm": [
+      [0, 0.009, 0],
+      [0.01, 1.99, 1],
+      [2, 5.99, 2],
+      [6, 20, 4]
+    ]
+  },
+
+  "vitals": {
+    "0-11m": {
+      "respiratoryRate": [
+        [0, 9.99, 4], [10, 19.99, 2], [20, 29.99, 1], [30, 49.99, 0],
+        [50, 59.99, 1], [60, 69.99, 2], [70, 999, 4]
+      ],
+      "heartRate": [
+        [0, 79.99, 4], [80, 89.99, 2], [90, 109.99, 1], [110, 149.99, 0],
+        [150, 169.99, 1], [170, 179.99, 2], [180, 999, 4]
+      ],
+      "bloodPressureSystolic": [
+        [0, 49.99, 4], [50, 59.99, 2], [60, 69.99, 1], [70, 89.99, 0],
+        [90, 99.99, 1], [100, 109.99, 2], [110, 999, 4]
+      ]
+    },
+    "1-4y": {
+      "respiratoryRate": [
+        [0, 9.99, 4], [10, 19.99, 2], [20, 39.99, 0], [40, 49.99, 1],
+        [50, 59.99, 2], [60, 999, 4]
+      ],
+      "heartRate": [
+        [0, 59.99, 4], [60, 69.99, 2], [70, 89.99, 1], [90, 139.99, 0],
+        [140, 149.99, 1], [150, 169.99, 2], [170, 999, 4]
+      ],
+      "bloodPressureSystolic": [
+        [0, 49.99, 4], [50, 59.99, 2], [60, 79.99, 1], [80, 99.99, 0],
+        [100, 119.99, 1], [120, 129.99, 2], [130, 999, 4]
+      ]
+    },
+    "5-12y": {
+      "respiratoryRate": [
+        [0, 9.99, 4], [10, 14.99, 2], [15, 19.99, 1], [20, 24.99, 0],
+        [25, 39.99, 1], [40, 49.99, 2], [50, 999, 4]
+      ],
+      "heartRate": [
+        [0, 59.99, 4], [60, 69.99, 2], [70, 79.99, 1], [80, 119.99, 0],
+        [120, 139.99, 1], [140, 159.99, 2], [160, 999, 4]
+      ],
+      "bloodPressureSystolic": [
+        [0, 69.99, 4], [70, 79.99, 2], [80, 89.99, 1], [90, 109.99, 0],
+        [110, 119.99, 1], [120, 129.99, 2], [130, 999, 4]
+      ]
+    },
+    "13+y": {
+      "respiratoryRate": [
+        [0, 9.99, 4], [10, 14.99, 1], [15, 24.99, 0], [25, 29.99, 1],
+        [30, 39.99, 2], [40, 999, 4]
+      ],
+      "heartRate": [
+        [0, 49.99, 4], [50, 59.99, 2], [60, 69.99, 1], [70, 99.99, 0],
+        [100, 119.99, 1], [120, 129.99, 2], [130, 999, 4]
+      ],
+      "bloodPressureSystolic": [
+        [0, 79.99, 4], [80, 89.99, 2], [90, 99.99, 1], [100, 119.99, 0],
+        [120, 129.99, 1], [130, 139.99, 2], [140, 999, 4]
+      ]
+    }
+  },
+
+  "categorical": {
+    "respiratoryDistress": { "none": 0, "mild": 1, "moderate": 2, "severe": 4 },
+    "capillaryRefill": { "thresholdSeconds": 3, "score": 2, "note": "Below/equal 2s scores 0; >=3s scores 2. Charts do not define a score for 2.01-2.99s." },
+    "oxygen": {
+      "highFlowDevices": ["HF", "BiP", "CP"],
+      "highFlowScore": 4,
+      "levelDevices": ["NP", "FM", "HB", "NRB"],
+      "note": "High-flow devices (High Flow, BiPAP, CPAP) override with score 4. Level devices score per the oxygenDeliveryPercent / oxygenDeliveryLpm bands."
+    }
+  },
+
+  "nonScoring": {
+    "comment": "Per the national SPOT NPEWS Configuration Document these parameters do NOT contribute numeric points. They are recorded and drive escalation only.",
+    "temperature": {
+      "role": "Sepsis / escalation trigger",
+      "triggers": { "high": ">= 38", "low": "< 36" },
+      "display": { "hotZoneFrom": 38, "coldZoneTo": 36 }
+    },
+    "avpu": {
+      "role": "Specific-concern escalation trigger",
+      "triggers": { "V": "escalate", "P": "escalate higher", "U": "escalate higher" }
+    }
+  },
+
+  "escalation": {
+    "comment": "PEWS total to escalation level. Reference only — the runtime escalation thresholds live in npews-scorer.js and the display metadata in npews-scoring-config.js (ESCALATION_META).",
+    "levels": [
+      { "level": "low",       "min": 1,  "max": 4,    "label": "Low" },
+      { "level": "medium",    "min": 5,  "max": 8,    "label": "Medium" },
+      { "level": "high",      "min": 9,  "max": 12,   "label": "High" },
+      { "level": "emergency", "min": 13, "max": null, "label": "Emergency" }
+    ]
+  }
+}
