@@ -19,7 +19,7 @@
 
 import { AGE_BANDS, ESCALATION_META } from './npews-scoring-config.js';
 import { scoreObservationsForPatient } from './npews-scorer.js';
-import { resolveAgeBand, ageBandSegments } from './age-band.js';
+import { resolveAgeBand, ageBandSegments, completedYears } from './age-band.js';
 
 // ---- Module-level data references --------------------------
 //
@@ -986,6 +986,10 @@ const SECTION_META = {
 };
 
 function buildChartGrid(gridEl) {
+  // Re-entrant: clear any previously built rows so init() can be called again to
+  // swap the mounted scenario (the demo harness relies on this).
+  gridEl.innerHTML = '';
+
   const defs = getChartDefs();
 
   // Count how many rows each section spans
@@ -1514,7 +1518,14 @@ function initLayout() {
 
 // ---- Toolbar wiring ----------------------------------------
 
+// The toolbar persists across scenario switches, so its listeners must be bound
+// exactly once. init() may run many times (the demo harness re-mounts on every
+// scenario change); this guard stops handlers stacking up.
+let _toolbarWired = false;
+
 function wireToolbar() {
+  if (_toolbarWired) return;
+  _toolbarWired = true;
   // Zoom buttons
   document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
     zoomIn(_observations); renderAll(); renderEscalationBanner();
@@ -1583,6 +1594,68 @@ window.addEventListener('resize', () => {
   }, 80);
 });
 
+// ---- Patient header ----------------------------------------
+
+// Human-readable age from a date of birth, computed at `at` (defaults to now).
+// Infants (<1 year) are shown in whole months; otherwise whole years. Returns
+// null when no usable DOB is present so the caller can fall back.
+function formatAge(dob, at = new Date()) {
+  if (!dob) return null;
+  try {
+    const years = completedYears(dob, at);
+    if (years < 0) return null;
+    if (years >= 1) return `${years} year${years === 1 ? '' : 's'}`;
+    const b = new Date(dob);
+    const a = at instanceof Date ? at : new Date(at);
+    let months = (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
+    if (a.getDate() < b.getDate()) months -= 1;
+    months = Math.max(0, months);
+    return `${months} month${months === 1 ? '' : 's'}`;
+  } catch (_) {
+    return null;
+  }
+}
+
+function fmtDob(dob) {
+  if (!dob) return '';
+  const d = new Date(dob);
+  if (Number.isNaN(d.getTime())) return String(dob);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// Populate the patient header from the patient object. Nothing about a specific
+// patient is hard-coded in the markup - the header is a pure function of data.
+function renderPatientHeader() {
+  const p = _patient || {};
+  const nameEl = document.querySelector('.patient-header__name');
+  const metaEl = document.querySelector('.patient-header__meta');
+  if (nameEl) nameEl.textContent = p.name || '';
+
+  if (metaEl) {
+    // Age is derived from DOB (relative to the latest observation) so it can
+    // never drift from the date of birth; fall back to a stored age string.
+    const latestTs = (_observations && _observations.length)
+      ? _observations[_observations.length - 1].timestamp
+      : undefined;
+    const age = formatAge(p.dob, latestTs ? new Date(latestTs) : new Date()) || p.age || '';
+    const rows = [
+      p.dob        ? ['DOB', fmtDob(p.dob)]     : null,
+      age          ? ['Age', age]               : null,
+      p.nhsNumber  ? ['NHS', p.nhsNumber]       : null,
+      p.ward       ? ['Ward', p.ward]           : null,
+      p.bed        ? ['Bed', p.bed]             : null,
+      p.consultant ? ['Consultant', p.consultant] : null,
+    ].filter(Boolean);
+    metaEl.innerHTML = rows
+      .map(([k, v]) => `<span><strong>${k}:</strong> ${v}</span>`)
+      .join('');
+  }
+
+  if (typeof document !== 'undefined' && p.name) {
+    document.title = `NPEWS Chart - ${p.name}`;
+  }
+}
+
 // ---- Age band banner ---------------------------------------
 
 function renderAgeBandBanner() {
@@ -1605,16 +1678,25 @@ function renderAgeBandBanner() {
 // ---- Init --------------------------------------------------
 
 /**
- * Initialise the chart.
+ * Initialise / (re-)mount the chart. Idempotent: may be called repeatedly to
+ * swap the mounted scenario (the demo harness relies on this).
  *
- * When called without arguments (e.g. from index.html's DOMContentLoaded),
- * falls back to the window globals PATIENT / OBSERVATIONS defined by
- * demo-data.js and the imported AGE_BANDS.
- *
- * Storybook stories and integration tests pass data directly:
+ * The chart is a pure visualisation device driven by a JSON props object:
+ *   NPEWSChart.init({ patient, observations, ageBands })
+ * Positional args are also accepted for convenience / back-compat:
  *   NPEWSChart.init(patient, observations, ageBands)
+ * With no arguments it falls back to the window globals PATIENT / OBSERVATIONS
+ * (set by demo-data.js) and the imported AGE_BANDS.
+ *
+ * `pewsTotal` / `escalationLevel` in the observations are ignored — scores are
+ * always computed from the vitals (the algorithm is the single source of truth).
  */
 function init(patient, observations, ageBands) {
+  // Props-object form: init({ patient, observations, ageBands })
+  if (patient && !observations && Array.isArray(patient.observations)) {
+    ({ patient, observations, ageBands } = patient);
+  }
+
   _patient      = patient      || (typeof window !== 'undefined' ? window.PATIENT : null);
   _observations = observations || (typeof window !== 'undefined' ? window.OBSERVATIONS : null) || [];
   _ageBands     = ageBands     || AGE_BANDS;
@@ -1632,7 +1714,8 @@ function init(patient, observations, ageBands) {
   // Resolve layout before building panels so initial canvas heights are correct
   initLayout();
 
-  // Set age band banner color
+  // Header + age band banner (both pure functions of the patient/observations)
+  renderPatientHeader();
   renderAgeBandBanner();
 
   // Build chart grid (sidebar labels + canvases as a single CSS grid)
@@ -1641,7 +1724,8 @@ function init(patient, observations, ageBands) {
 
   wireToolbar();
 
-  // Tooltips
+  // Tooltips. buildChartGrid recreates the canvases on every call, so the old
+  // listeners die with the old elements and we simply (re)attach to the new ones.
   getChartDefs().forEach(def => {
     if (def.categorical) {
       attachCategoricalTooltip(`canvas-${def.id}`, def.getCell);
@@ -1655,16 +1739,15 @@ function init(patient, observations, ageBands) {
   renderFooter();
 }
 
-// When loaded as a module in index.html, auto-init on DOMContentLoaded using the
-// window globals set by demo-data.js. Stories call NPEWSChart.init() directly,
-// so only auto-init when demo data is present and the DOM is the index page.
-if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window !== 'undefined' && window.PATIENT && document.getElementById('chart-grid')) {
-      init();
-    }
-  });
+// The chart is a pure visualisation device: it renders when a host calls
+// render({ patient, observations }). index.html and demo.js both mount the
+// shared shell then call render() explicitly, so there is no auto-init off
+// window globals here — nothing renders until a host passes in its data.
+
+// Public API. `render` is the preferred props-object entry point; `init` is kept
+// as an alias for back-compat and positional calls.
+if (typeof window !== 'undefined') {
+  window.NPEWSChart = { init, render: init };
 }
 
-// Public API - allows callers outside index.html to mount the chart
-if (typeof window !== 'undefined') window.NPEWSChart = { init };
+export { init, init as render };

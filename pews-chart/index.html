@@ -18,104 +18,23 @@
 <!-- data-layout: landscape | portrait | mobile (set by JS on load, overridable by user)  -->
 <!-- data-lock-layout: present to disable the user toggle in production deployments       -->
 <body>
-<div class="app-layout">
 
-  <!-- Patient header (sticky) -->
-  <header class="patient-header" role="banner">
-    <!-- Age band indicator banner (colored bar, populated by JS) -->
-    <div class="age-band-banner"></div>
-    <div class="patient-header__inner">
-      <span class="patient-header__name">Alex Thompson</span>
-      <div class="patient-header__meta">
-        <span><strong>DOB:</strong> 14 Mar 2017</span>
-        <span><strong>Age:</strong> 7 years</span>
-        <span><strong>NHS:</strong> 943 476 5210</span>
-        <span><strong>Ward:</strong> Paediatric B</span>
-        <span><strong>Bed:</strong> 12</span>
-        <span><strong>Consultant:</strong> Dr S. Patel</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Escalation banner (rendered by JS) -->
-  <div id="escalation-banner" class="escalation-banner" style="display:none;" role="alert" aria-live="polite"></div>
-
-  <!-- Toolbar -->
-  <div class="toolbar" role="toolbar" aria-label="Chart controls">
-    <div class="toolbar__inner">
-
-      <!-- Zoom -->
-      <div class="toolbar__group" aria-label="Zoom">
-        <span class="toolbar__label">Zoom</span>
-        <button class="btn btn--icon" id="btn-zoom-in"  title="Zoom in"  aria-label="Zoom in">+</button>
-        <button class="btn btn--icon" id="btn-zoom-out" title="Zoom out" aria-label="Zoom out">-</button>
-      </div>
-
-      <!-- Quick ranges -->
-      <div class="toolbar__group" aria-label="Quick date range">
-        <span class="toolbar__label">Range</span>
-        <button class="btn" id="btn-today"   aria-pressed="false">Today</button>
-        <button class="btn" id="btn-week"    aria-pressed="false">This Week</button>
-        <button class="btn" id="btn-month"   aria-pressed="false">This Month</button>
-        <button class="btn btn--active" id="btn-present" aria-pressed="true">Jump to Present</button>
-      </div>
-
-      <div class="toolbar__spacer"></div>
-
-      <!-- Layout toggle (hidden when data-lock-layout is set on <body>) -->
-      <div class="toolbar__group layout-toggle-group" aria-label="Layout">
-        <span class="toolbar__label">Layout</span>
-        <button class="btn btn--icon" id="btn-layout-landscape" title="Landscape" aria-label="Landscape layout" aria-pressed="false">&#9644;</button>
-        <button class="btn btn--icon" id="btn-layout-portrait"  title="Portrait"  aria-label="Portrait layout"  aria-pressed="false">&#9645;</button>
-        <button class="btn btn--icon" id="btn-layout-mobile"    title="Mobile"    aria-label="Mobile layout"    aria-pressed="false">&#9647;</button>
-      </div>
-
-      <!-- Value visibility -->
-      <label class="cb-toggle" title="Always show exact observation values on chart">
-        <input type="checkbox" id="toggle-values" checked />
-        Show values
-      </label>
-
-      <!-- Colour-blind mode -->
-      <label class="cb-toggle" title="Colour-blind friendly mode">
-        <input type="checkbox" id="toggle-cb" />
-        Colour-blind mode
-      </label>
-
-    </div>
-  </div>
-
-  <!-- Main chart area -->
-  <main class="main-content" role="main" aria-label="Observation charts">
-
-    <!-- Shared band colour legend -->
-    <div class="shared-legend" aria-label="Scoring band colours">
-      <div class="shared-legend__inner">
-        <span class="shared-legend__label">Scoring bands:</span>
-        <div class="legend__item"><div class="legend__swatch legend__swatch--white"></div> 0 - Normal</div>
-        <div class="legend__item"><div class="legend__swatch legend__swatch--yellow"></div> 1 - Low concern</div>
-        <div class="legend__item"><div class="legend__swatch legend__swatch--orange"></div> 2 - Moderate concern</div>
-        <div class="legend__item"><div class="legend__swatch legend__swatch--pink"></div> 4 - High concern</div>
-      </div>
-    </div>
-
-    <div class="charts-layout">
-      <!-- Two-column grid: sidebar labels (col 1) + canvases (col 2), one row per parameter.
-           Both cells in each row share the same grid row so heights are always in sync. -->
-      <div class="chart-grid" id="chart-grid" role="table" aria-label="Observation charts"></div>
-    </div>
-  </main>
-
-  <!-- Sticky footer (rendered by JS) -->
-  <footer class="sticky-footer" id="sticky-footer" role="contentinfo" aria-label="Current PEWS score and escalation status">
-  </footer>
-
-</div><!-- /.app-layout -->
+<!-- The chart shell is injected here by chart-shell.js so this standalone page
+     and the demo harness (demo.html) share one source of truth for the markup.
+     The patient header is populated by chart.js from the patient object at
+     render time - nothing about a specific patient is baked into this page. -->
+<div id="chart-host"></div>
 
 <!-- Load as ES modules. demo-data.js publishes window.PATIENT / window.OBSERVATIONS;
-     chart.js imports its config/scorer/age-band dependencies and auto-inits on
-     DOMContentLoaded using those window globals. -->
+     the bootstrap below mounts the shared shell then renders the chart from those
+     globals. chart.js is the visualisation engine (imported by the bootstrap). -->
 <script type="module" src="demo-data.js"></script>
-<script type="module" src="chart.js"></script>
+<script type="module">
+  import { mountChartShell } from './chart-shell.js';
+  import { render } from './chart.js';
+
+  mountChartShell(document.getElementById('chart-host'));
+  render({ patient: window.PATIENT, observations: window.OBSERVATIONS });
+</script>
 </body>
 </html>
