@@ -1,6 +1,11 @@
 // Fictional test data for NPEWS chart UI
 // Patient: 7-year-old (age bracket 5-12 years)
 // 18 observation sets over 24 hours, showing normal -> deterioration -> escalation -> recovery
+//
+// NOTE: observations carry only raw vitals. PEWS totals and escalation levels are
+// NEVER hand-typed here — chart.js computes them from these vitals via the scorer
+// (npews-scorer.js), using the age band resolved from the patient's date of birth.
+// The algorithm is the single source of truth.
 
 const PATIENT = {
   name: 'Alex Thompson',
@@ -37,8 +42,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.8,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n2',
@@ -54,8 +57,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.9,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n3',
@@ -71,8 +72,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.8,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n4',
@@ -88,8 +87,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.7,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n5',
@@ -105,8 +102,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.8,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n6',
@@ -122,8 +117,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.9,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n7',
@@ -139,8 +132,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.0,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-n8',
@@ -156,8 +147,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.0,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-1',
@@ -173,8 +162,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,            // white (<= 2s)
     avpu: 'A',
     temperature: 37.1,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-2',
@@ -190,8 +177,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,            // white
     avpu: 'A',
     temperature: 37.8,
-    pewsTotal: 1,
-    escalationLevel: null,
   },
   {
     id: 'obs-3',
@@ -208,8 +193,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,            // white
     avpu: 'A',
     temperature: 38.2,
-    pewsTotal: 4,
-    escalationLevel: null,
   },
   {
     id: 'obs-4',
@@ -225,8 +208,6 @@ const OBSERVATIONS = [
     capillaryRefill: 3,            // orange (>= 3s)
     avpu: 'A',
     temperature: 38.6,
-    pewsTotal: 7,
-    escalationLevel: 'medium',
   },
   {
     id: 'obs-5',
@@ -242,8 +223,6 @@ const OBSERVATIONS = [
     capillaryRefill: 3,            // orange
     avpu: 'A',
     temperature: 39.0,
-    pewsTotal: 9,
-    escalationLevel: 'high',
   },
   {
     id: 'obs-6',
@@ -259,8 +238,6 @@ const OBSERVATIONS = [
     capillaryRefill: 4,            // orange
     avpu: 'V',
     temperature: 39.4,
-    pewsTotal: 13,
-    escalationLevel: 'emergency',
   },
   {
     id: 'obs-7',
@@ -276,8 +253,6 @@ const OBSERVATIONS = [
     capillaryRefill: 3,            // orange
     avpu: 'A',
     temperature: 38.9,
-    pewsTotal: 10,
-    escalationLevel: 'high',
   },
   {
     id: 'obs-8',
@@ -295,8 +270,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,            // white
     avpu: 'A',
     temperature: 38.5,
-    pewsTotal: 6,
-    escalationLevel: 'medium',
   },
   {
     id: 'obs-9',
@@ -312,8 +285,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 38.3,
-    pewsTotal: 5,
-    escalationLevel: 'medium',
   },
   {
     id: 'obs-10',
@@ -329,8 +300,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 38.0,
-    pewsTotal: 3,
-    escalationLevel: 'low',
   },
   {
     id: 'obs-11',
@@ -346,8 +315,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.8,
-    pewsTotal: 2,
-    escalationLevel: 'low',
   },
   {
     id: 'obs-12',
@@ -363,8 +330,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.6,
-    pewsTotal: 1,
-    escalationLevel: null,
   },
   {
     id: 'obs-13',
@@ -380,8 +345,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.4,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-14',
@@ -397,8 +360,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.3,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-15',
@@ -414,8 +375,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.2,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-16',
@@ -431,8 +390,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.1,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-17',
@@ -448,8 +405,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.0,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     id: 'obs-18',
@@ -465,8 +420,6 @@ const OBSERVATIONS = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.9,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
 ];
 
@@ -520,8 +473,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'V',
     temperature: 39.2,
-    pewsTotal: 9,
-    escalationLevel: 'high',
   },
   {
     // 30 min post-admission. Still postictal but responding to name.
@@ -540,8 +491,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'V',
     temperature: 39.0,
-    pewsTotal: 7,
-    escalationLevel: 'medium',
   },
   {
     // 03:00. Alert (AVPU A). Recognises mother. Mild distress ongoing. SpO2 96%.
@@ -560,8 +509,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 39.0,
-    pewsTotal: 5,
-    escalationLevel: 'medium',
   },
   {
     // 04:00. 2nd seizure begins (focal → generalised, duration ~90 sec).
@@ -581,8 +528,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 3,
     avpu: 'P',
     temperature: 39.6,
-    pewsTotal: 19,
-    escalationLevel: 'emergency',
   },
   {
     // 04:30. Post-ictal. AVPU=V. Seizure self-terminated; buccal midazolam not required.
@@ -601,8 +546,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'V',
     temperature: 39.4,
-    pewsTotal: 9,
-    escalationLevel: 'high',
   },
   {
     // 05:00. Alert again. Crying — good sign of neurological recovery.
@@ -621,8 +564,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 38.9,
-    pewsTotal: 5,
-    escalationLevel: 'medium',
   },
   {
     // 06:00. Temperature beginning to respond to paracetamol. SpO2 improved to 95%.
@@ -641,8 +582,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 38.7,
-    pewsTotal: 4,
-    escalationLevel: 'low',
   },
   {
     // 07:00. Temp 38.4°C. Tolerating NP 15%. SpO2 96%. Less irritable.
@@ -660,8 +599,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 38.4,
-    pewsTotal: 2,
-    escalationLevel: 'low',
   },
   {
     // 08:00. Temp 38.2°C. Now on air — NP removed after SpO2 stable >97% on room air.
@@ -680,8 +617,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 38.2,
-    pewsTotal: 1,
-    escalationLevel: null,
   },
   {
     // 09:00. Temp 37.9°C. Ibuprofen given orally at 08:30. HR settling.
@@ -699,8 +634,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.9,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 10:00. Temperature 37.6°C. Fully settled, sleeping between obs.
@@ -718,8 +651,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.6,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 11:00. EEG completed. No further seizure activity. Parents reassured.
@@ -739,8 +670,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.4,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 12:00. Resting comfortably. Good urine output.
@@ -758,8 +687,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.3,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 14:00. Paediatric neurology reviewed. Diagnosis: simple febrile seizure (x2).
@@ -777,8 +704,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.2,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 16:00. Ready for discharge planning. Feeding and sleeping normally.
@@ -796,8 +721,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.1,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 18:00. Overnight observation plan confirmed — hourly obs until 06:00.
@@ -815,8 +738,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.0,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 20:00. Sleeping. Mum staying overnight.
@@ -834,8 +755,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 37.0,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 22:00. Sleeping, settled.
@@ -853,8 +772,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.9,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 00:00. Overnight check. Sleeping. No concerns.
@@ -872,8 +789,6 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.9,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
   {
     // 02:00. 24-hour mark since admission. Stable and well. Discharge planned for morning.
@@ -891,7 +806,25 @@ const OBSERVATIONS_FEBRILE_CONVULSION = [
     capillaryRefill: 2,
     avpu: 'A',
     temperature: 36.8,
-    pewsTotal: 0,
-    escalationLevel: null,
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Module / browser interop
+// index.html loads this as an ES module and reads window.PATIENT / window.OBSERVATIONS
+// (the default 5-12y demo). chart.js (also a module) imports nothing from here; it
+// reads the window globals on auto-init. Tests/stories import the named exports.
+// ---------------------------------------------------------------------------
+if (typeof window !== 'undefined') {
+  window.PATIENT = PATIENT;
+  window.OBSERVATIONS = OBSERVATIONS;
+  window.PATIENT_FEBRILE_CONVULSION = PATIENT_FEBRILE_CONVULSION;
+  window.OBSERVATIONS_FEBRILE_CONVULSION = OBSERVATIONS_FEBRILE_CONVULSION;
+}
+
+export {
+  PATIENT,
+  OBSERVATIONS,
+  PATIENT_FEBRILE_CONVULSION,
+  OBSERVATIONS_FEBRILE_CONVULSION,
+};

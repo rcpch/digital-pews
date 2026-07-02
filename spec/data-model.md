@@ -53,8 +53,23 @@ Represents a patient's demographic information and current admission details.
 
 ### Notes
 
-- `ageBand` must match one of the keys in `AGE_BANDS`: `'0-11m'`, `'1-4y'`, `'5-12y'`, `'13+y'`
-- This key determines which scoring thresholds and chart ranges are used
+- `dob` is the **authoritative** input for age-band selection. The chart resolves
+  the applicable band per observation from `dob` + the observation timestamp using
+  **calendar completed years** (see `pews-chart/age-band.js`), so the boundary lands
+  exactly on the 1st / 5th / 13th birthday. Day-based approximations (e.g. `days/365.25`)
+  are deliberately avoided because they mis-fire around leap-year birthdays.
+- `ageBand` is now a **display/fallback hint only**. If `dob` is present it is ignored
+  for scoring and band selection; it is used only when `dob` is missing. It must still
+  match one of the keys in `AGE_BANDS`: `'0-11m'`, `'1-4y'`, `'5-12y'`, `'13+y'`.
+- The canonical band bounds (half-open year intervals) live in
+  `spec/npews-scoring-spec.json` (`ageBandBounds`) and are generated into
+  `AGE_BAND_BOUNDS` in `npews-scoring-config.js`: `0-11m`=[0,1), `1-4y`=[1,5),
+  `5-12y`=[5,13), `13+y`=[13,∞).
+- **Boundary crossing:** when an admission spans a birthday the chart does not stop one
+  chart and start another — it joins them. The trend line stays continuous on a unified
+  y-scale (the union of the spanned bands' ranges) while the coloured scoring-band
+  backgrounds switch at the exact birthday instant, with a dashed divider marking the seam.
+- `age` and `ageBracket` are human-readable display strings only and play no part in scoring.
 
 ---
 
@@ -103,10 +118,17 @@ Represents a single set of vital sign measurements taken at a specific time.
   // Temperature
   temperature: number | null,              // °C
   temperature_skipReason?: string,
-  
-  // Calculated scores
-  pewsTotal: number,                       // Total PEWS score
-  escalationLevel: string | null,          // 'low'|'medium'|'high'|'emergency' or null
+
+  // Calculated scores — COMPUTED, never authored by hand.
+  // chart.js computes these for every observation from the vitals above via the
+  // scorer (npews-scorer.js), using the age band resolved from the patient's
+  // date of birth + this observation's timestamp. Any pewsTotal / escalationLevel
+  // present in input data is IGNORED and overwritten. They appear here only to
+  // document the shape of a *scored* observation.
+  ageBand?: string,                        // Band applied to THIS obs (from DOB+timestamp)
+  pewsTotal?: number,                      // Total PEWS score (computed)
+  escalationLevel?: string | null,         // 'low'|'medium'|'high'|'emergency' or null (computed)
+  scoreBreakdown?: object,                 // Per-parameter contributions (computed)
 }
 ```
 
@@ -127,8 +149,7 @@ Represents a single set of vital sign measurements taken at a specific time.
   capillaryRefill: 3,
   avpu: 'A',
   temperature: 38.6,
-  pewsTotal: 7,
-  escalationLevel: 'medium',
+  // pewsTotal / escalationLevel are NOT authored here — the chart computes them.
 }
 ```
 
@@ -349,19 +370,29 @@ Metadata for the four escalation levels that trigger based on total PEWS score.
 
 ## Data Files
 
-The data model is split across two files:
+The data model is split across these files:
 
-1. **`npews-scoring-config.js`** - Contains `AGE_BANDS` and `ESCALATION_META`
-   - Age-specific scoring thresholds
+1. **`npews-scoring-config.js`** - Contains `AGE_BANDS`, `AGE_BAND_BOUNDS` and `ESCALATION_META`
+   - Age-specific scoring thresholds (generated `SCORING_BANDS_BY_AGE`)
+   - Canonical half-open age-band bounds in years (generated `AGE_BAND_BOUNDS`)
    - Chart display parameters
    - Escalation level metadata
+   - Loaded as an ES module (imported by `chart.js`, `npews-scorer.js`, `age-band.js`)
 
-2. **`demo-data.js`** - Contains `PATIENT` and `OBSERVATIONS`
-   - Fictional test patient data
-   - 18 observation sets spanning 24 hours
-   - Demonstrates normal -> deterioration -> recovery scenario
+2. **`age-band.js`** - Pure module that selects the age band for a given DOB + instant
+   using calendar completed-years, and splits a time window into per-band segments
+   for seamless boundary crossing.
 
-The `chart.js` file derives `SCORING_BANDS` and `CHART_CONFIG` directly from `AGE_BANDS[PATIENT.ageBand]` at runtime.
+3. **`npews-scorer.js`** - `scoreObservationsForPatient(patient, observations)` resolves
+   the band per observation from DOB, scores the vitals and derives the escalation level.
+   The algorithm is the single source of truth for `pewsTotal` / `escalationLevel`.
+
+4. **`demo-data.js`** - Contains `PATIENT` and `OBSERVATIONS` (raw vitals only; no
+   hand-typed scores). Demonstrates a normal → deterioration → recovery scenario.
+
+`chart.js` loads as an ES module. On init it calls `scoreObservationsForPatient(...)`,
+selects the chart config per spanned age band, and renders a continuous chart that joins
+bands seamlessly across any birthday in the view window.
 
 ---
 

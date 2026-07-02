@@ -112,9 +112,10 @@
 
 </div><!-- /.app-layout -->
 
-<!-- Load data files in order: config -> demo data -> chart engine -->
-<script src="npews-scoring-config.js"></script>
-<script src="demo-data.js"></script>
-<script src="chart.js"></script>
+<!-- Load as ES modules. demo-data.js publishes window.PATIENT / window.OBSERVATIONS;
+     chart.js imports its config/scorer/age-band dependencies and auto-inits on
+     DOMContentLoaded using those window globals. -->
+<script type="module" src="demo-data.js"></script>
+<script type="module" src="chart.js"></script>
 </body>
 </html>

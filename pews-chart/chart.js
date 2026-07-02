@@ -1,6 +1,6 @@
 /* ============================================================
    RCPCH NPEWS Chart Engine - chart.js
-   Plain JS, no build step, no dependencies.
+   ES module. No build step required beyond native ESM.
 
    Responsibilities:
    - Render band-box backgrounds on canvas
@@ -12,17 +12,28 @@
    - Zoom in/out (U3.1) and quick-range buttons (U3.3)
    - Jump to present (U3.12)
    - Colour-blind mode (U1.1)
+   - Compute the PEWS score for every observation via the scorer (single
+     source of truth) and select the age band per observation from the
+     patient's date of birth, joining charts seamlessly across a birthday.
    ============================================================ */
+
+import { AGE_BANDS, ESCALATION_META } from './npews-scoring-config.js';
+import { scoreObservationsForPatient } from './npews-scorer.js';
+import { resolveAgeBand, ageBandSegments } from './age-band.js';
 
 // ---- Module-level data references --------------------------
 //
 // These are set by init() and used by all rendering functions.
-// When loaded via <script src> in index.html, init() falls back to the
-// window globals (PATIENT, OBSERVATIONS, AGE_BANDS) defined by the data
-// scripts that load before chart.js. Stories and other callers pass data
-// directly: NPEWSChart.init(patient, observations, ageBands).
+// When loaded as a module from index.html, init() falls back to the window
+// globals PATIENT / OBSERVATIONS (set by demo-data.js) and the imported
+// AGE_BANDS. Stories and other callers pass data directly:
+// NPEWSChart.init(patient, observations, ageBands).
+//
+// _scored mirrors _observations with computed { ageBand, pewsTotal,
+// escalationLevel } added. _segments is the current view window split into
+// contiguous age-band segments (for boundary-crossing backgrounds).
 
-let _patient, _observations, _ageBands;
+let _patient, _observations, _ageBands, _scored, _segments;
 
 // ---- Colour helpers ----------------------------------------
 
@@ -94,8 +105,28 @@ function drawBands(ctx, bands, yMin, yMax, x0, x1, chartHeight, padTop, padBot) 
   });
 }
 
-// ---- Grid lines & y-axis labels ----------------------------
+// Draw a subtle dashed vertical divider at each internal age-band boundary
+// (birthday) so the seam between the two charts is visible while they remain
+// joined. `segs` are the per-row band segments; boundaries are the interior
+// segment starts.
+function drawAgeBandBoundaries(ctx, segs, tsToX, clampX, x0, x1, chartHeight, padTop, padBot) {
+  if (!segs || segs.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(11,12,12,0.45)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 3]);
+  for (let i = 1; i < segs.length; i++) {
+    const x = clampX(tsToX(segs[i].startTs));
+    if (x <= x0 || x >= x1) continue;
+    ctx.beginPath();
+    ctx.moveTo(x, padTop);
+    ctx.lineTo(x, chartHeight - padBot);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 
+// ---- Grid lines & y-axis labels ----------------------------
 function drawYAxis(ctx, yMin, yMax, step, chartHeight, padTop, padBot, padLeft, padRight, rightLabels) {
   ctx.save();
   ctx.font = chartFont('11px');
@@ -455,8 +486,10 @@ function renderCategoricalRow(canvas, config) {
  * config: {
  *   observations: OBSERVATIONS array (from demo-data.js)
  *   field: string - which field to chart (e.g. 'respiratoryRate')
- *   bands: array of band objects from SCORING_BANDS
- *   yMin, yMax, step: axis range
+ *   bandSegments: array of { ageBand, bands, startTs, endTs } - scoring-band
+ *     backgrounds segmented in time so colour zones switch at each age-band
+ *     boundary (birthday) while the y-scale stays unified
+ *   yMin, yMax, step: unified axis range across the spanned age bands
  *   unit: string for label
  *   viewStart: timestamp ms - left edge
  *   viewEnd:   timestamp ms - right edge
@@ -468,7 +501,7 @@ function renderCategoricalRow(canvas, config) {
  */
 function renderChart(canvas, config) {
   const {
-    observations, field, bands, yMin, yMax, step, unit,
+    observations, field, bandSegments, yMin, yMax, step, unit,
     viewStart, viewEnd, showValues, bpMode, isO2Delivery,
   } = config;
 
@@ -489,6 +522,24 @@ function renderChart(canvas, config) {
 
   const drawW = W - PAD_LEFT - PAD_RIGHT;
 
+  // X positions
+  const range = viewEnd - viewStart;
+  function tsToX(ts) {
+    return PAD_LEFT + ((parseTs(ts) - viewStart) / range) * drawW;
+  }
+  const clampX = (x) => Math.max(PAD_LEFT, Math.min(W - PAD_RIGHT, x));
+
+  // Draw band backgrounds, segmented in time so the colour zones switch at each
+  // age-band boundary (birthday) while the y-scale stays unified.
+  const segs = (bandSegments && bandSegments.length)
+    ? bandSegments
+    : [{ bands: config.bands || [], startTs: viewStart, endTs: viewEnd }];
+  segs.forEach(seg => {
+    const x0 = clampX(tsToX(seg.startTs));
+    const x1 = clampX(tsToX(seg.endTs));
+    if (x1 > x0) drawBands(ctx, seg.bands, yMin, yMax, x0, x1, H, PAD_TOP, PAD_BOTTOM);
+  });
+
   // Filter and sort observations within view window
   const inView = observations.filter(o => {
     const t = parseTs(o.timestamp);
@@ -496,20 +547,12 @@ function renderChart(canvas, config) {
   });
 
   if (inView.length === 0) {
+    drawAgeBandBoundaries(ctx, segs, tsToX, clampX, PAD_LEFT, W - PAD_RIGHT, H, PAD_TOP, PAD_BOTTOM);
     ctx.fillStyle = '#505a5f';
     ctx.font = chartFont('12px');
     ctx.fillText('No observations in range', PAD_LEFT + 8, H / 2);
     return;
   }
-
-  // X positions
-  const range = viewEnd - viewStart;
-  function tsToX(ts) {
-    return PAD_LEFT + ((parseTs(ts) - viewStart) / range) * drawW;
-  }
-
-  // Draw band backgrounds
-  drawBands(ctx, bands, yMin, yMax, PAD_LEFT, W - PAD_RIGHT, H, PAD_TOP, PAD_BOTTOM);
 
   // Grid + y-axis
   drawYAxis(ctx, yMin, yMax, step, H, PAD_TOP, PAD_BOTTOM, PAD_LEFT, PAD_RIGHT, config.rightLabels);
@@ -523,6 +566,9 @@ function renderChart(canvas, config) {
   const ticks = hourTicks(viewStart, viewEnd);
   const hourXPositions = ticks.map(t => PAD_LEFT + ((t - viewStart) / range) * drawW);
   drawXAxis(ctx, hourXPositions, H);
+
+  // Age-band boundary dividers (birthday crossings) — drawn under the data.
+  drawAgeBandBoundaries(ctx, segs, tsToX, clampX, PAD_LEFT, W - PAD_RIGHT, H, PAD_TOP, PAD_BOTTOM);
 
   if (bpMode) {
     // Blood pressure: no horizontal trend lines (U11.7), draw inward arrows
@@ -765,55 +811,118 @@ function getAVPUCell(obs) {
   return map[v] || { label: v, color: '#ffffff', textColor: '#0b0c0c' };
 }
 
+// ---- Age-band view (seamless boundary crossing) ------------
+//
+// A patient charted across a birthday changes age band mid-admission. Rather
+// than stopping one chart and starting another, we draw a single continuous
+// chart per parameter: the trend line uses one unified y-scale (the union of
+// the spanned bands' ranges) while the coloured scoring-band backgrounds are
+// segmented in time, switching at the exact birthday instant.
+
+function spannedAgeBands() {
+  const set = [];
+  for (const seg of (_segments || [])) {
+    if (seg.ageBand && _ageBands[seg.ageBand] && !set.includes(seg.ageBand)) set.push(seg.ageBand);
+  }
+  if (set.length === 0) {
+    const fallback = resolveAgeBand(_patient, viewState.end);
+    set.push(fallback && _ageBands[fallback] ? fallback : '5-12y');
+  }
+  return set;
+}
+
+// The age band the patient is in *now* (at the latest observation) — drives the
+// header banner colour and the unit labels.
+function currentAgeBand() {
+  if (_observations && _observations.length) {
+    const latestTs = _observations[_observations.length - 1].timestamp;
+    const band = resolveAgeBand(_patient, latestTs);
+    if (band && _ageBands[band]) return band;
+  }
+  const spanned = spannedAgeBands();
+  return spanned[spanned.length - 1];
+}
+
+// Unified y-scale across every age band spanned by the current view so the same
+// value plots at the same height either side of a boundary.
+function unifiedScale(chartParamKey) {
+  let yMin = Infinity, yMax = -Infinity, step = 0;
+  for (const ab of spannedAgeBands()) {
+    const cfg = (_ageBands[ab] || _ageBands['5-12y']).chartConfig[chartParamKey];
+    if (!cfg) continue;
+    yMin = Math.min(yMin, cfg.yMin);
+    yMax = Math.max(yMax, cfg.yMax);
+    step = Math.max(step, cfg.step);
+  }
+  if (!Number.isFinite(yMin)) {
+    const cfg = _ageBands['5-12y'].chartConfig[chartParamKey];
+    return { yMin: cfg.yMin, yMax: cfg.yMax, step: cfg.step };
+  }
+  return { yMin, yMax, step };
+}
+
+// Resolve the per-segment scoring bands for one parameter. Each segment carries
+// the bands for the age band that applies over its time span.
+function rowBandSegments(scoringKey) {
+  const segs = (_segments && _segments.length)
+    ? _segments
+    : [{ ageBand: spannedAgeBands()[0], startTs: new Date(viewState.start), endTs: new Date(viewState.end) }];
+  return segs.map(seg => {
+    const ab = (seg.ageBand && _ageBands[seg.ageBand]) ? seg.ageBand : '5-12y';
+    const bands = scoringKey ? (_ageBands[ab].scoringBands[scoringKey] || []) : [];
+    return { ageBand: ab, bands, startTs: seg.startTs, endTs: seg.endTs };
+  });
+}
+
+// Split the current view window into age-band segments from the patient DOB.
+function computeAgeBandView() {
+  if (viewState.start == null || viewState.end == null) { _segments = []; return; }
+  _segments = ageBandSegments(_patient, new Date(viewState.start), new Date(viewState.end));
+}
+
 // ---- Chart panel definitions --------------------------------
 
 function getChartDefs() {
-  // Get age-specific configuration based on patient's age band
-  const ageBand = _patient.ageBand || '5-12y';
-  const SCORING_BANDS = _ageBands[ageBand]?.scoringBands || _ageBands['5-12y'].scoringBands;
-  const cfg = _ageBands[ageBand]?.chartConfig || _ageBands['5-12y'].chartConfig;
-  
+  const cfg = (_ageBands[currentAgeBand()] || _ageBands['5-12y']).chartConfig;
+
+  // Numeric row: unified y-scale + per-segment scoring bands for boundary join.
+  const numeric = (id, title, field, chartKey, scoringKey, extra = {}) => {
+    const scale = unifiedScale(chartKey);
+    return {
+      id,
+      title,
+      unit: cfg[chartKey].unit,
+      field,
+      scoringKey,
+      bandSegments: rowBandSegments(scoringKey),
+      yMin: scale.yMin,
+      yMax: scale.yMax,
+      step: scale.step,
+      ...extra,
+    };
+  };
+
+  const temperature = numeric('temperature', 'Temperature', 'temperature', 'temperature', null, { section: 'disability' });
+  // Temperature is not numerically scored (conformant); hot/cold zones drawn via
+  // tempOverlays. bandSegments carry empty bands so no scoring colour is drawn.
+  temperature.tempOverlays = [
+    { min: 38, max: temperature.yMax, color: '#d4351c', edgeLabel: '>39' }, // red - hot
+    { min: temperature.yMin, max: 36,  color: '#1d70b8' },                  // blue - cold
+  ];
+
   return [
     // --- Airway and Breathing ---
+    numeric('respiratoryRate', 'Respiratory Rate', 'respiratoryRate', 'respiratoryRate', 'respiratoryRate', { section: 'airway' }),
     {
-      id:    'respiratoryRate',
-      title: 'Respiratory Rate',
-      unit:  cfg.respiratoryRate.unit,
-      field: 'respiratoryRate',
-      bands: SCORING_BANDS.respiratoryRate,
-      yMin: cfg.respiratoryRate.yMin,
-      yMax: cfg.respiratoryRate.yMax,
-      step: cfg.respiratoryRate.step,
-      section: 'airway',
-    },
-    {
-      id:         'respiratoryDistress',
-      title:      'Respiratory Distress',
-      unit:       '',
+      id:          'respiratoryDistress',
+      title:       'Respiratory Distress',
+      unit:        '',
       categorical: true,
-      getCell:    getRespiratoryDistressCell,
-      section: 'airway',
+      getCell:     getRespiratoryDistressCell,
+      section:     'airway',
     },
-    {
-      id:    'oxygenSaturation',
-      title: 'O\u2082 Saturation',
-      unit:  cfg.oxygenSaturation.unit,
-      field: 'oxygenSaturation',
-      bands: SCORING_BANDS.oxygenSaturation,
-      yMin: cfg.oxygenSaturation.yMin,
-      yMax: cfg.oxygenSaturation.yMax,
-      step: cfg.oxygenSaturation.step,
-      section: 'airway',
-    },
-    {
-      id:    'oxygenDelivery',
-      title: 'O\u2082 Delivery / Respiratory Support',
-      unit:  cfg.oxygenDelivery.unit,
-      field: 'oxygenDelivery',
-      bands: SCORING_BANDS.oxygenDeliveryPercent,
-      yMin: cfg.oxygenDelivery.yMin,
-      yMax: cfg.oxygenDelivery.yMax,
-      step: cfg.oxygenDelivery.step,
+    numeric('oxygenSaturation', 'O\u2082 Saturation', 'oxygenSaturation', 'oxygenSaturation', 'oxygenSaturation', { section: 'airway' }),
+    numeric('oxygenDelivery', 'O\u2082 Delivery / Respiratory Support', 'oxygenDelivery', 'oxygenDelivery', 'oxygenDeliveryPercent', {
       isO2Delivery: true,
       rightLabels: [
         { value: 100, label: '20 L' },
@@ -825,66 +934,32 @@ function getChartDefs() {
         { value: 5,   label: '1 L'  },
       ],
       section: 'airway',
-    },
+    }),
     // --- Circulation ---
-    {
-      id:    'heartRate',
-      title: 'Heart Rate',
-      unit:  cfg.heartRate.unit,
-      field: 'heartRate',
-      bands: SCORING_BANDS.heartRate,
-      yMin: cfg.heartRate.yMin,
-      yMax: cfg.heartRate.yMax,
-      step: cfg.heartRate.step,
-      section: 'circulation',
-    },
-    {
-      id:    'bloodPressure',
-      title: 'Blood Pressure',
-      unit:  'mmHg (sys / dia)',
-      field: 'bloodPressureSystolic',
-      bands: SCORING_BANDS.bloodPressureSystolic,
-      yMin: cfg.bloodPressureSystolic.yMin,
-      yMax: cfg.bloodPressureSystolic.yMax,
-      step: cfg.bloodPressureSystolic.step,
+    numeric('heartRate', 'Heart Rate', 'heartRate', 'heartRate', 'heartRate', { section: 'circulation' }),
+    numeric('bloodPressure', 'Blood Pressure', 'bloodPressureSystolic', 'bloodPressureSystolic', 'bloodPressureSystolic', {
+      unit: 'mmHg (sys / dia)',
       bpMode: true,
       section: 'circulation',
-    },
+    }),
     {
-      id:         'capillaryRefill',
-      title:      'Capillary Refill Time',
-      unit:       'seconds',
+      id:          'capillaryRefill',
+      title:       'Capillary Refill Time',
+      unit:        'seconds',
       categorical: true,
-      getCell:    getCRTCell,
-      section: 'circulation',
+      getCell:     getCRTCell,
+      section:     'circulation',
     },
     // --- Disability and Exposure ---
     {
-      id:         'avpu',
-      title:      'AVPU / Neurological',
-      unit:       '',
+      id:          'avpu',
+      title:       'AVPU / Neurological',
+      unit:        '',
       categorical: true,
-      getCell:    getAVPUCell,
-      section: 'disability',
+      getCell:     getAVPUCell,
+      section:     'disability',
     },
-    {
-      id:    'temperature',
-      title: 'Temperature',
-      unit:  cfg.temperature.unit,
-      field: 'temperature',
-      bands: SCORING_BANDS.temperature,
-      yMin: cfg.temperature.yMin,
-      yMax: cfg.temperature.yMax,
-      step: cfg.temperature.step,
-      section: 'disability',
-      // Red box around hot zone (>=38), blue box around cold zone (<36).
-      // min/max are the data-value boundaries of the coloured rectangle.
-      // edgeLabel: text shown at the chart-edge extremity (e.g. ">39" at chart top).
-      tempOverlays: [
-        { min: 38, max: cfg.temperature.yMax, color: '#d4351c', edgeLabel: '>39' }, // red - hot
-        { min: cfg.temperature.yMin, max: 36,  color: '#1d70b8' },                  // blue - cold
-      ],
-    },
+    temperature,
   ];
 }
 
@@ -1058,7 +1133,7 @@ function renderPewsCanvas() {
   const drawW = W - PAD_LEFT - PAD_RIGHT;
   const range = viewState.end - viewState.start;
 
-  const inView = _observations.filter(o => {
+  const inView = (_scored || _observations).filter(o => {
     const t = parseTs(o.timestamp);
     return t >= viewState.start && t <= viewState.end;
   });
@@ -1119,6 +1194,32 @@ function renderPewsCanvas() {
     ctx.stroke();
   });
 
+  // Age-band boundary markers (birthday crossings), labelled with the new band.
+  const segs = _segments || [];
+  if (segs.length > 1) {
+    const clampX = (x) => Math.max(PAD_LEFT, Math.min(W - PAD_RIGHT, x));
+    for (let i = 1; i < segs.length; i++) {
+      const x = clampX(PAD_LEFT + ((parseTs(segs[i].startTs) - viewState.start) / range) * drawW);
+      if (x <= PAD_LEFT || x >= W - PAD_RIGHT) continue;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(11,12,12,0.55)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      const label = `\u2192 ${(_ageBands[segs[i].ageBand] || {}).label || segs[i].ageBand}`;
+      ctx.font = chartFont('10px', 'bold');
+      ctx.fillStyle = '#0b0c0c';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = x > W - PAD_RIGHT - 60 ? 'right' : 'left';
+      ctx.fillText(label, ctx.textAlign === 'right' ? x - 3 : x + 3, 2);
+      ctx.restore();
+    }
+  }
+
   // Border around draw area
   ctx.strokeStyle = 'rgba(0,0,0,0.15)';
   ctx.lineWidth = 0.75;
@@ -1173,6 +1274,7 @@ function renderTimeAxis() {
 }
 
 function renderAll() {
+  computeAgeBandView();
   const defs = getChartDefs();
   const h = getChartHeight();
   const hCat = getCategoricalHeight();
@@ -1193,7 +1295,7 @@ function renderAll() {
       renderChart(canvas, {
         observations: _observations,
         field:        def.field,
-        bands:        def.bands,
+        bandSegments: def.bandSegments,
         yMin:         def.yMin,
         yMax:         def.yMax,
         step:         def.step,
@@ -1219,9 +1321,10 @@ function renderEscalationBanner() {
   if (!banner) return;
 
   // Always use the globally latest observation - zoom must not affect PEWS score display
-  if (_observations.length === 0) { banner.style.display = 'none'; return; }
+  const scored = _scored || [];
+  if (scored.length === 0) { banner.style.display = 'none'; return; }
 
-  const latest = _observations[_observations.length - 1];
+  const latest = scored[scored.length - 1];
   if (!latest.escalationLevel) { banner.style.display = 'none'; return; }
 
   const meta = ESCALATION_META[latest.escalationLevel];
@@ -1240,7 +1343,9 @@ function renderFooter() {
   const footer = document.getElementById('sticky-footer');
   if (!footer) return;
 
-  const latest = _observations[_observations.length - 1];
+  const scored = _scored || [];
+  if (scored.length === 0) { footer.innerHTML = ''; return; }
+  const latest = scored[scored.length - 1];
   const level  = latest.escalationLevel;
   const meta   = level ? ESCALATION_META[level] : null;
 
@@ -1483,12 +1588,17 @@ window.addEventListener('resize', () => {
 function renderAgeBandBanner() {
   const banner = document.querySelector('.age-band-banner');
   if (!banner) return;
-  
-  const ageBand = _patient.ageBand || '5-12y';
+
+  const ageBand = currentAgeBand();
   const config = _ageBands[ageBand];
   if (config && config.headerColor) {
     banner.style.background = config.headerColor;
-    banner.setAttribute('aria-label', `Age band: ${config.label}`);
+    // If the patient crosses a band boundary within the loaded data, note it.
+    const spanned = spannedAgeBands();
+    const label = spanned.length > 1
+      ? `${(_ageBands[spanned[0]] || {}).label || spanned[0]} \u2192 ${config.label}`
+      : `Age band: ${config.label}`;
+    banner.setAttribute('aria-label', label);
   }
 }
 
@@ -1498,24 +1608,30 @@ function renderAgeBandBanner() {
  * Initialise the chart.
  *
  * When called without arguments (e.g. from index.html's DOMContentLoaded),
- * falls back to the window globals PATIENT, OBSERVATIONS, AGE_BANDS defined
- * by the data scripts loaded before chart.js.
+ * falls back to the window globals PATIENT / OBSERVATIONS defined by
+ * demo-data.js and the imported AGE_BANDS.
  *
  * Storybook stories and integration tests pass data directly:
  *   NPEWSChart.init(patient, observations, ageBands)
  */
 function init(patient, observations, ageBands) {
-  _patient      = patient      || window.PATIENT;
-  _observations = observations || window.OBSERVATIONS;
-  _ageBands     = ageBands     || window.AGE_BANDS;
+  _patient      = patient      || (typeof window !== 'undefined' ? window.PATIENT : null);
+  _observations = observations || (typeof window !== 'undefined' ? window.OBSERVATIONS : null) || [];
+  _ageBands     = ageBands     || AGE_BANDS;
+
+  // Compute the PEWS score, escalation level and applicable age band for every
+  // observation from the patient's date of birth — the algorithm is the single
+  // source of truth (any pewsTotal / escalationLevel in the input is ignored).
+  _scored = scoreObservationsForPatient(_patient, _observations);
 
   const def = computeDefaultView(_observations);
   viewState.start = def.start;
   viewState.end   = def.end;
+  computeAgeBandView();
 
   // Resolve layout before building panels so initial canvas heights are correct
   initLayout();
-  
+
   // Set age band banner color
   renderAgeBandBanner();
 
@@ -1539,9 +1655,16 @@ function init(patient, observations, ageBands) {
   renderFooter();
 }
 
-// When loaded as a plain <script> in index.html, auto-init on DOMContentLoaded
-// using window globals. Storybook stories call NPEWSChart.init() directly.
-document.addEventListener('DOMContentLoaded', () => init());
+// When loaded as a module in index.html, auto-init on DOMContentLoaded using the
+// window globals set by demo-data.js. Stories call NPEWSChart.init() directly,
+// so only auto-init when demo data is present and the DOM is the index page.
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window !== 'undefined' && window.PATIENT && document.getElementById('chart-grid')) {
+      init();
+    }
+  });
+}
 
 // Public API - allows callers outside index.html to mount the chart
-window.NPEWSChart = { init };
+if (typeof window !== 'undefined') window.NPEWSChart = { init };
