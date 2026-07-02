@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Serve the chart-ui app and Storybook using Docker Compose.
+# Serve the chart demo app using Docker Compose.
 
 
 set -euo pipefail
@@ -72,21 +72,14 @@ case "$SERVICE" in
     wait_and_open "http://localhost:8000"
     docker compose up demo
     ;;
-  storybook)
-    echo "Starting Storybook on http://localhost:6006"
-    wait_and_open "http://localhost:6006"
-    docker compose up storybook
-    ;;
   "")
     echo "Starting demo app on http://localhost:8000"
-    echo "Starting Storybook on http://localhost:6006"
     wait_and_open "http://localhost:8000"
-    wait_and_open "http://localhost:6006"
     docker compose up
     ;;
   *)
     echo "Error: unknown service '$SERVICE'" >&2
-    echo "Available services: demo, storybook" >&2
+    echo "Available services: demo" >&2
     exit 1
     ;;
 esac

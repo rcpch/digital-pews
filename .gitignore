@@ -5,7 +5,6 @@ packages/*/node_modules/
 # Build output
 dist/
 packages/*/dist/
-storybook-static/
 
 # Empty scaffold directories - no source files here
 packages/

@@ -1,0 +1,159 @@
+/* ============================================================
+   Demo harness chrome - demo.css
+   Styles ONLY for the demonstration shell (left sidebar + scenario picker).
+   The chart itself is styled entirely by styles.css; nothing here changes the
+   chart's appearance. Everything is scoped under body.demo so it can never leak
+   into a real embedding of the chart component.
+   ============================================================ */
+
+body.demo {
+  --demo-sidebar-w: 320px;
+}
+
+.demo-shell {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+/* --- Sidebar -------------------------------------------------- */
+.demo-sidebar {
+  flex: 0 0 var(--demo-sidebar-w);
+  width: var(--demo-sidebar-w);
+  background: #003087; /* NHS navy */
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-sidebar__brand {
+  padding: 1.25rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.demo-sidebar__title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.demo-sidebar__subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0.35rem 0 0;
+}
+
+.demo-sidebar__heading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 1rem 1.25rem 0.35rem;
+  margin: 0;
+}
+
+.scenario-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scenario {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 4px solid transparent;
+  border-radius: 4px;
+  padding: 0.6rem 0.75rem;
+  color: #ffffff;
+  font-family: inherit;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.scenario:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.scenario:focus-visible {
+  outline: 3px solid var(--focus-ring, #ffdd00);
+  outline-offset: 2px;
+}
+
+.scenario--active {
+  background: rgba(255, 255, 255, 0.18);
+  border-left-color: var(--focus-ring, #ffdd00);
+}
+
+.scenario__title {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.scenario__band {
+  display: inline-block;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #005eb8; /* NHS blue */
+  color: #ffffff;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.scenario__desc {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.demo-sidebar__foot {
+  margin-top: auto;
+  padding: 1rem 1.25rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.7);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* --- Main (chart) region ------------------------------------- */
+.demo-main {
+  flex: 1 1 auto;
+  min-width: 0; /* allow canvases to shrink instead of forcing overflow */
+}
+
+/* The chart's sticky footer is position:fixed across the viewport; shift it so
+   it aligns with the chart region rather than sitting under the sidebar. */
+body.demo .sticky-footer {
+  left: var(--demo-sidebar-w);
+}
+
+/* --- Narrow screens: stack sidebar above the chart ----------- */
+@media (max-width: 900px) {
+  .demo-shell {
+    flex-direction: column;
+  }
+  .demo-sidebar {
+    flex-basis: auto;
+    width: 100%;
+    height: auto;
+    position: static;
+  }
+  body.demo .sticky-footer {
+    left: 0;
+  }
+}

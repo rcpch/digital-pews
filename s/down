@@ -25,17 +25,13 @@ case "$SERVICE" in
     echo "Stopping demo app..."
     docker compose down demo
     ;;
-  storybook)
-    echo "Stopping Storybook..."
-    docker compose down storybook
-    ;;
   "")
     echo "Stopping all services..."
     docker compose down
     ;;
   *)
     echo "Error: unknown service '$SERVICE'" >&2
-    echo "Available services: demo, storybook" >&2
+    echo "Available services: demo" >&2
     exit 1
     ;;
 esac

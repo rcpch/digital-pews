@@ -362,3 +362,54 @@ stories loaded it as a *classic* `<script>` (Storybook `staticDirs`, untransform
 top-level `export` in a classic script is a SyntaxError, so the browser runtime was silently
 broken. Fixed by making `chart.js` a module that imports its config / scorer / age-band deps;
 `index.html` and the stories now load `chart.js` (and `demo-data.js`) as `type="module"`.
+
+---
+
+## Session 3 (2026-07-02): remove Storybook, bespoke demo harness, props-driven chart
+
+**Decision — Storybook removed.** After weighing Storybook/Chromatic against a
+dependency-free harness for a vendor-neutral, NHS-positioned tool, Marcus chose to drop
+Storybook. Rationale: Storybook was only ever a static-page host here (no `argTypes`/controls,
+Chromatic never wired up), and a bespoke harness demonstrates the same "stories" to a clinical
+audience without adding a build tool or a SaaS dependency — which is on-message for an
+anti-lock-in pitch. Visual regression, when we want it, will be PNG baselines captured with
+browser automation (e.g. Playwright `toHaveScreenshot`) rather than a hosted service.
+
+**What replaced it.**
+- `pews-chart/scenarios.js` — canonical `SCENARIOS` catalogue (the former stories as plain
+  `{ id, title, ageBand, description, patient, observations }` objects). Verified parity with
+  the deleted `AgeBands.stories.js` (same 5 patients / DOBs). Observations carry raw vitals
+  only; scores are computed.
+- `pews-chart/demo.html` + `demo.js` + `demo.css` — a left-sidebar scenario picker. Selecting a
+  scenario mounts a fresh chart shell and calls `render({ patient, observations })`.
+  Deep-linkable via the URL hash (`demo.html#birthday-crossing`).
+- `pews-chart/chart-shell.js` — the shared chart DOM scaffold (`mountChartShell`) used by both
+  `index.html` and `demo.html` so they can't drift; the patient header is intentionally EMPTY
+  and populated by `chart.js` from the patient object.
+
+**Data / presentation split completed.**
+`chart.js` is now a pure visualisation device: `render({ patient, observations })` is the entry
+point, the patient header is data-driven (name/DOB/meta populated from the patient object, age
+computed from DOB), and there is **no auto-init off window globals** — nothing renders until a
+host passes in its data. `index.html` was refactored to mount the shell and call `render`
+explicitly (its hardcoded "Alex Thompson" header markup is gone).
+
+**Verification.** vitest 176 passing + 6 todo (unchanged); `generate:scoring:check` clean.
+Rendered `demo.html`, `index.html` and `demo.html#birthday-crossing` in headless Chrome — the
+sidebar, data-driven header, computed PEWS scores and the seamless birthday seam
+(`1 1 1` in 1-4y → `→ 5-12 Years` → `0 0 0` in 5-12y) all render correctly.
+
+**❓Q — CLAUDE.md "script load order" hard constraint is now stale (for you, Marcus).**
+`CLAUDE.md` still lists as hard-constraint #7 *"Do not change script load order"* with
+*"Files use global scope, not ES modules"*. That stopped being true in session 2 (the module
+conversion): `chart.js` is an ES module that imports its config/scorer/age-band deps, and both
+entry points load it as `type="module"`. I updated the Storybook-related parts of `CLAUDE.md`
+but left the hard-constraints list alone rather than silently rewriting a "never violate" rule.
+Please confirm and I'll reword constraint #7 (e.g. "load `pews-chart/` as native ES modules; no
+bundler/transpiler") and the "Script load order" block.
+
+**❓Q — still open from session 1:** does AVPU contribute to the **numeric** PEWS total?
+`plan.md` (Decisions) says *"AVPU contributes to BOTH the PEWS total AND escalation
+thresholds"*, but the Q9=CONFORMANT decision removed AVPU from the numeric total (it still
+drives escalation). These contradict. The scorer currently EXCLUDES AVPU from the total. Please
+confirm which is correct against the NHSE spec so I can align the scorer + docs.

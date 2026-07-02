@@ -11,40 +11,51 @@ Plain HTML/CSS/JS implementation of the NHS National Paediatric Early Warning Sy
 ### Using Docker Compose (recommended)
 
 ```bash
-# Start both demo app and Storybook
+# Start the demo app (http://localhost:8000)
 s/up
 
-# Start only the demo app (http://localhost:8000)
+# Equivalent - start only the demo app
 s/up demo
-
-# Start only Storybook (http://localhost:6006)
-s/up storybook
 ```
 
 Press Ctrl+C to stop the services. Docker Compose will automatically clean up containers.
 
 ### Demo app
-- Serves at http://localhost:8000
+
+- Serves at <http://localhost:8000>
 - Uses live-server for automatic reload
 - Volume-mounted from `pews-chart/`
-
-### Storybook
-- Serves at http://localhost:6006
-- Volume-mounted from `.storybook/`
-- Node modules cached in Docker volume for faster restarts
-
+- Open <http://localhost:8000/demo.html> for the demonstration harness (left
+  sidebar of example patients); <http://localhost:8000/> renders a single chart.
 
 ## How the chart works
 
-`index.html` loads the following scripts in order:
-1. `npews-scoring-config.js` - age bands and scoring thresholds
-2. `demo-data.js` - fictional patient and observations
-3. `chart.js` - rendering logic (includes age-specific config selection)
-4. `styles.css` - styling
+The chart is a **props-driven visualisation component**: given a patient and a
+list of observations it renders into a fixed set of DOM hooks. Data is kept
+separate from presentation - the chart never carries a specific patient in its
+markup, and it computes all PEWS scores itself (see below).
 
-The chart is rendered on `<canvas>` elements. All rendering is kicked off by `renderAll()` which is called from `index.html` after the DOM is ready.
+`pews-chart/` is loaded as ES modules (no build step):
 
-Data files use global scope (not ES6 modules) and must load in the specific order shown above.
+- `chart-shell.js` - the shared chart DOM scaffold (`mountChartShell(host)`), used
+  by both the standalone page and the demo harness so they can't drift.
+- `chart.js` - the rendering engine. Import `render` and call
+  `render({ patient, observations })`. It imports its own dependencies:
+  - `npews-scoring-config.js` - age bands, scoring thresholds and age-band bounds.
+  - `npews-scorer.js` - computes the PEWS score, escalation level and applicable
+    age band for every observation from the patient's date of birth. **Scores are
+    always computed, never hand-typed** - any score in the input data is ignored.
+  - `age-band.js` - pure date maths for resolving the age band(s) an admission
+    spans (supports seamless charting across a birthday boundary).
+- `styles.css` - all styling (colours, layout, colour-blind mode).
+
+Two entry points render the chart:
+
+- `index.html` - a single standalone chart. Loads `demo-data.js` (which publishes
+  `window.PATIENT` / `window.OBSERVATIONS`), mounts the shell, then calls `render`.
+- `demo.html` - the **demonstration harness**. A left sidebar lists example
+  patients from `scenarios.js`; selecting one mounts a fresh shell and passes the
+  scenario to `render({ patient, observations })`. This replaced Storybook.
 
 ## Layout modes
 
@@ -69,7 +80,10 @@ Four age bands are defined, each with different y-axis ranges, scoring threshold
 | `5-12y` | 5-12 Years | Yellow |
 | `13+y` | 13+ Years | Grey |
 
-Currently only `5-12y` has a complete fictional data scenario in `demo-data.js`. The other three age bands have placeholder Storybook stories that need data.
+All four age bands have demonstration scenarios in `pews-chart/scenarios.js`
+(shown in the `demo.html` sidebar), including a birthday-crossing scenario where a
+child turns 5 mid-admission and the chart seamlessly joins the `1-4y` and `5-12y`
+bands. `demo-data.js` holds the two full-day datasets reused by those scenarios.
 
 ## Visual reference
 
@@ -89,31 +103,25 @@ Lato (from Google Fonts) is the default fallback. If you have a Frutiger licence
 
 Canvas text rendering uses the `chartFont(size, weight)` helper in `chart.js`, which reads `--font` at call time so the override takes effect automatically.
 
-## Adding a Storybook story
+## Adding a demo scenario
 
-1. Create a `.stories.js` file in `pews-chart/`
-2. Export a default object with a `title`:
+Demonstration scenarios (the example patients in the `demo.html` sidebar) live in
+`pews-chart/scenarios.js`. Add a plain object to the `SCENARIOS` array:
 
 ```javascript
-export default {
-  title: 'NPEWS/My Category',
-};
-
-export const MyStory = {
-  render: () => {
-    const container = document.createElement('div');
-    container.innerHTML = `
-      <iframe
-        src="/pews-chart/index.html"
-        style="width: 100%; height: 800px; border: none;">
-      </iframe>
-    `;
-    return container;
-  },
-};
+{
+  id: 'my-scenario',            // unique, used in the URL hash (#my-scenario)
+  title: 'Patient Name',        // sidebar label
+  ageBand: '5-12y',             // shown as a chip
+  description: 'One line describing the clinical picture.',
+  patient: { name: 'Patient Name', dob: '2018-05-01', /* ... */ },
+  observations: [ /* raw vitals only - NO pewsTotal / escalationLevel */ ],
+}
 ```
 
-Storybook auto-detects `.stories.js` files and hot-reloads on save.
+Observations carry raw vital signs only; the chart computes the PEWS score,
+escalation level and applicable age band from the patient's date of birth. The
+sidebar hot-reloads on save (live-server).
 
 ## Specs and reference materials
 

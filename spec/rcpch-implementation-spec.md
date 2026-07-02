@@ -16,33 +16,36 @@ The SPOT NPEWS specification does not specify exactly how such a colour blindnes
 The degree of zoom **must** not affect the calculation of the PEWS score. both the banner and the footer should always use the globally latest observation set to calculate PEWS. (This detail is not stated in existing Spec and was a bug in an initial implementation.)
 
 
-* storybook next with plausible screnarios than demonstrate spec rules in action (should show input data as well as the resulting PEWS score and the chart)
+* demo harness: show the raw input observation data alongside the resulting PEWS score and the chart (currently the sidebar shows the scenario + chart + computed scores, but not the underlying vitals table)
 * nhs logo
 * obs don't happen on the exact hour - need plausible variation
 * resp support codes
-* chromatic 
+* visual regression: pin the canvas render and capture PNG baselines (browser automation, e.g. Playwright `toHaveScreenshot`) rather than a hosted SaaS
 
-## Storybook
+## Demonstration harness
 
-### 1. Age Band Stories (`NPEWS/Age Bands`)
-- **Age Band 5-12 Years** - Working demo with full fictional patient "Alex Thompson" showing deterioration scenario
-- **Age Bands 0-11m, 1-4y, 13+y** - Placeholder stories (data scenarios need to be created)
+Storybook was removed in favour of a dependency-free harness (`pews-chart/demo.html` +
+`demo.js`) that better fits an NHS-positioned, vendor-neutral tool. Scenarios live in
+`pews-chart/scenarios.js` as plain `{ id, title, ageBand, description, patient, observations }`
+objects and are rendered as a left-sidebar picker.
 
-### 2. Documentation Stories (`NPEWS/Documentation`)
-- **Specifications** - Full specs including age bands, escalation levels, layout modes, scoring bands
-- **Data Model** - Complete data model documentation with code examples
+### Scenarios (`SCENARIOS`)
+- **5-12 Years** - "Alex Thompson" deterioration and recovery (default).
+- **0-11 months** - "Zara Okafor" febrile convulsion.
+- **1-4 Years** - "Jamie Osei" bronchiolitis-style deterioration and recovery.
+- **13+ Years** - "Morgan Clarke" deterioration and recovery.
+- **Birthday crossing** - "Sam Rivera" turns 5 mid-admission; the chart seamlessly joins the
+  `1-4y` and `5-12y` bands (unified y-scale, time-segmented scoring bands, boundary divider).
 
 ## Aims
 
 ### For Clinical Users:
 1. **Side-by-side age band comparison** - can see how thresholds differ across ages
 2. **Interactive demos** - can explore without touching code
-3. **Documentation embedded** - specs are visible alongside working examples
-4. **Shareable URL** - can send links to stakeholders for review
+3. **Shareable URL** - scenarios are deep-linkable via the URL hash (e.g. `demo.html#birthday-crossing`)
 
 ### For QA Staff:
-1. **Visual regression testing** - can be integrated with Chromatic/Percy
-2. **Spec adherence** - documentation stories show what's implemented vs spec
-3. **Edge case coverage** - can add stories for every edge case scenario
-4. **Automated testing** - can write tests against stories using Playwright
+1. **Visual regression testing** - PNG baselines captured via browser automation (no SaaS lock-in)
+2. **Edge case coverage** - can add a scenario object for every edge case
+3. **Automated testing** - the same scenario objects feed unit tests and any browser-driven checks
 

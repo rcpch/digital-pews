@@ -7,16 +7,10 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
     "generate:scoring": "node scripts/generate-scoring.mjs",
     "generate:scoring:check": "node scripts/generate-scoring.mjs --check"
   },
   "devDependencies": {
-    "@storybook/html": "^10.4.6",
-    "@storybook/html-vite": "^10.4.6",
-    "storybook": "^10.4.6",
-    "vite": "^8.1.1",
     "vitest": "^4.1.9"
   }
 }

@@ -12,9 +12,9 @@ This is a **clinical safety tool**. Visual accuracy and spec compliance matter m
 
 - **Vanilla JS, HTML, CSS** — no framework, no transpilation
 - **Canvas** — all chart rendering is done with the 2D Canvas API
-- **Storybook 8** (HTML/Vite) — component development and visual testing
-- **Docker Compose** — local dev (`s/up`, `s/up demo`, `s/up storybook`)
-- Demo app: http://localhost:8000 | Storybook: http://localhost:6006
+- **ES modules** — `pews-chart/` loads as native ES modules (no bundler, no build step)
+- **Docker Compose** — local dev (`s/up` / `s/up demo`)
+- Demo app: http://localhost:8000 (`/demo.html` = scenario harness · `/` = single chart)
 
 ### Script load order (must not change)
 ```
@@ -118,7 +118,7 @@ Col 3 (1fr):   Canvas chart
 | `5-12y` | 5–12 Years     | Yellow |
 | `13+y`  | 13+ Years      | Grey |
 
-Currently only `5-12y` has complete demo data. The other three age bands have placeholder Storybook stories.
+All four age bands have demonstration scenarios in `pews-chart/scenarios.js` (shown in the `demo.html` sidebar), including a birthday-crossing scenario where a child turns 5 mid-admission. The two full-day datasets live in `demo-data.js`.
 
 ---
 
@@ -150,7 +150,7 @@ Escalation can also be triggered by Carer Question (W=Worse), Clinical Intuition
 1. **Do not change band colours** (`--band-*`). They are clinically mandated by the NHS NPEWS specification.
 2. **Do not change escalation colours** (`--esc-*`). Same reason.
 3. **Do not add a framework**. This is intentionally dependency-free.
-4. **Do not add a build step** to `pews-chart/`. Storybook has its own Vite build — that's fine. The demo app must stay plain HTML/CSS/JS.
+4. **Do not add a build step** to `pews-chart/`. It must stay plain HTML/CSS/JS loaded as native ES modules — no bundler, no transpiler.
 5. **Do not break colour-blind mode**. Test any colour-adjacent change with `.cb-mode` on `<body>`.
 6. **Do not draw a line over a skipped observation** (spec U3.10). A skip must cause a break in the line.
 7. **Do not change script load order** in `index.html`.
@@ -177,21 +177,29 @@ Escalation can also be triggered by Carer Question (W=Worse), Clinical Intuition
 
 ---
 
-## Storybook
+## Demo harness
 
-Stories live in `pews-chart/*.stories.js`. Each story renders an `<iframe src="/pews-chart/index.html">`. Add new stories for new states you want to visually test. Storybook hot-reloads on save.
+The demonstration scenarios (the "stories") live in `pews-chart/scenarios.js` as a
+`SCENARIOS` array of plain objects — each `{ id, title, ageBand, description, patient,
+observations }`. `demo.html` + `demo.js` render them as a left-sidebar picker; selecting one
+mounts a fresh chart shell (`chart-shell.js`) and passes the scenario straight to the chart
+via `render({ patient, observations })`. Observations carry raw vitals only — the chart
+computes the PEWS score, escalation level and age band from the patient's DOB.
+
+To add a scenario, append an object to `SCENARIOS`:
 
 ```javascript
-export default { title: 'NPEWS/My Category' };
-
-export const MyStory = {
-  render: () => {
-    const el = document.createElement('div');
-    el.innerHTML = `<iframe src="/pews-chart/index.html" style="width:100%;height:800px;border:none;"></iframe>`;
-    return el;
-  },
-};
+{
+  id: 'my-scenario',            // unique; used in the URL hash (#my-scenario)
+  title: 'Patient Name',
+  ageBand: '5-12y',
+  description: 'One line describing the clinical picture.',
+  patient: { name: 'Patient Name', dob: '2018-05-01', /* ... */ },
+  observations: [ /* raw vitals only — NO pewsTotal / escalationLevel */ ],
+}
 ```
+
+live-server hot-reloads the sidebar on save.
 
 ---
 
