@@ -5,7 +5,7 @@
  * (spec/npews-scoring-spec.json). If someone edits the JSON but forgets to run
  * `npm run generate:scoring`, these tests fail.
  *
- *   - pews-chart/npews-scoring-config.js   (SCORING_BANDS_BY_AGE block)
+ *   - chart/npews-scoring-config.js   (SCORING_BANDS_BY_AGE block)
  *   - spec/npews-scoring-tables.generated.md
  */
 

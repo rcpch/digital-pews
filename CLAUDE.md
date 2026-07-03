@@ -15,22 +15,26 @@ This is a **clinical safety tool**. Visual accuracy and spec compliance matter m
 - **Web Component** — the chart is packaged as a framework-neutral `<npews-chart>` custom
   element (`npews-chart.js`) that takes a JSON `{ patient, observations }` object via its
   `.data` property. Works in plain HTML, React, Angular, Vue, or a SMART-on-FHIR app.
-- **ES modules** — `pews-chart/` loads as native ES modules (no bundler, no build step)
+- **ES modules** — the `chart/` component loads as native ES modules (no bundler, no build step)
 - **Docker Compose** — local dev (`s/up` / `s/up demo`)
-- Demo app: http://localhost:8000 (`/demo.html` = scenario harness · `/` = single chart ·
-  `/embed-example.html` = minimal `<npews-chart>` drop-in)
+- Repo layout: `chart/` = the reusable component source · `demo/` = the demonstration harness
+  and examples · `spec/` = specification & decisions · `reference-sources/` = authoritative NHS
+  source material.
+- Demo app: http://localhost:8000 (`/demo/demo.html` = scenario harness · `/demo/` = single
+  chart · `/demo/embed-example.html` = minimal `<npews-chart>` drop-in)
 
 ### Module dependency graph
 ```
-npews-scoring-config.js ─┐
-npews-scorer.js          ├─→ chart.js ─→ npews-chart.js  (<npews-chart> element)
-age-band.js              ┘        ▲
-chart-shell.js ───────────────────┘
+chart/                                    demo/
+  npews-scoring-config.js ─┐                demo-data.js ─→ scenarios.js ─┐
+  npews-scorer.js          ├─→ chart.js ─→ npews-chart.js  ◀────────────┘
+  age-band.js              ┘        ▲          (demo.js / index.html / embed-example.html
+  chart-shell.js ───────────────────┘           import ../chart/npews-chart.js)
 ```
 Files load as native ES modules and `import` their own dependencies — there is no fragile
-global-script load order to preserve. A host page just imports `npews-chart.js` (module) and
-feeds the `<npews-chart>` element its `{ patient, observations }` data. `demo-data.js` still
-exposes `window.PATIENT`/`window.OBSERVATIONS` for the zero-config single-chart `index.html`.
+global-script load order to preserve. A host page just imports `chart/npews-chart.js` (module)
+and feeds the `<npews-chart>` element its `{ patient, observations }` data. `demo-data.js` still
+exposes `window.PATIENT`/`window.OBSERVATIONS` for the zero-config single-chart `demo/index.html`.
 
 ---
 
@@ -52,7 +56,7 @@ When asking for visual work, **share a screenshot** of the current rendered stat
 
 ## Design tokens
 
-All colours, spacing, and typography are defined as CSS custom properties in `pews-chart/styles.css`.
+All colours, spacing, and typography are defined as CSS custom properties in `chart/styles.css`.
 
 ### PEWS band colours (clinically mandated — do not change)
 ```css
@@ -128,7 +132,7 @@ Col 3 (1fr):   Canvas chart
 | `5-12y` | 5–12 Years     | Yellow |
 | `13+y`  | 13+ Years      | Grey |
 
-All four age bands have demonstration scenarios in `pews-chart/scenarios.js` (shown in the `demo.html` sidebar), including a birthday-crossing scenario where a child turns 5 mid-admission. The two full-day datasets live in `demo-data.js`.
+All four age bands have demonstration scenarios in `demo/scenarios.js` (shown in the `demo.html` sidebar), including a birthday-crossing scenario where a child turns 5 mid-admission. The two full-day datasets live in `demo/demo-data.js`.
 
 ---
 
@@ -180,7 +184,7 @@ Start at `spec/README.md` — the spec index and landing page.
    drops into any host (plain page, React, Angular, Vue, EHR/SMART-on-FHIR). Optional thin
    framework *wrappers* (e.g. a React wrapper over the element) are allowed, but the core must
    never require one. See `spec/react.md` for the decision.
-4. **Do not add a build step to the `pews-chart/` source.** The source must stay plain
+4. **Do not add a build step to the `chart/` source.** The source must stay plain
    HTML/CSS/JS loaded as native ES modules — no bundler, no transpiler in development. A
    **distribution-only** bundle (NPM/UMD build for CDN publishing) is allowed as a separate
    packaging step, provided the source itself keeps running unbuilt in the browser.
@@ -215,7 +219,7 @@ Start at `spec/README.md` — the spec index and landing page.
 
 ## Demo harness
 
-The demonstration scenarios (the "stories") live in `pews-chart/scenarios.js` as a
+The demonstration scenarios (the "stories") live in `demo/scenarios.js` as a
 `SCENARIOS` array of plain objects — each `{ id, title, ageBand, description, patient,
 observations }`. `demo.html` + `demo.js` render them as a left-sidebar picker; selecting one
 mounts a fresh chart shell (`chart-shell.js`) and passes the scenario straight to the chart

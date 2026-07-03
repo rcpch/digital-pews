@@ -15,7 +15,7 @@ import {
   resolveAgeBand,
   ageBandBoundariesInRange,
   ageBandSegments,
-} from '../../pews-chart/age-band.js';
+} from '../../chart/age-band.js';
 
 describe('completedYears (calendar exact)', () => {
   it('is 0 on the day of birth', () => {

@@ -4,7 +4,7 @@
  *
  *   spec/npews-scoring-spec.json   (source of truth)
  *        |
- *        +--> pews-chart/npews-scoring-config.js   (SCORING_BANDS_BY_AGE region)
+ *        +--> chart/npews-scoring-config.js   (SCORING_BANDS_BY_AGE region)
  *        +--> spec/npews-scoring-tables.generated.md (unified human table)
  *
  * Usage:
@@ -42,7 +42,7 @@ const tablesStale = nextTables !== currentTables;
 if (check) {
   if (configStale || tablesStale) {
     console.error('Generated scoring artifacts are STALE. Run `npm run generate:scoring`.');
-    if (configStale) console.error(' - pews-chart/npews-scoring-config.js');
+    if (configStale) console.error(' - chart/npews-scoring-config.js');
     if (tablesStale) console.error(' - spec/npews-scoring-tables.generated.md');
     process.exit(1);
   }
@@ -52,9 +52,9 @@ if (check) {
 
 if (configStale) {
   writeFileSync(CONFIG_PATH, nextConfig);
-  console.log('Wrote pews-chart/npews-scoring-config.js');
+  console.log('Wrote chart/npews-scoring-config.js');
 } else {
-  console.log('pews-chart/npews-scoring-config.js already up to date');
+  console.log('chart/npews-scoring-config.js already up to date');
 }
 
 if (tablesStale) {

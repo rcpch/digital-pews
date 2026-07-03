@@ -4,11 +4,11 @@ This file documents the implemented FHIR boundary for Digital PEWS. The adapter 
 
 ## Adapter contract
 
-Implemented in `pews-chart/fhir-adapter.js`:
+Implemented in `chart/fhir-adapter.js`:
 
 - `fromFhirBundleToChartModel(bundle)` parses a FHIR R4 `Bundle` into `{ patient, observations }` for the chart.
 - `fromChartModelToFhirBundle(patient, observations, context?)` builds a FHIR R4 `Bundle` from chart data.
-- Both functions are pure data transforms. The adapter does **not** compute or recompute PEWS scores. It copies `observation.pewsTotal` to/from the score `Observation`; score recomputation is a separate safety gate in `test/fhir/score-conformance.test.js` using `pews-chart/npews-scorer.js`.
+- Both functions are pure data transforms. The adapter does **not** compute or recompute PEWS scores. It copies `observation.pewsTotal` to/from the score `Observation`; score recomputation is a separate safety gate in `test/fhir/score-conformance.test.js` using `chart/npews-scorer.js`.
 
 ### FHIR -> chart behaviour
 
@@ -103,7 +103,7 @@ The adapter does not validate local value sets. Coded field values are passed th
 - Oxygen delivery is represented by the local observation code `pews-o2-delivery` with `valueQuantity`.
 - The adapter preserves the FHIR/chart unit literally. Current tests exercise `%` and `L/min`.
 - Outbound sets `valueQuantity.unit` and `valueQuantity.code` to the same chart unit, using UCUM as the system.
-- The adapter itself only preserves the unit. The rendered chart line-break behaviour is in `pews-chart/chart.js`: oxygen-delivery points are split into separate trend-line segments when a value is skipped/null or when adjacent non-null `oxygenDelivery.unit` values differ. `L/min` values are scaled for display on the shared axis; the break marks that `%` and `L/min` are not a continuous modality.
+- The adapter itself only preserves the unit. The rendered chart line-break behaviour is in `chart/chart.js`: oxygen-delivery points are split into separate trend-line segments when a value is skipped/null or when adjacent non-null `oxygenDelivery.unit` values differ. `L/min` values are scaled for display on the shared axis; the break marks that `%` and `L/min` are not a continuous modality.
 
 ### Skipped observations and absent data
 
@@ -142,7 +142,7 @@ Current gates:
 
 ## Appendix: future work / unresolved mappings
 
-These items are draft or aspirational. They are **not** implemented by `pews-chart/fhir-adapter.js` unless stated above.
+These items are draft or aspirational. They are **not** implemented by `chart/fhir-adapter.js` unless stated above.
 
 - Strict FHIR R4 and UK Core profile validation with pinned package versions, validator reports, and warning allow-lists.
 - National/canonical code decisions for PEWS total, escalation labels, respiratory distress values, oxygen device values, AVPU including `Asleep`, trigger codes, and skip-reason scoring impact. The current RCPCH PEWS CodeSystem and extensions are interim repo-local conventions.

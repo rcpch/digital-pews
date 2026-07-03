@@ -9,7 +9,7 @@
    through `chartEl.data = { patient, observations }`.
    ============================================================ */
 
-import './npews-chart.js';
+import '../chart/npews-chart.js';
 import { SCENARIOS, scenarioById } from './scenarios.js';
 
 const host = document.getElementById('chart-host');

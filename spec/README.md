@@ -4,7 +4,7 @@ This folder is the source of record for **what** Digital PEWS must do and **why*
 built the way it is. Every fact here is traceable to a document in
 [`../reference-sources/`](../reference-sources/) (the NHS SPOT/NPEWS specifications, the
 published age-band charts, and the configuration/decision-pathway PDFs) or to the code in
-[`../pews-chart/`](../pews-chart/).
+[`../chart/`](../chart/) (the chart component) and [`../demo/`](../demo/) (the demo harness).
 
 New here? Read [`../README.md`](../README.md) for how to run the app, then
 [`decisions.md`](./decisions.md) for the shape of the project, then the reference

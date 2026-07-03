@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const SPEC_PATH = join(__dirname, '..', 'spec', 'npews-scoring-spec.json');
-export const CONFIG_PATH = join(__dirname, '..', 'pews-chart', 'npews-scoring-config.js');
+export const CONFIG_PATH = join(__dirname, '..', 'chart', 'npews-scoring-config.js');
 export const TABLES_MD_PATH = join(__dirname, '..', 'spec', 'npews-scoring-tables.generated.md');
 
 export const GEN_START = '// <<< GENERATED SCORING BANDS START — do not edit by hand; run `npm run generate:scoring` >>>';
@@ -150,7 +150,7 @@ export function renderConfigBandsBlock(spec) {
     `const SCORING_BANDS_BY_AGE = {\n${ageEntries}\n};`,
     '',
     '// Canonical age-in-years bounds per band (half-open [minAgeYears, maxAgeYears);',
-    '// maxAgeYears null = open-ended). Used by pews-chart/age-band.js to select the',
+    '// maxAgeYears null = open-ended). Used by chart/age-band.js to select the',
     '// applicable band from a patient date of birth with calendar exactitude.',
     `const AGE_BAND_BOUNDS = {\n${boundsEntries}\n};`,
   ].join('\n');

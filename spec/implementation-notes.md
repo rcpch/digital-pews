@@ -25,7 +25,7 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 
 ### Chart layout and sidebars
 
-- [ ] All chart rows rendered by `pews-chart/chart.js` are visible and can be compared against the PDF row order: Respiratory Rate, Respiratory Distress, O₂ Saturation, O₂ Delivery / Respiratory Support, Heart Rate, Blood Pressure, Capillary Refill Time, AVPU / Neurological, Temperature.
+- [ ] All chart rows rendered by `chart/chart.js` are visible and can be compared against the PDF row order: Respiratory Rate, Respiratory Distress, O₂ Saturation, O₂ Delivery / Respiratory Support, Heart Rate, Blood Pressure, Capillary Refill Time, AVPU / Neurological, Temperature.
 - [ ] Parameter panels are stacked vertically with no visible gaps between panels.
 - [ ] Categorical rows (Respiratory Distress, Capillary Refill Time, AVPU / Neurological) render as compact coloured-cell bands.
 - [ ] Categorical sidebar entries remain compact and align to their panel heights.

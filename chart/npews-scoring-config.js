@@ -199,7 +199,7 @@ const SCORING_BANDS_BY_AGE = {
 };
 
 // Canonical age-in-years bounds per band (half-open [minAgeYears, maxAgeYears);
-// maxAgeYears null = open-ended). Used by pews-chart/age-band.js to select the
+// maxAgeYears null = open-ended). Used by chart/age-band.js to select the
 // applicable band from a patient date of birth with calendar exactitude.
 const AGE_BAND_BOUNDS = {
   '0-11m': { minAgeYears: 0, maxAgeYears: 1 },

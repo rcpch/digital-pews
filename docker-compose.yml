@@ -1,5 +1,7 @@
 services:
-  # Static demo app server (pews-chart) using live-server
+  # Static demo app server using live-server. The chart component (chart/) and
+  # the demo harness (demo/) are mounted as siblings under the served root so the
+  # demo's `../chart/...` module imports resolve over HTTP exactly as on disk.
   demo:
     image: node:alpine
     working_dir: /app
@@ -7,6 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./pews-chart:/app
+      - ./chart:/app/chart
+      - ./demo:/app/demo
     container_name: digital-pews-demo
     restart: unless-stopped

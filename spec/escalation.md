@@ -1,6 +1,6 @@
 # Escalation, sepsis & communication
 
-Sources: Configuration Document for SPOT NPEWS (NHS England); SPOT Decision Pathway V3 draft; NPEWS observation and escalation charts; implemented scorer behaviour in `pews-chart/npews-scorer.js`.
+Sources: Configuration Document for SPOT NPEWS (NHS England); SPOT Decision Pathway V3 draft; NPEWS observation and escalation charts; implemented scorer behaviour in `chart/npews-scorer.js`.
 
 ## Escalation levels
 
@@ -29,7 +29,7 @@ For emergency or life-threatening situations: call 2222 and state “Paediatric 
 
 Clinical policy from the reference charts: respond according to the highest escalation level from the PEWS score or any trigger criterion. These triggers can raise the escalation level above the numeric-score level.
 
-Implementation status: `pews-chart/npews-scorer.js` currently hardcodes only `escalationLevelFromScore(total)`. Trigger-based overrides for Carer Question, Clinical Intuition, Specific Concern, AVPU and temperature are documented policy and are not all hardcoded in the scorer.
+Implementation status: `chart/npews-scorer.js` currently hardcodes only `escalationLevelFromScore(total)`. Trigger-based overrides for Carer Question, Clinical Intuition, Specific Concern, AVPU and temperature are documented policy and are not all hardcoded in the scorer.
 
 | Trigger criterion | Low | Medium | High | Emergency |
 | --- | --- | --- | --- | --- |
@@ -54,7 +54,7 @@ Short codes for escalation reason:
 
 ## AVPU & temperature
 
-AVPU and temperature do not contribute to the numeric PEWS total. In `pews-chart/npews-scorer.js`, the numeric total includes respiratory rate, respiratory distress, oxygen saturation, oxygen support, heart rate, systolic blood pressure and capillary refill time only. AVPU and temperature feed the escalation/trigger grid: AVPU change to V/P/U or abnormal pupillary response; temperature ≥38°C or <36°C as a sepsis trigger.
+AVPU and temperature do not contribute to the numeric PEWS total. In `chart/npews-scorer.js`, the numeric total includes respiratory rate, respiratory distress, oxygen saturation, oxygen support, heart rate, systolic blood pressure and capillary refill time only. AVPU and temperature feed the escalation/trigger grid: AVPU change to V/P/U or abnormal pupillary response; temperature ≥38°C or <36°C as a sepsis trigger.
 
 ## Think sepsis
 

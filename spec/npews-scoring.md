@@ -2,7 +2,7 @@
 
 > **The numbers live elsewhere.** The single source of truth for every numeric
 > threshold is [`npews-scoring-spec.json`](./npews-scoring-spec.json). It generates
-> both the runtime bands (`pews-chart/npews-scoring-config.js`) and the human-readable
+> both the runtime bands (`chart/npews-scoring-config.js`) and the human-readable
 > [`npews-scoring-tables.generated.md`](./npews-scoring-tables.generated.md); a test
 > fails if they drift. Edit the JSON, then run `npm run generate:scoring`.
 >
