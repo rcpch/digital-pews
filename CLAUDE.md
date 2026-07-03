@@ -147,6 +147,8 @@ Escalation can also be triggered by Carer Question (W=Worse), Clinical Intuition
 
 ## Spec documents (read before making changes)
 
+Start at `spec/README.md` — the spec index and landing page.
+
 **Reference (transcriptions of the SPOT-NPEWS `.xlsx`):**
 - `spec/spot-npews-ui-spec.md` — NHS SPOT/NPEWS UI specification (MOSCOW priorities). **Must** requirements are non-negotiable.
 - `spec/spot-npews-spec.md` — NHS SPOT/NPEWS clinical/technical specification (`C*` IDs).

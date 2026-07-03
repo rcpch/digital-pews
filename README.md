@@ -166,6 +166,8 @@ sidebar hot-reloads on save (live-server).
 
 ## Specs and reference materials
 
+Start at [`spec/README.md`](spec/README.md) — the spec index and landing page.
+
 - `spec/spot-npews-ui-spec.md` / `spec/spot-npews-spec.md` - NHS SPOT/NPEWS specification (transcribed from the reference `.xlsx`)
 - `spec/npews-scoring-spec.json` - canonical scoring spec (source of truth); `spec/npews-scoring-tables.generated.md` - generated reference table; `spec/npews-scoring.md` - clinical narrative
 - `spec/data-model.md` - the Patient + Observation input shapes and data-entry codes
