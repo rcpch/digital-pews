@@ -20,8 +20,9 @@ This is a **clinical safety tool**. Visual accuracy and spec compliance matter m
 - Repo layout: `chart/` = the reusable component source · `demo/` = the demonstration harness
   and examples · `spec/` = specification & decisions · `reference-sources/` = authoritative NHS
   source material.
-- Demo app: http://localhost:8000 (`/demo/demo.html` = scenario harness · `/demo/` = single
-  chart · `/demo/embed-example.html` = minimal `<npews-chart>` drop-in)
+- Demo app: http://localhost:8000 (`/demo.html` = scenario harness · `/` = single
+  chart · `/embed-example.html` = minimal `<npews-chart>` drop-in). The dev server mounts
+  `demo/` at the root and `chart/` as a subdirectory (see `docker-compose.yml`).
 
 ### Module dependency graph
 ```

@@ -25,8 +25,8 @@ Press Ctrl+C to stop the services. Docker Compose will automatically clean up co
 - Serves at <http://localhost:8000>
 - Uses live-server for automatic reload
 - Volume-mounted from `chart/` and `demo/`
-- Open <http://localhost:8000/demo/demo.html> for the demonstration harness (left
-  sidebar of example patients); <http://localhost:8000/demo/> renders a single chart.
+- Open <http://localhost:8000/demo.html> for the demonstration harness (left
+  sidebar of example patients); <http://localhost:8000/> renders a single chart.
 
 ## How the chart works
 
@@ -90,7 +90,7 @@ fonts, so a consumer only loads one module and feeds it a JSON object:
 - **Scores are always computed** from the patient's date of birth and the raw
   observations — any score in the input is ignored (single source of truth).
 - See `demo/embed-example.html` for a minimal, self-contained drop-in
-  (<http://localhost:8000/demo/embed-example.html>). It links no chart stylesheet and
+  (<http://localhost:8000/embed-example.html>). It links no chart stylesheet and
   calls no rendering API — it just loads the module and sets `.data`.
 
 **Phase 1 limitation:** the engine uses fixed DOM ids, so one chart per document is

@@ -68,13 +68,13 @@ wait_and_open() {
 # Start the services
 case "$SERVICE" in
   demo)
-    echo "Starting demo app on http://localhost:8000"
-    wait_and_open "http://localhost:8000"
+    echo "Starting demo app — harness at http://localhost:8000/demo.html"
+    wait_and_open "http://localhost:8000/demo.html"
     docker compose up demo
     ;;
   "")
-    echo "Starting demo app on http://localhost:8000"
-    wait_and_open "http://localhost:8000"
+    echo "Starting demo app — harness at http://localhost:8000/demo.html"
+    wait_and_open "http://localhost:8000/demo.html"
     docker compose up
     ;;
   *)
