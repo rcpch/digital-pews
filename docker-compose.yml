@@ -10,3 +10,16 @@ services:
       - ./pews-chart:/app
     container_name: digital-pews-demo
     restart: unless-stopped
+
+  # SMART-on-FHIR shell server (smart/) — separate port so the OAuth
+  # redirect_uri stays stable and the chart demo container is untouched.
+  smart:
+    image: node:alpine
+    working_dir: /app
+    command: sh -c "npm install -g live-server && live-server --port=9000 --host=0.0.0.0 --no-browser"
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./smart:/app
+    container_name: digital-pews-smart
+    restart: unless-stopped

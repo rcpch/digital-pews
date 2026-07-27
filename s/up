@@ -72,14 +72,19 @@ case "$SERVICE" in
     wait_and_open "http://localhost:8000"
     docker compose up demo
     ;;
+  smart)
+    echo "Starting SMART-on-FHIR shell on http://localhost:9000"
+    wait_and_open "http://localhost:9000/launch.html"
+    docker compose up smart
+    ;;
   "")
-    echo "Starting demo app on http://localhost:8000"
+    echo "Starting demo app on http://localhost:8000 and SMART shell on http://localhost:9000"
     wait_and_open "http://localhost:8000"
     docker compose up
     ;;
   *)
     echo "Error: unknown service '$SERVICE'" >&2
-    echo "Available services: demo" >&2
+    echo "Available services: demo, smart" >&2
     exit 1
     ;;
 esac

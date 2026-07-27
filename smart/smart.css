@@ -1,0 +1,99 @@
+/* ============================================================
+   SMART-on-FHIR shell — minimal styling using the project's
+   design tokens (mirrors pews-chart/styles.css tokens so the
+   SMART shell matches the chart's visual language).
+   ============================================================ */
+
+:root {
+  /* NHS-style chrome tokens (kept in sync with pews-chart/styles.css) */
+  --page-bg:        #f3f2f1;
+  --surface:        #ffffff;
+  --border:         #b1b4b6;
+  --text-primary:   #0b0c0c;
+  --text-secondary: #505a5f;
+  --focus-ring:     #ffdd00;
+
+  /* Section header colours (mirrors the chart's section labels) */
+  --section-bg:     #003087; /* NHS navy */
+  --section-text:   #ffffff;
+
+  --font: 'Lato', 'Trebuchet MS', Helvetica, Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--page-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header -------------------------------------------------- */
+.smart-header {
+  background: var(--section-bg);
+  color: var(--section-text);
+  padding: 1rem 1.5rem;
+}
+.smart-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.smart-subtitle {
+  color: #d9d9d9;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+/* --- Main ---------------------------------------------------- */
+.smart-main {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 60rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* --- Patient card ------------------------------------------- */
+.patient-host {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem;
+}
+
+.patient-status {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+.patient-status--error {
+  color: var(--text-primary);
+  background: #ffeda0; /* NHS yellow band — soft warning */
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #d4351c;
+}
+
+.patient-card {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.5rem;
+}
+.patient-card__label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.patient-card__value {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.patient-card__heading {
+  grid-column: 1 / -1;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}

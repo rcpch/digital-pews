@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPEWS — SMART on FHIR</title>
+  <link rel="stylesheet" href="smart.css" />
+  <!--
+    Post-redirect landing page. fhirclient.js exchanges the OAuth code
+    for an access token, then this page calls smart.js to read the
+    launch patient and render their demographics.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/fhirclient@2.5.0/build/fhir-client.min.js"></script>
+</head>
+<body data-layout="landscape">
+  <header class="smart-header">
+    <h1>NPEWS — SMART on FHIR</h1>
+    <p class="smart-subtitle">Patient demographics</p>
+  </header>
+
+  <main class="smart-main">
+    <!-- Loading / error / patient states are rendered into this host -->
+    <section id="patient-host" class="patient-host" aria-live="polite">
+      <p class="patient-status patient-status--loading">Initialising SMART session…</p>
+    </section>
+  </main>
+
+  <script type="module" src="smart.js"></script>
+</body>
+</html>
