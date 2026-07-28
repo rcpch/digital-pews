@@ -36,64 +36,40 @@ body {
 .smart-header {
   background: var(--section-bg);
   color: var(--section-text);
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
 }
 .smart-header h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-}
-.smart-subtitle {
-  color: #d9d9d9;
-  font-size: 0.95rem;
-  margin-top: 0.25rem;
 }
 
 /* --- Main ---------------------------------------------------- */
 .smart-main {
   flex: 1;
-  padding: 1.5rem;
-  max-width: 60rem;
+  padding: 1rem 1.5rem;
+  max-width: 100rem;
   width: 100%;
   margin: 0 auto;
 }
 
-/* --- Patient card ------------------------------------------- */
-.patient-host {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1.5rem;
-}
-
-.patient-status {
+/* --- Chart status / errors ---------------------------------- */
+/* Hidden once the chart has data; visible for loading + error states. */
+.chart-status {
   font-size: 1rem;
   color: var(--text-secondary);
+  padding: 1rem;
+  text-align: center;
 }
-.patient-status--error {
+.chart-status--hidden { display: none; }
+.chart-status--error {
   color: var(--text-primary);
   background: #ffeda0; /* NHS yellow band — soft warning */
-  padding: 0.75rem 1rem;
   border-left: 4px solid #d4351c;
+  text-align: left;
 }
-
-.patient-card {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.5rem 1.5rem;
-}
-.patient-card__label {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.patient-card__value {
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-.patient-card__heading {
-  grid-column: 1 / -1;
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+.chart-status--empty {
+  color: var(--text-primary);
+  background: #f3f2f1;
+  border: 1px solid var(--border);
+  text-align: left;
 }

@@ -1,125 +1,167 @@
 /* ============================================================
-   SMART-on-FHIR shell — patient demographics only.
+   SMART-on-FHIR shell — boot the NPEWS chart from EHR data.
 
-   This is intentionally minimal: it boots the SMART client, reads
-   the launch patient, and renders their demographics. The NPEWS
-   chart will be wired in later by feeding the same patient + their
-   Observation resources into <npews-chart>.
+   Flow:
+     1. FHIR.oauth2.ready() resolves the SMART client (OAuth done).
+     2. Read the launch patient.
+     3. Fetch the patient's Observation resources, filtered to the
+        LOINC + RCPCH PEWS codes the chart understands. Falls back to
+        an unfiltered query if the EHR rejects the code filter.
+     4. Build a synthetic Bundle { Patient, Observations[] } and run it
+        through fromFhirBundleToChartModel() — the same adapter the
+        conformance tests exercise. Scores are computed by the chart,
+        never stored.
+     5. Set <npews-chart>.data = { patient, observations }.
 
    fhirclient.js (loaded via <script> in index.html) publishes a
    global `FHIR` object. We use it directly — no bundler, no build
    step, in keeping with the project's framework-neutral rule.
    ============================================================ */
 
-const host = document.getElementById('patient-host');
+import { fromFhirBundleToChartModel } from './pews-chart/fhir-adapter.js';
 
-/**
- * Render a status line into the host (loading or error states).
- * @param {string} message
- * @param {'loading'|'error'} [kind='loading']
- */
+const chartEl = document.getElementById('chart');
+const statusEl = document.getElementById('chart-status');
+
+// --- LOINC + RCPCH PEWS codes the chart consumes -----------------------------
+// Source of truth: spec/fhir.md "LOINC vital-sign mappings" + "Local PEWS
+// observation mappings". PEWS totals are NOT fetched — they are computed
+// on the fly by the chart's scorer.
+const LOINC = 'http://loinc.org';
+const PEWS_SYSTEM = 'https://rcpch.github.io/fhir/CodeSystem/pews';
+const CHART_CODES = [
+  `${LOINC}|9279-1`,        // Respiratory rate
+  `${LOINC}|59408-5`,       // Oxygen saturation
+  `${LOINC}|8867-4`,        // Heart rate
+  `${LOINC}|55284-4`,       // Blood pressure panel
+  `${LOINC}|8310-5`,        // Body temperature
+  `${LOINC}|44963-7`,       // Capillary refill time
+  `${PEWS_SYSTEM}|pews-resp-distress`,
+  `${PEWS_SYSTEM}|pews-o2-device`,
+  `${PEWS_SYSTEM}|pews-o2-delivery`,
+  `${PEWS_SYSTEM}|pews-avpu`,
+];
+
+// --- Status helpers ---------------------------------------------------------
+
 function setStatus(message, kind = 'loading') {
-  host.innerHTML = `<p class="patient-status patient-status--${kind}">${escapeHtml(message)}</p>`;
+  statusEl.textContent = message;
+  statusEl.className = `chart-status chart-status--${kind}`;
+}
+function hideStatus() {
+  statusEl.className = 'chart-status chart-status--hidden';
 }
 
-/** Minimal HTML-escaper so we never inject raw FHIR strings as HTML. */
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
+// --- FHIR fetch helpers -----------------------------------------------------
+
+/**
+ * Fetch all of the patient's Observations matching the given `code` token
+ * list, paging through Bundle.link.next as needed.
+ *
+ * @param {fhirclient.Client} client
+ * @param {string} patientId
+ * @param {string|null} codeToken  comma-separated system|code list, or null
+ * @returns {Promise<fhir.Observation[]>}
+ */
+async function fetchObservations(client, patientId, codeToken) {
+  const params = new URLSearchParams();
+  params.set('patient', patientId);
+  params.set('_sort', 'date');
+  params.set('_count', '1000');
+  if (codeToken) params.set('code', codeToken);
+
+  const observations = [];
+  let bundle = await client.request(`Observation?${params.toString()}`);
+
+  while (bundle) {
+    if (Array.isArray(bundle.entry)) {
+      for (const e of bundle.entry) {
+        if (e?.resource?.resourceType === 'Observation') observations.push(e.resource);
+      }
+    }
+    const next = bundle.link && bundle.link.find(l => l.relation === 'next');
+    bundle = next ? await client.request(next.url) : null;
+  }
+  return observations;
 }
 
 /**
- * Pull a single human-readable name out of a FHIR Patient.name array.
- * Prefers `text`, then a `usual`/`official` use, then the first entry.
- * @param {Array} names
- * @returns {string}
+ * Fetch observations with the code filter. If that returns nothing AND the
+ * EHR may have rejected the unknown RCPCH PEWS code system, retry once
+ * without the code filter and let the adapter filter client-side.
+ *
+ * @param {fhirclient.Client} client
+ * @param {string} patientId
+ * @returns {Promise<fhir.Observation[]>}
  */
-function formatName(names) {
-  if (!Array.isArray(names) || names.length === 0) return '—';
-  const withText = names.find(n => n.text);
-  if (withText) return withText.text;
-  const n = names.find(x => x.use === 'usual') || names[0];
-  const given = Array.isArray(n.given) ? n.given.join(' ') : (n.given || '');
-  const family = n.family || '';
-  const prefix = Array.isArray(n.prefix) ? n.prefix.join(' ') : (n.prefix || '');
-  return [prefix, given, family].filter(Boolean).join(' ').trim() || '—';
+async function fetchChartObservations(client, patientId) {
+  const codeToken = CHART_CODES.join(',');
+  const filtered = await fetchObservations(client, patientId, codeToken);
+  if (filtered.length > 0) return filtered;
+
+  // Fallback: some EHRs reject `code=` queries that reference code systems
+  // they don't know (the RCPCH PEWS system is repo-local). Retry unfiltered
+  // and let fromFhirBundleToChartModel drop unknown codes.
+  return fetchObservations(client, patientId, null);
 }
 
-/**
- * Render a Patient resource as a small demographics card.
- * @param {fhir.Patient} patient
- * @param {string} patientId  resolved launch patient id (Patient/<id>)
- */
-function renderPatient(patient, patientId) {
-  const name = formatName(patient.name);
-  const dob = patient.birthDate || '—';
-  const gender = patient.gender ? capitalise(patient.gender) : '—';
-  const nhsNumber = findIdentifier(patient.identifier, 'https://fhir.nhs.uk/Id/nhs-number');
-  const mrn = findIdentifier(patient.identifier, 'http://terminology.hl7.org/CodeSystem/v2-0208'); // MRN-ish
+// --- Boot -------------------------------------------------------------------
 
-  host.innerHTML = `
-    <article class="patient-card">
-      <h2 class="patient-card__heading">${escapeHtml(name)}</h2>
-
-      <div class="patient-card__label">Patient ID</div>
-      <div class="patient-card__value">${escapeHtml(patientId)}</div>
-
-      <div class="patient-card__label">Date of birth</div>
-      <div class="patient-card__value">${escapeHtml(dob)}</div>
-
-      <div class="patient-card__label">Sex</div>
-      <div class="patient-card__value">${escapeHtml(gender)}</div>
-
-      ${nhsNumber ? `
-        <div class="patient-card__label">NHS number</div>
-        <div class="patient-card__value">${escapeHtml(nhsNumber)}</div>
-      ` : ''}
-
-      ${mrn ? `
-        <div class="patient-card__label">MRN</div>
-        <div class="patient-card__value">${escapeHtml(mrn)}</div>
-      ` : ''}
-    </article>
-  `;
-}
-
-/** Find the first identifier value matching a system URL. */
-function findIdentifier(identifiers, system) {
-  if (!Array.isArray(identifiers)) return null;
-  const match = identifiers.find(i => i.system === system && i.value);
-  return match ? match.value : null;
-}
-
-function capitalise(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-}
-
-// --- Boot -----------------------------------------------------
-
-/**
- * fhirclient's ready() resolves once the OAuth dance is complete and
- * a FhirClient instance is available. The client carries the launch
- * patient id (from the `patient/*.read` scope + `launch` context).
- */
 FHIR.oauth2.ready()
-  .then(client => {
-    // The launch patient id is on client.patient.id (string) per the
-    // SMART spec when the `launch/patient` context was used.
+  .then(async client => {
     const patientId = client.patient.id;
-
     if (!patientId) {
       setStatus('No launch patient in the SMART context. Open this app from an EHR patient launch.', 'error');
-      return null;
+      return;
     }
 
     setStatus(`Loading patient ${patientId}…`);
-    // client.patient.read() is a convenience for `Patient/{client.patient.id}`.
-    return client.patient.read().then(patient => ({ patient, patientId: `Patient/${patientId}` }));
-  })
-  .then(result => {
-    if (!result) return;
-    renderPatient(result.patient, result.patientId);
+
+    // 1. Patient
+    const patient = await client.patient.read();
+
+    // 2. Observations (code-filtered, with unfiltered fallback)
+    setStatus('Loading observations…');
+    const observations = await fetchChartObservations(client, patientId);
+
+    if (observations.length === 0) {
+      setStatus('No observations found for this patient.', 'empty');
+      return;
+    }
+
+    // 3. Build a synthetic Bundle and run it through the adapter. The
+    //    adapter groups by effectiveDateTime, dispatches on code, handles
+    //    BP components, skip reasons, oxygen delivery units, etc. Unknown
+    //    codes are dropped silently.
+    const bundle = {
+      resourceType: 'Bundle',
+      type: 'collection',
+      entry: [
+        { resource: patient },
+        ...observations.map(resource => ({ resource })),
+      ],
+    };
+
+    let chartModel;
+    try {
+      chartModel = fromFhirBundleToChartModel(bundle);
+    } catch (err) {
+      console.error('FHIR -> chart model mapping failed:', err);
+      setStatus(`Failed to map observations: ${err.message}`, 'error');
+      return;
+    }
+
+    if (chartModel.observations.length === 0) {
+      setStatus('No PEWS-relevant observations found for this patient.', 'empty');
+      return;
+    }
+
+    // 4. Feed the chart. Scores are computed by the chart from DOB + vitals.
+    chartEl.data = {
+      patient: chartModel.patient,
+      observations: chartModel.observations,
+    };
+    hideStatus();
   })
   .catch(err => {
     console.error('SMART on FHIR boot failed:', err);
