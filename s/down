@@ -16,7 +16,7 @@ fi
 
 compose_cmd() {
   if [ "$SERVICE" = "smart" ] && [ -f "$SMART_OVERRIDE" ]; then
-    echo "docker compose -f docker-compose.yml -f $SMART_OVERRIDE"
+    echo "docker compose -f docker-compose.yml -f $SMART_OVERRIDE --env-file smart/fhir-sandbox/.env"
   else
     echo "docker compose"
   fi
