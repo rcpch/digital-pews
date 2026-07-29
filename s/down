@@ -7,11 +7,20 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 SERVICE="${1:-}"
+SMART_OVERRIDE="smart/fhir-sandbox/docker-compose.smart.yml"
 
 if [ ! -f "docker-compose.yml" ]; then
   echo "Error: docker-compose.yml not found at $ROOT" >&2
   exit 1
 fi
+
+compose_cmd() {
+  if [ "$SERVICE" = "smart" ] && [ -f "$SMART_OVERRIDE" ]; then
+    echo "docker compose -f docker-compose.yml -f $SMART_OVERRIDE"
+  else
+    echo "docker compose"
+  fi
+}
 
 # Check if docker compose is available
 if ! command -v docker &>/dev/null; then
@@ -25,13 +34,21 @@ case "$SERVICE" in
     echo "Stopping demo app..."
     docker compose down demo
     ;;
+  smart)
+    if [ ! -f "$SMART_OVERRIDE" ]; then
+      echo "Error: SMART sandbox override not found at $ROOT/$SMART_OVERRIDE" >&2
+      exit 1
+    fi
+    echo "Stopping SMART sandbox (NPEWS app + HAPI R4 + launcher + browser + viewer + control panel)..."
+    $(compose_cmd) down
+    ;;
   "")
     echo "Stopping all services..."
     docker compose down
     ;;
   *)
     echo "Error: unknown service '$SERVICE'" >&2
-    echo "Available services: demo" >&2
+    echo "Available services: demo, smart" >&2
     exit 1
     ;;
 esac

@@ -1,0 +1,177 @@
+# =============================================================================
+# Digital PEWS — optional SMART-on-FHIR sandbox override
+# =============================================================================
+# Stacked on top of docker-compose.yml by `s/up smart`. Adds a local HAPI R4
+# FHIR server seeded with the Alex Thompson PEWS bundle, the SMART launcher,
+# patient browser, FHIR viewer and a control panel — i.e. the rcpch/smart-dev-
+# sandbox stack, trimmed to R4-only and wired so the launcher's "Launch" button
+# points at the NPEWS SMART app served by the `smart` service in the base file.
+#
+# The base docker-compose.yml is untouched: `s/up` and `s/up demo` never pull
+# the HAPI image. Only `s/up smart` activates this override.
+#
+# Ports (no collision with :8000 demo / :9000 smart shell):
+#   4000  control panel   (www/)
+#   4004  HAPI R4 FHIR
+#   4011  FHIR viewer
+#   4012  patient browser
+#   4013  SMART launcher
+# ==============================================================================
+
+volumes:
+  r4-database:
+
+services:
+
+  # HAPI R4 FHIR server --------------------------------------------------------
+  r4:
+    container_name: hapi-r4
+    image: ${R4_IMAGE}
+    environment:
+      - PORT=${R4_PORT}
+      - HOST=${HOST}
+    ports:
+      - "${R4_PORT}:8080"
+    volumes:
+      - "r4-database:/usr/local/tomcat/target/database"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst < /tmp/hapi.properties.tpl > /config/hapi.properties
+        envsubst < /tmp/server.xml > /usr/local/tomcat/conf/server.xml
+        catalina.sh run
+    stop_grace_period: 0s
+    deploy:
+      resources:
+        limits:
+          cpus: "${R4_CPU_CORES}"
+          memory: ${R4_MEMORY}
+      replicas: ${R4_ENABLED}
+
+  # FHIR viewer ----------------------------------------------------------------
+  fhir-viewer:
+    container_name: fhir-viewer
+    image: docker.io/smartonfhir/fhir-viewer
+    ports:
+      - "${FHIR_VIEWER_PORT}:80"
+    stop_grace_period: 0s
+    deploy:
+      replicas: ${FHIR_VIEWER_ENABLED}
+
+  # Patient browser ------------------------------------------------------------
+  # The upstream image's command runs envsubst over r2.tpl/r3.tpl/r4.tpl. We
+  # only ship r4.tpl (R2/R3 are disabled), so override the command to process
+  # r4 alone — avoids needing empty stub templates.
+  patient-browser:
+    container_name: patient-browser
+    image: docker.io/smartonfhir/patient-browser:latest
+    volumes:
+      - ./patient-browser:/usr/share/nginx/html/config
+    environment:
+      - HOST=${HOST}
+      - FHIR_VIEWER_PORT=${FHIR_VIEWER_PORT}
+      - R4_PORT=${R4_PORT}
+    ports:
+      - "${PATIENT_BROWSER_PORT}:80"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst < /usr/share/nginx/html/config/r4.tpl > /usr/share/nginx/html/config/r4-local.json5
+        nginx -g 'daemon off;'
+    stop_grace_period: 0s
+    deploy:
+      replicas: ${PATIENT_BROWSER_ENABLED}
+
+  # Control panel --------------------------------------------------------------
+  index:
+    container_name: home-page
+    image: docker.io/library/nginx:alpine
+    volumes:
+      - ./www:/usr/share/nginx/html
+    ports:
+      - "${CONTROL_PANEL_PORT}:80"
+    environment:
+      - HOST=${HOST}
+      - R4_PORT=${R4_PORT}
+      - PATIENT_BROWSER_PORT=${PATIENT_BROWSER_PORT}
+      - FHIR_VIEWER_PORT=${FHIR_VIEWER_PORT}
+      - LAUNCHER_PORT=${LAUNCHER_PORT}
+      - R4_ENABLED=${R4_ENABLED}
+      - PATIENT_BROWSER_ENABLED=${PATIENT_BROWSER_ENABLED}
+      - FHIR_VIEWER_ENABLED=${FHIR_VIEWER_ENABLED}
+      - LAUNCHER_ENABLED=${LAUNCHER_ENABLED}
+      # The NPEWS SMART app served by the `smart` service in the base compose
+      # file. The control panel's "Launch" button deep-links into the launcher
+      # with this prefilled, so the user lands on the NPEWS chart in one click.
+      - NPEWS_LAUNCH_URL=http://${HOST}:9000/launch.html
+      - ISSUES_URL=https://github.com/rcpch/digital-pews/issues
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst < /usr/share/nginx/html/template.html > /usr/share/nginx/html/index.html
+        nginx -g 'daemon off;'
+    stop_grace_period: 0s
+    deploy:
+      replicas: ${CONTROL_PANEL_ENABLED}
+
+  # Seed -----------------------------------------------------------------------
+  # One-shot: waits for HAPI R4 to answer metadata, then POSTs the Alex
+  # Thompson PEWS bundle (Patient + Encounter + 26 obs rows + Practitioner).
+  # Idempotent at the resource level (PUT by id), so re-running is safe.
+  seed:
+    container_name: seed
+    image: docker.io/curlimages/curl:latest
+    volumes:
+      - ./seed:/seed:ro
+    depends_on:
+      - r4
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Waiting for HAPI R4 at http://r4:8080/hapi-fhir-jpaserver/fhir/metadata..."
+        until curl -sf http://r4:8080/hapi-fhir-jpaserver/fhir/metadata -o /dev/null; do
+          sleep 2
+        done
+        echo "HAPI R4 is up. Posting PEWS seed bundle..."
+        curl -sf -X POST http://r4:8080/hapi-fhir-jpaserver/fhir \
+          -H "Content-Type: application/fhir+json" \
+          --data @/seed/pews.json
+        echo ""
+        echo "Seed complete. Alex Thompson (patient-alex) is now queryable at"
+        echo "  http://${HOST}:${R4_PORT}/hapi-fhir-jpaserver/fhir/Patient/patient-alex"
+    deploy:
+      replicas: ${SEED_ENABLED:-1}
+    restart: "no"
+
+  # SMART launcher -------------------------------------------------------------
+  # The launcher's /launch endpoint (src/launcher.js) accepts:
+  #   launch_uri  - the SMART app's launch URL (our smart/launch.html)
+  #   fhir_ver    - 2 | 3 | 4
+  #   patient     - patient id to preselect
+  #   sim_ehr     - 1 to simulate an EHR launch (passes iss+launch to the app)
+  # The static index.html form is prefilled from query params via qsToForm(),
+  # so the control panel's "Launch" link deep-links straight into a ready-to-
+  # go launch of the NPEWS app against the seeded Alex Thompson patient.
+  smart-launcher:
+    container_name: launcher
+    image: docker.io/smartonfhir/smart-launcher:latest
+    environment:
+      - HOST=${HOST}
+      - NODE_ENV=production
+      - LAUNCHER_BASE_URL=http://${HOST}:${LAUNCHER_PORT}
+      - BASE_URL=http://${HOST}:${LAUNCHER_PORT}
+      - FHIR_SERVER_R4=http://${HOST}:${R4_PORT}/hapi-fhir-jpaserver/fhir
+      - FHIR_SERVER_R4_INTERNAL=http://r4:8080/hapi-fhir-jpaserver/fhir
+      - DISABLE_SANDBOXES=1
+      - CDS_SANDBOX_URL=https://sandbox.cds-hooks.org
+      - PICKER_CONFIG_R4=r4-local
+      - PICKER_ORIGIN=http://${HOST}:${PATIENT_BROWSER_PORT}
+      - STU4_ENABLED=${R4_ENABLED}
+    ports:
+      - "${LAUNCHER_PORT}:80"
+    stop_grace_period: 0s
+    deploy:
+      replicas: ${LAUNCHER_ENABLED}

@@ -15,16 +15,33 @@ scores are computed on the fly by the chart's scorer, never stored.
 
 ## Running locally
 
+### Local SMART sandbox (recommended)
+
+The project ships an optional docker-compose override that brings up a local
+HAPI R4 FHIR server seeded with the Alex Thompson PEWS bundle, plus the SMART
+launcher, patient browser, FHIR viewer and a control panel. See
+[`fhir-sandbox/README.md`](fhir-sandbox/README.md) for full detail.
+
 ```bash
 s/up smart
+```
+
+This opens the SMART launcher at <http://localhost:4013> with the NPEWS app's
+launch URL, R4, and the Alex Thompson patient prefilled. Click "Launch" and
+you'll land inside the simulated EHR iframe on the NPEWS chart, populated from
+the seeded observations.
+
+### SMART shell only (no FHIR server)
+
+If you only need the SMART shell (e.g. to point at an external FHIR endpoint):
+
+```bash
+# Just the NPEWS SMART app on :9000 — no FHIR server, launcher, or browser.
+docker compose up smart
 # then visit http://localhost:9000/launch.html
 ```
 
-The `smart` docker-compose service mounts `./pews-chart` read-only at
-`/app/pews-chart` so the shell can import the chart module same-origin. No
-CORS, no build step, no file duplication. The chart core is untouched.
-
-## Testing against the public SMART sandbox
+### Testing against the public SMART sandbox
 
 Use the SMART launcher at <https://launch.smarthealthit.org> with:
 
