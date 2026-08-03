@@ -18,7 +18,7 @@
    step, in keeping with the project's framework-neutral rule.
    ============================================================ */
 
-import { fromFhirBundleToChartModel } from './pews-chart/fhir-adapter.js';
+import { fromFhirBundleToChartModel } from './chart/fhir-adapter.js';
 
 const chartEl = document.getElementById('chart');
 const statusEl = document.getElementById('chart-status');

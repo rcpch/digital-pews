@@ -18,9 +18,10 @@ s/up
 s/up demo
 
 # Start the SMART-on-FHIR sandbox (NPEWS app + local HAPI R4 FHIR server
-# seeded with the Alex Thompson PEWS bundle + SMART launcher, patient
-# browser, FHIR viewer, control panel). Opens the launcher with the NPEWS
-# app prefilled — one click lands you on the chart.
+# seeded with demo patient data + SMART launcher, patient browser,
+# FHIR viewer, control panel). Opens the launcher with the NPEWS
+# app prefilled - one click lands you on the chart.
+# See smart/README.md for what SMART-on-FHIR is and how to use it.
 s/up smart
 ```
 

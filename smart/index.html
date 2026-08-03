@@ -13,11 +13,11 @@
   <script src="https://cdn.jsdelivr.net/npm/fhirclient@2.5.0/build/fhir-client.min.js"></script>
   <!--
     Register the <npews-chart> custom element. Mounted same-origin via
-    the docker-compose volume (./pews-chart -> /app/pews-chart) so the
+    the docker-compose volume (./chart -> /app/chart) so the
     element can self-provision its stylesheet/font relative to its own
     module URL. No chart CSS <link> needed here.
   -->
-  <script type="module" src="./pews-chart/npews-chart.js"></script>
+  <script type="module" src="./chart/npews-chart.js"></script>
 </head>
 <body data-layout="landscape">
   <header class="smart-header">

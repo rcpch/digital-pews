@@ -52,7 +52,7 @@ services:
   # FHIR viewer ----------------------------------------------------------------
   fhir-viewer:
     container_name: fhir-viewer
-    image: docker.io/smartonfhir/fhir-viewer
+    image: docker.io/smartonfhir/fhir-viewer:latest
     ports:
       - "${FHIR_VIEWER_PORT}:80"
     stop_grace_period: 0s
@@ -65,6 +65,7 @@ services:
   # r4 alone — avoids needing empty stub templates.
   patient-browser:
     container_name: patient-browser
+    # NOTE: upstream smart-dev-sandbox only publishes a :latest tag (archived repo).
     image: docker.io/smartonfhir/patient-browser:latest
     # NOTE: podman-compose resolves relative paths against the FIRST compose
     # file's directory (the project root), not this override's directory.
@@ -122,12 +123,15 @@ services:
       replicas: ${CONTROL_PANEL_ENABLED}
 
   # Seed -----------------------------------------------------------------------
-  # One-shot: waits for HAPI R4 to answer metadata, then POSTs the Alex
-  # Thompson PEWS bundle (Patient + Encounter + 26 obs rows + Practitioner).
+  # One-shot: waits for HAPI R4 to answer metadata, then POSTs a PEWS seed
+  # bundle. Two seed files are available:
+  #   - /seed/pews.json           - Alex Thompson only (hand-authored, ~10k lines)
+  #   - /seed/generated-pews.json - all 5 demo scenarios (generated from demo-data.js)
+  # The file is selected by the SEED_FILE env var (default: pews.json).
   # Idempotent at the resource level (PUT by id), so re-running is safe.
   seed:
     container_name: seed
-    image: docker.io/curlimages/curl:latest
+    image: docker.io/curlimages/curl:8.21.0
     # See patient-browser note: path rooted at project root, not override dir.
     volumes:
       - ./smart/fhir-sandbox/seed:/seed:ro
@@ -140,13 +144,14 @@ services:
         until curl -sf http://r4:8080/hapi-fhir-jpaserver/fhir/metadata -o /dev/null; do
           sleep 2
         done
-        echo "HAPI R4 is up. Posting PEWS seed bundle..."
+        echo "HAPI R4 is up. Posting seed bundle ($${SEED_FILE})..."
         curl -sf -X POST http://r4:8080/hapi-fhir-jpaserver/fhir \
           -H "Content-Type: application/fhir+json" \
-          --data @/seed/pews.json
+          --data @/seed/$${SEED_FILE}
         echo ""
-        echo "Seed complete. Alex Thompson (patient-alex) is now queryable at"
-        echo "  http://${HOST}:${R4_PORT}/hapi-fhir-jpaserver/fhir/Patient/patient-alex"
+        echo "Seed complete."
+    environment:
+      - SEED_FILE=${SEED_FILE:-pews.json}
     deploy:
       replicas: ${SEED_ENABLED:-1}
     restart: "no"
@@ -162,6 +167,8 @@ services:
   # go launch of the NPEWS app against the seeded Alex Thompson patient.
   smart-launcher:
     container_name: launcher
+    # NOTE: upstream smart-dev-sandbox only publishes a :latest tag (archived repo).
+    # No version tag available to pin against.
     image: docker.io/smartonfhir/smart-launcher:latest
     environment:
       - HOST=${HOST}

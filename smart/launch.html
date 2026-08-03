@@ -32,13 +32,11 @@
     // resources; openid + fhirUser lets us resolve the launch patient.
     const SCOPE = 'patient/*.read openid fhirUser';
 
-    console.log("before authorize");
     FHIR.oauth2.authorize({
       client_id: CLIENT_ID,
       scope: SCOPE,
       redirect_uri: REDIRECT_URI,
     });
-    console.log("after authorize");
   </script>
 </head>
 <body>
@@ -47,3 +45,4 @@
   </p>
 </body>
 </html>
+

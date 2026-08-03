@@ -1,10 +1,10 @@
-# Digital PEWS — local SMART-on-FHIR sandbox
+# Digital PEWS - local SMART-on-FHIR sandbox
 
 An optional extension of the project's docker-compose setup that brings up a
-local HAPI R4 FHIR server seeded with the Alex Thompson PEWS bundle, plus the
-SMART launcher, patient browser, FHIR viewer and a control panel. It is a
-trimmed, R4-only vendoring of the [rcpch/smart-dev-sandbox](https://github.com/rcpch/smart-dev-sandbox)
-fork, wired so the launcher's "Launch" button points straight at the NPEWS
+local HAPI R4 FHIR server seeded with PEWS observation data, plus the SMART
+launcher, patient browser, FHIR viewer and a control panel. It is a trimmed,
+R4-only vendoring of the [smart-on-fhir/smart-dev-sandbox](https://github.com/smart-on-fhir/smart-dev-sandbox)
+upstream, wired so the launcher's "Launch" button points straight at the NPEWS
 SMART app in `smart/`.
 
 This is **not** a clinical system. It is a development-only sandbox for
@@ -23,7 +23,7 @@ and starts:
 |---|---|---|
 | **SMART launcher** | <http://localhost:4013> | The front door. The control panel's "Launch" tile deep-links here with the NPEWS app + Alex Thompson prefilled. |
 | Control panel | <http://localhost:4000> | Landing page linking everything together. |
-| HAPI R4 FHIR | <http://localhost:4004/hapi-fhir-jpaserver/fhir> | Seeded with `seed/pews.json` on first boot. |
+| HAPI R4 FHIR | <http://localhost:4004/hapi-fhir-jpaserver/fhir> | Seeded on first boot (see below). |
 | Patient browser | <http://localhost:4012> | Browse/query seeded patients. |
 | FHIR viewer | <http://localhost:4011> | Explore raw FHIR resources. |
 | NPEWS SMART app | <http://localhost:9000/launch.html> | The `smart` service from the base compose file — the actual chart app. |
@@ -38,21 +38,32 @@ Press `Ctrl+C` to stop. `s/down smart` tears the sandbox stack down (the base
 
 ## What gets seeded
 
-`seed/pews.json` is a FHIR transaction bundle containing:
+Two seed files are available, selected by `SEED_FILE` in `.env`:
 
-- **Patient** `patient-alex` — Alex Thompson, DOB 2017-03-14 (5-12y band)
-- **Encounter** `encounter-alex` — in-progress inpatient encounter
-- **26 observation rows** spanning 2025-01-10T00:00:00 → 23:00:00, each with
-  the full PEWS vital set: RR, SpO₂, HR, BP (systolic/diastolic), CRT, AVPU,
-  temperature, respiratory distress, O₂ device, O₂ delivery
-- Two skipped observations exercising the `pews-skip-reason` extension
-  (one `unable`, one `procedure`) — the chart breaks the line over these per
-  spec U3.10
-- **Practitioner** `practitioner-smith` — Dr. Sarah Smith
+### `generated-pews.json` (default)
 
-The seed is idempotent (PUT by id), so re-running `s/up smart` after the
-volume is populated is safe — the `seed` container will repost the bundle
-and HAPI will upsert.
+Generated from `demo/scenarios.js` by `npm run generate:smart-seed`. Contains
+all 5 demo scenarios as separate patients:
+
+| Patient id | Scenario | Age band | Observations |
+|---|---|---|---|
+| `patient-5-12y-deterioration` | Alex Thompson | 5-12y | 26 rows, 24h deterioration + recovery |
+| `patient-0-11m-febrile-convulsion` | Zara Okafor | 0-11m | 18 rows, febrile convulsion |
+| `patient-1-4y-deterioration` | Jamie Osei | 1-4y | 18 rows, bronchiolitis + recovery |
+| `patient-13y-deterioration` | Morgan Clarke | 13+y | 18 rows, post-surgical deterioration |
+| `patient-birthday-crossing` | Sam Rivera | 1-4y -> 5-12y | Turns 5 at midnight mid-admission |
+
+This is the recommended seed for demonstrating the chart across all age bands.
+
+### `pews.json` (original hand-authored)
+
+Alex Thompson only (5-12y, 24h of observations). ~10k lines, vendored from the
+original PR. Contains a Practitioner resource (`practitioner-smith`) that the
+generated seed does not include.
+
+Both seeds are idempotent (PUT by id), so re-running `s/up smart` after the
+volume is populated is safe - the `seed` container will repost the bundle and
+HAPI will upsert.
 
 ## Resetting the FHIR database
 
@@ -82,8 +93,10 @@ To skip seeding on subsequent boots (the data is already in the volume), set
 | Path | Purpose |
 |---|---|
 | `docker-compose.smart.yml` | The compose override. Stacked on `docker-compose.yml` by `s/up smart`. |
-| `.env` | Port + image config (R4-only). |
-| `seed/pews.json` | Alex Thompson PEWS bundle (vendored verbatim from rcpch/smart-dev-sandbox). |
+| `.env` | Port + image config (R4-only). Copy from `.env.example`. |
+| `.env.example` | Template for `.env` with all required variables. |
+| `seed/pews.json` | Alex Thompson PEWS bundle (hand-authored, single patient). |
+| `seed/generated-pews.json` | All 5 demo scenarios (generated from `demo/scenarios.js` by `npm run generate:smart-seed`). |
 | `patient-browser/r4.tpl` | Patient-browser R4 config template (envsubst'd at container start). |
 | `www/template.html` | Control panel template (envsubst'd to `index.html` at container start). |
 | `www/style.css`, `www/favicon.png`, `www/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2` | Control panel static assets. |

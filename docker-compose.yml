@@ -26,8 +26,8 @@ services:
     volumes:
       - ./smart:/app
       # Mount the chart core so the SMART shell can import
-      # ./pews-chart/npews-chart.js + fhir-adapter.js same-origin. No CORS,
+      # ./chart/npews-chart.js + fhir-adapter.js same-origin. No CORS,
       # no build step, no file duplication. The chart core stays untouched.
-      - ./pews-chart:/app/pews-chart
+      - ./chart:/app/chart
     container_name: digital-pews-smart
     restart: unless-stopped
