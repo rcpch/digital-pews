@@ -23,7 +23,7 @@ Prefer semantic assertions for behaviour that does not require pixel comparison:
 - Initial render from `.data` assigned before and after connection.
 - Repeated `.data`, `.patient`, and `.observations` updates.
 - Scenario changes after the shell has already rendered.
-- Layout, show-values, zoom, quick-range, and colour-blind controls.
+- Layout, zoom, quick-range controls.
 - Layout locking, keyboard navigation, focus visibility, and 200% zoom.
 - Empty observations, missing optional fields, malformed required fields, and skipped values.
 - Connect, disconnect, and reconnect cleanup.
@@ -59,7 +59,7 @@ The minimum approved matrix covers:
 - Every age band: `0-11m`, `1-4y`, `5-12y`, and `13+y`.
 - Landscape, portrait, and mobile layouts.
 - Every supported theme registered by the demo, currently NHS, RCPCH, Slate, and Midnight.
-- Normal and colour-blind modes.
+- Normal mode and each supported theme.
 - Values shown and hidden where labels could affect layout.
 - Birthday crossing, skipped observations, oxygen-modality transition, rapid deterioration, and recovery.
 - The primary NHS reference comparison at `reference-sources/images/chart-5-12-years-1.png`.
@@ -99,7 +99,7 @@ Fetch each Action repository immediately before implementation to confirm the cu
 
 ## Completion Criteria
 
-- The interaction suite catches component remount/listener regressions and ineffective Canvas colour-blind mode.
+- The interaction suite catches component remount/listener regressions.
 - The approved smoke matrix covers every age band, layout, theme, mode, and named edge case.
 - A clean checkout can regenerate matching output through documented `s/` commands.
 - CI blocks unexplained interaction or screenshot differences.

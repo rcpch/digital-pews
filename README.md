@@ -47,7 +47,7 @@ The `chart/` component is loaded as ES modules (no build step):
     always computed, never hand-typed** - any score in the input data is ignored.
   - `age-band.js` - pure date maths for resolving the age band(s) an admission
     spans (supports seamless charting across a birthday boundary).
-- `styles.css` - all styling (colours, layout, colour-blind mode).
+- `styles.css` - all styling (colours, layout).
 
 Two entry points render the chart (both in `demo/`):
 

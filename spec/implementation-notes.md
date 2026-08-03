@@ -5,9 +5,9 @@ Clarifications of ambiguities discovered during implementation and testing; a li
 ## Decisions and clarifications
 
 <a id="RCPCH1.1"></a>
-### U1.1 / RCPCH 1.1 — Colour-blindness friendly design
+### U1.1 / RCPCH 1.1 — Accessible design
 
-The SPOT NPEWS specification requires a colour-blindness friendly design, but does not prescribe exactly how to implement it. [GOV.UK accessibility guidance](https://www.gov.uk/service-manual/helping-people-to-use-your-service/understanding-wcag) points to [WCAG version 2.2](https://www.w3.org/TR/wcag/). This project follows WCAG 2.2 where it does not conflict with the purpose and standards surrounding PEWS.
+The SPOT NPEWS specification requires a colour-blindness friendly design, but does not prescribe exactly how to implement it. [GOV.UK accessibility guidance](https://www.gov.uk/service-manual/helping-people-to-use-your-service/understanding-wcag) points to [WCAG version 2.2](https://www.w3.org/TR/wcag/). This project follows WCAG 2.2 where it does not conflict with the purpose and standards surrounding PEWS. The colour-blind toggle has been removed pending evidenced recommendations for what an accessible mode should look like in a PEWS chart; see roadmap R14.
 
 ### RCPCH 1.1 — Zoom must not affect PEWS score display
 
@@ -47,8 +47,8 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 ### PEWS bands and plotted observations
 
 - [ ] PEWS band colours match the mandated tokens and reference image: `--band-white` `#ffffff`, `--band-yellow` `#ffeda0`, `--band-orange` `#ffb366`, `--band-pink` `#ffb3d9`.
-- [ ] Colour-blind mode remains usable and higher contrast without changing the mandated default palette.
-- [ ] 5–12 years RR thresholds match the reference: pink 0–9 and 50+; orange 10–14 and 40–49; yellow 15–19 and 25–39; white 20–24 breaths/min.
+- [ ] Accessible rendering meets WCAG 2.2 AA contrast and target-size requirements without changing the mandated default palette.
+- [ ] 5-12 years RR thresholds match the reference: pink 0-9 and 50+; orange 10-14 and 40-49; yellow 15-19 and 25-39; white 20-24 breaths/min.
 - [ ] 5–12 years HR thresholds match the reference: pink 0–59 and 160+; orange 60–69 and 140–159; yellow 70–79 and 120–139; white 80–119 bpm.
 - [ ] Observation dots and trend lines are visible at the correct plotted positions.
 - [ ] Trend lines break over skipped observations.
@@ -65,5 +65,5 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 - [ ] Escalation banner appears when an escalation level exists.
 - [ ] Escalation banner displays the correct level, PEWS score, action text and colour.
 - [ ] Zoom and quick-range controls do not change the banner or sticky-footer score; both use the globally latest observation set.
-- [ ] Toolbar controls work: zoom, quick ranges, show values, colour-blind mode and layout mode.
+- [ ] Toolbar controls work: zoom, quick ranges.
 - [ ] Landscape, portrait and mobile layouts remain visually coherent.

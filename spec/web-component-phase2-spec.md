@@ -19,7 +19,7 @@ Phase 1 browser correctness work in roadmap R13-R19 must land before or with Pha
 - The clinical band and escalation colours remain unchanged.
 - A skipped observation breaks the corresponding trend line.
 - The native `chart/` source remains directly runnable without bundling or transpilation.
-- Colour-blind mode, responsive layouts, host font overrides, and the NHS reference-chart fidelity remain supported.
+- Responsive layouts, host font overrides, and NHS reference-chart fidelity remain supported.
 - Instance isolation must not prevent hosts from setting documented CSS custom properties on `<npews-chart>`.
 
 ## R25 - Shadow DOM Isolation
@@ -30,7 +30,7 @@ Acceptance criteria:
 
 - DOM queries used by the renderer are scoped to the component root rather than `document`.
 - Host-page selectors cannot restyle internal chart structure accidentally, and component selectors do not leak into the host page.
-- Documented CSS custom properties inherit through the host and are read from the effective component scope, including colour-blind values used by Canvas.
+- Documented CSS custom properties inherit through the host and are read from the effective component scope by Canvas.
 - Existing host pages that set the `.data`, `.patient`, or `.observations` properties continue to work.
 - Browser tests demonstrate isolation in both directions with deliberately conflicting host styles.
 
@@ -99,7 +99,7 @@ Phase 2 is complete only when:
 - Existing unit and conformance tests remain green.
 - Browser lifecycle and multiple-instance tests pass.
 - The approved visual baseline matrix shows no unexplained clinical rendering changes.
-- Keyboard, 200% zoom, mobile, tablet, desktop, and colour-blind checks pass.
+- Keyboard, 200% zoom, mobile, tablet, and desktop checks pass.
 - Package-consumer fixtures pass against the packed artifact rather than local source imports.
 - Any intentional visual or API change is documented in the decision log and linked to its clinical-safety review where applicable.
 

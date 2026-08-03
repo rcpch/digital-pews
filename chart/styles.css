@@ -1,7 +1,6 @@
 /* ============================================================
    NPEWS Chart UI - Styles
    Colour tokens follow spec/npews-scoring.md and spec/escalation.md
-   Colour-blind friendly mode via .cb-mode class on <body>
    ============================================================ */
 
 /* --- Design tokens ----------------------------------------- */
@@ -31,6 +30,12 @@
   --chart-dot-r:    5px;
   --chart-skip-stroke: #b1b4b6;
 
+  /* Chart structure labels (DOM cells, not canvas). Themeable chrome - see the
+     "Optional chrome themes" block below. Defaults match the NHS paper chart. */
+  --section-label-bg:   #003087;  /* col 1, deep NHS navy */
+  --param-label-bg:     #005eb8;  /* col 2, NHS blue */
+  --param-label-bg-cat: #004f9f;  /* col 2, categorical rows (slightly darker) */
+
   /* UI chrome */
   --page-bg:        #f3f2f1;
   --surface:        #ffffff;
@@ -48,15 +53,60 @@
   --font-mono: 'Courier New', Courier, monospace;
 }
 
-/* Colour-blind friendly overrides - higher contrast versions of the PDF palette */
-body.cb-mode {
-  --band-yellow: #e8d400;
-  --band-orange: #cc6200;
-  --band-pink:   #99003a;
-  --esc-medium:    #e69900;
-  --esc-medium-text: #ffffff;
-  --esc-high:      #cc6600;
-  --esc-emergency: #8b0000;
+/* --- Optional chrome themes ------------------------------------------------
+   Themes restyle ONLY the chart *chrome*: the frame, section/parameter label
+   cells, trend line/dots and background/border/text tokens. They deliberately
+   NEVER override the clinically-mandated PEWS band (--band-*) or escalation
+   (--esc-*) colours. The canvas reads custom properties from
+   document.documentElement at render time, so the theme class is applied to
+   <html>. Default (no class) = the NHS palette defined in :root.
+   Adding a theme here must not touch --band-* / --esc-*.                     */
+html.theme-rcpch {
+  --page-bg:        #f3f3f3;   /* RCPCH lightest grey */
+  --surface:        #ffffff;
+  --border:         #d9d9d9;   /* RCPCH light grey */
+  --text-primary:   #191919;   /* RCPCH charcoal dark */
+  --text-secondary: #4d4d4d;   /* RCPCH charcoal */
+  --focus-ring:     #11a7f2;   /* RCPCH bright blue */
+  --section-label-bg:   #0d0d58;   /* RCPCH dark blue */
+  --param-label-bg:     #3366cc;   /* RCPCH strong blue */
+  --param-label-bg-cat: #2b57ad;
+  --chart-line:     #0d0d58;
+  --chart-dot:      #0d0d58;
+  --chart-grid:     #e4e4ef;
+  --chart-bg:       #fbfbfd;
+}
+
+html.theme-slate {
+  --page-bg:        #e8eaed;
+  --surface:        #ffffff;
+  --border:         #b3b3b3;   /* RCPCH mid grey */
+  --text-primary:   #191919;
+  --text-secondary: #4d4d4d;
+  --focus-ring:     #ffdd00;   /* keep NHS yellow for contrast vs dark chrome */
+  --section-label-bg:   #191919;   /* charcoal dark */
+  --param-label-bg:     #4d4d4d;   /* charcoal */
+  --param-label-bg-cat: #3f3f3f;
+  --chart-line:     #191919;
+  --chart-dot:      #191919;
+  --chart-grid:     #d9d9d9;
+  --chart-bg:       #f7f7f7;
+}
+
+html.theme-midnight {
+  --page-bg:        #191919;   /* dark frame, light chart interior */
+  --surface:        #262a2e;
+  --border:         #4d4d4d;
+  --text-primary:   #f3f3f3;
+  --text-secondary: #b3b3b3;
+  --focus-ring:     #11a7f2;
+  --section-label-bg:   #0d0d58;   /* RCPCH dark blue */
+  --param-label-bg:     #12406b;
+  --param-label-bg-cat: #0e3358;
+  --chart-line:     #0d0d58;   /* dark line stays legible on the light chart */
+  --chart-dot:      #0d0d58;
+  --chart-grid:     #dee0e2;
+  --chart-bg:       #f8f8f8;    /* chart stays light so pastel bands read true */
 }
 
 /* --- Reset & base ------------------------------------------ */
@@ -234,23 +284,6 @@ npews-chart {
 
 .toolbar__spacer { flex: 1; }
 
-/* Colour-blind toggle pill */
-.cb-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  user-select: none;
-}
-
-.cb-toggle input[type=checkbox] {
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-}
-
 /* --- Charts container -------------------------------------- */
 .charts-layout {
   max-width: 1400px;
@@ -277,7 +310,7 @@ npews-chart {
 
 /* --- Section label cell (column 1) ------------------------ */
 .chart-grid__section {
-  background: #003087;   /* deep NHS navy */
+  background: var(--section-label-bg);   /* deep NHS navy */
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -304,7 +337,7 @@ npews-chart {
 
 /* --- Label cell (column 1) --------------------------------- */
 .chart-grid__label {
-  background: #005eb8;   /* NHS blue */
+  background: var(--param-label-bg);   /* NHS blue */
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -316,7 +349,7 @@ npews-chart {
 }
 
 .chart-grid__label--categorical {
-  background: #004f9f;   /* slightly darker blue for categorical rows */
+  background: var(--param-label-bg-cat);   /* slightly darker blue for categorical rows */
   justify-content: center;
   padding: 0 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -367,7 +400,7 @@ npews-chart {
 
 /* Time axis row - dedicated label strip below all chart rows */
 .chart-grid__label--time {
-  background: #004f9f;
+  background: var(--param-label-bg-cat);
   border-bottom: none;
 }
 
@@ -410,12 +443,12 @@ canvas.chart-canvas {
 
 /* --- PEWS total score row (canvas, inside chart grid) ------ */
 .chart-grid__section--pews {
-  background: #003087;
+  background: var(--section-label-bg);
   border-bottom: none;
 }
 
 .chart-grid__label--pews {
-  background: #005eb8;
+  background: var(--param-label-bg);
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -668,6 +701,3 @@ body[data-layout="mobile"] .sticky-footer__score {
 
 /* --- Lock: hide the layout toggle when implementer sets      */
 /*     data-lock-layout on <body>                              */
-body[data-lock-layout] .layout-toggle-group {
-  display: none;
-}

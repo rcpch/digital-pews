@@ -26,22 +26,22 @@ Clinical correctness, safety evidence, and conformance take precedence over pack
 
 ## P1 - Browser And Visual Safety Evidence
 
-- [ ] **R13 - Make controls survive component updates.** Remove module-global one-time listener state or otherwise ensure layout, values, zoom, range, and colour-blind controls still work after `.data` is reassigned or the component reconnects.
-- [~] **R14 - Complete colour-blind rendering.** DOM overrides exist, but Canvas colour lookup must read the effective component/body values and receive an automated browser assertion.
+- [ ] **R13 - Make controls survive component updates.** Remove module-global one-time listener state or otherwise ensure zoom and range controls still work after `.data` is reassigned or the component reconnects.
+- [ ] **R14 - Establish accessible rendering.** Ensure Canvas colour lookup reads from the effective component scope and that rendering meets WCAG 2.2 AA contrast and target-size requirements; add an automated browser assertion.
 - [ ] **R15 - Add browser interaction tests.** Cover initial render, repeated `.data` assignment, scenario switching, connect/disconnect cycles, controls, layout locking, empty input, malformed input, keyboard use, and 200% zoom.
 - [ ] **R16 - Establish deterministic visual regression testing.** Add Playwright with controlled fonts, timezone, data, viewport, and device scale, without requiring Storybook or a hosted visual-testing service; see the [Visual Regression Testing Plan](./visual-regression-testing-plan.md).
-- [ ] **R17 - Approve the visual baseline matrix.** Capture all age bands, landscape/portrait/mobile layouts, supported themes, colour-blind mode, birthday crossing, skipped values, and oxygen-modality changes against the NHS reference chart.
+- [ ] **R17 - Approve the visual baseline matrix.** Capture all age bands, landscape/portrait/mobile layouts, supported themes, birthday crossing, skipped values, and oxygen-modality changes against the NHS reference chart.
 - [ ] **R18 - Add visual CI and change governance.** Run browser tests on pull requests and document who approves intentional clinical visual changes and baseline updates.
 - [ ] **R19 - Reuse scenarios as automated fixtures.** Import the scenario catalogue into browser and regression checks instead of maintaining separate test data.
 - [~] **R40 - Make the local development experience reliable.** `s/up` serves the current demo, but a clean checkout must have one documented setup path, reproducible locked serving dependencies, useful startup errors, automatic browser opening, and a straightforward way to run tests and scoring-generation checks.
-- [~] **R41 - Complete the clinical UI quality pass.** Preserve fidelity to the NHS chart while making the interface coherent, readable, responsive, accessible, and professionally finished across realistic patient data, supported themes, colour-blind mode, and mobile/tablet/desktop layouts; verify through human review and R15-R18 rather than subjective polish alone.
+- [~] **R41 - Complete the clinical UI quality pass.** Preserve fidelity to the NHS chart while making the interface coherent, readable, responsive, accessible, and professionally finished across realistic patient data, supported themes, and mobile/tablet/desktop layouts; verify through human review and R15-R18 rather than subjective polish alone.
 
 ## P2 - Component API And Configuration
 
 - [ ] **R20 - Decide which clinical configuration may be overridden.** Age-band bounds and scoring thresholds are already data-driven internally; arbitrary host overrides require an explicit clinical-governance decision and canonical defaults must remain authoritative.
 - [~] **R21 - Centralise escalation configuration.** Presentation metadata is centralised, but score boundaries and non-score trigger policy are not yet represented by one canonical runtime structure.
 - [~] **R22 - Complete respiratory-support handling.** Known support codes are scored; configurable additions, national-code governance, and clinically useful device-change display remain incomplete.
-- [ ] **R23 - Define typed presentation options.** Keep options separate from `Patient` and `Observation`, covering initial layout, colour-blind mode, show-values state, time window, and zoom.
+- [ ] **R23 - Define typed presentation options.** Keep options separate from `Patient` and `Observation`, covering initial layout, show-values state, time window, and zoom.
 - [ ] **R24 - Define branding and explanatory-content extension points.** Separate demo-owner branding, embedding-organisation branding, NHS identity approval, and host-supplied helper text.
 
 ## P3 - Web Component Phase 2

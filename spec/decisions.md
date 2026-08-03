@@ -91,10 +91,7 @@ observation set, never the latest observation visible in the current zoom window
 [`implementation-notes.md`](./implementation-notes.md#RCPCH1.1).
 
 ## D3 — Colour-blindness: follow WCAG 2.2 (RCPCH 1.1)
-**Implementation.** SPOT NPEWS mandates a colour-blindness-friendly design without prescribing
-how; we follow WCAG 2.2 where it does not conflict with PEWS colour semantics. The mandated
-band/escalation palette is never changed; `.cb-mode` supplies higher-contrast overrides. See
-[`implementation-notes.md`](./implementation-notes.md).
+**Implementation.** SPOT NPEWS mandates a colour-blindness-friendly design without prescribing how; we follow WCAG 2.2 where it does not conflict with PEWS colour semantics. The mandated band/escalation palette is never changed. The `.cb-mode` toggle and its CSS overrides have been removed because Canvas rendering did not read them; an evidenced accessible mode will be reintroduced under roadmap R14. See [`implementation-notes.md`](./implementation-notes.md).
 
 ## D2 — Dependencies current + Dependabot per house style
 **Session.** All dependencies were upgraded to latest and Dependabot was configured following
