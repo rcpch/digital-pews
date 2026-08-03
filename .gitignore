@@ -27,6 +27,8 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+# Keep .env.example files tracked
+!**/.env.example
 
 # Test output (screenshots etc - not source)
 test-output/screenshots/

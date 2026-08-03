@@ -16,9 +16,16 @@ s/up
 
 # Equivalent - start only the demo app
 s/up demo
+
+# Start the SMART-on-FHIR sandbox (NPEWS app + local HAPI R4 FHIR server
+# seeded with demo patient data + SMART launcher, patient browser,
+# FHIR viewer, control panel). Opens the launcher with the NPEWS
+# app prefilled - one click lands you on the chart.
+# See smart/README.md for what SMART-on-FHIR is and how to use it.
+s/up smart
 ```
 
-Press Ctrl+C to stop the services. Docker Compose will automatically clean up containers.
+Press Ctrl+C to stop the services. Docker Compose will automatically clean up containers. `s/down smart` tears down the FHIR sandbox stack; `s/down` (no arg) tears down everything.
 
 ### Demo app
 

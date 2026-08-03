@@ -14,3 +14,20 @@ services:
       - ./chart:/app/chart
     container_name: digital-pews-demo
     restart: unless-stopped
+
+  # SMART-on-FHIR shell server (smart/) — separate port so the OAuth
+  # redirect_uri stays stable and the chart demo container is untouched.
+  smart:
+    image: node:alpine
+    working_dir: /app
+    command: sh -c "npm install -g live-server && live-server --port=9000 --host=0.0.0.0 --no-browser"
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./smart:/app
+      # Mount the chart core so the SMART shell can import
+      # ./chart/npews-chart.js + fhir-adapter.js same-origin. No CORS,
+      # no build step, no file duplication. The chart core stays untouched.
+      - ./chart:/app/chart
+    container_name: digital-pews-smart
+    restart: unless-stopped

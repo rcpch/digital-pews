@@ -1,0 +1,75 @@
+/* ============================================================
+   SMART-on-FHIR shell — minimal styling using the project's
+   design tokens (mirrors pews-chart/styles.css tokens so the
+   SMART shell matches the chart's visual language).
+   ============================================================ */
+
+:root {
+  /* NHS-style chrome tokens (kept in sync with pews-chart/styles.css) */
+  --page-bg:        #f3f2f1;
+  --surface:        #ffffff;
+  --border:         #b1b4b6;
+  --text-primary:   #0b0c0c;
+  --text-secondary: #505a5f;
+  --focus-ring:     #ffdd00;
+
+  /* Section header colours (mirrors the chart's section labels) */
+  --section-bg:     #003087; /* NHS navy */
+  --section-text:   #ffffff;
+
+  --font: 'Lato', 'Trebuchet MS', Helvetica, Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--page-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header -------------------------------------------------- */
+.smart-header {
+  background: var(--section-bg);
+  color: var(--section-text);
+  padding: 0.75rem 1.5rem;
+}
+.smart-header h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* --- Main ---------------------------------------------------- */
+.smart-main {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  max-width: 100rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* --- Chart status / errors ---------------------------------- */
+/* Hidden once the chart has data; visible for loading + error states. */
+.chart-status {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  padding: 1rem;
+  text-align: center;
+}
+.chart-status--hidden { display: none; }
+.chart-status--error {
+  color: var(--text-primary);
+  background: #ffeda0; /* NHS yellow band — soft warning */
+  border-left: 4px solid #d4351c;
+  text-align: left;
+}
+.chart-status--empty {
+  color: var(--text-primary);
+  background: #f3f2f1;
+  border: 1px solid var(--border);
+  text-align: left;
+}

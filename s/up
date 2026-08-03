@@ -9,10 +9,24 @@ cd "$ROOT"
 
 SERVICE="${1:-}"
 
+# The SMART sandbox override is optional — it is only stacked on top of the
+# base docker-compose.yml when the user asks for `s/up smart`. Base `s/up`
+# and `s/up demo` never pull the HAPI image.
+SMART_OVERRIDE="smart/fhir-sandbox/docker-compose.smart.yml"
+
 if [ ! -f "docker-compose.yml" ]; then
   echo "Error: docker-compose.yml not found at $ROOT" >&2
   exit 1
 fi
+
+# Compose command builder. For the `smart` profile we stack the override.
+compose_cmd() {
+  if [ "$SERVICE" = "smart" ] && [ -f "$SMART_OVERRIDE" ]; then
+    echo "docker compose -f docker-compose.yml -f $SMART_OVERRIDE --env-file smart/fhir-sandbox/.env"
+  else
+    echo "docker compose"
+  fi
+}
 
 # Check if docker compose is available
 if ! command -v docker &>/dev/null; then
@@ -24,7 +38,9 @@ fi
 cleanup() {
   echo ""
   echo "Stopping services..."
-  if [ -n "$SERVICE" ]; then
+  if [ "$SERVICE" = "smart" ] && [ -f "$SMART_OVERRIDE" ]; then
+    $(compose_cmd) down
+  elif [ -n "$SERVICE" ]; then
     docker compose down "$SERVICE"
   else
     docker compose down
@@ -72,14 +88,26 @@ case "$SERVICE" in
     wait_and_open "http://localhost:8000/demo.html"
     docker compose up demo
     ;;
+  smart)
+    if [ ! -f "$SMART_OVERRIDE" ]; then
+      echo "Error: SMART sandbox override not found at $ROOT/$SMART_OVERRIDE" >&2
+      exit 1
+    fi
+    # Launch URL prefilled into the SMART launcher: NPEWS app + R4 + Alex Thompson.
+    LAUNCHER_URL="http://localhost:4013/?launch_uri=http%3A%2F%2Flocalhost%3A9000%2Flaunch.html&fhir_ver=4&patient=patient-alex&sim_ehr=1&select_encounter=1"
+    echo "Starting SMART sandbox: NPEWS app (:9000), HAPI R4 (:4004), launcher (:4013), patient browser (:4012), FHIR viewer (:4011), control panel (:4000)"
+    echo "Opening SMART launcher (NPEWS app prefilled): $LAUNCHER_URL"
+    wait_and_open "$LAUNCHER_URL"
+    $(compose_cmd) up smart smart-launcher r4 seed patient-browser fhir-viewer index
+    ;;
   "")
     echo "Starting demo app — harness at http://localhost:8000/demo.html"
     wait_and_open "http://localhost:8000/demo.html"
-    docker compose up
+    docker compose up demo
     ;;
   *)
     echo "Error: unknown service '$SERVICE'" >&2
-    echo "Available services: demo" >&2
+    echo "Available services: demo, smart" >&2
     exit 1
     ;;
 esac

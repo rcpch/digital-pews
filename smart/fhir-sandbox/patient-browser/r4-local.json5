@@ -1,0 +1,17 @@
+{
+    server: {
+        type: 'R4',
+        url: 'http://localhost:4004/hapi-fhir-jpaserver/fhir',
+        tags: [],
+    },
+    patientsPerPage: 25,
+    timeout: 20000,
+    renderSelectedOnly: false,
+    fhirViewer: {
+        enabled: true,
+        url: 'localhost:4011/index.html',
+        param: 'url',
+    },
+    outputMode: 'id-list',
+    submitStrategy: 'manual',
+}

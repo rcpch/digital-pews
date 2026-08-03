@@ -8,7 +8,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "generate:scoring": "node scripts/generate-scoring.mjs",
-    "generate:scoring:check": "node scripts/generate-scoring.mjs --check"
+    "generate:scoring:check": "node scripts/generate-scoring.mjs --check",
+    "generate:smart-seed": "node scripts/generate-smart-seed.mjs"
   },
   "devDependencies": {
     "vitest": "^4.1.9"

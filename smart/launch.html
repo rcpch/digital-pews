@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPEWS — SMART on FHIR launch</title>
+  <!--
+    EHR launch entry point.
+
+    A SMART-on-FHIR launch begins when the EHR opens this page inside an
+    iframe with two query parameters:
+      ?iss=<FHIR base URL>&launch=<launch id issued by the EHR>
+
+    fhir-client.js reads those parameters, redirects to the EHR's
+    authorisation endpoint, and on callback lands on index.html with
+    `?code=...` in the URL. We load fhirclient v2 from the canonical
+    CDN (unpkg). Pin the version when you go to production.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/fhirclient@2.5.0/build/fhir-client.min.js"></script>
+  <script type="text/javascript">
+    // The SMART client id for this app. Replace with your real client id
+    // registered with the EHR's OAuth server. For local dev against a
+    // public sandbox (e.g. https://launch.smarthealthit.org) the literal
+    // 'example-npews-smart-app' is fine.
+    const CLIENT_ID = 'example-npews-smart-app';
+
+    // The page fhirclient should redirect to after the OAuth code is
+    // exchanged. Lives next to this file.
+    const REDIRECT_URI = new URL('index.html', window.location.href).href;
+
+    // Scopes. patient/*.read gives us read access to the patient's
+    // resources; openid + fhirUser lets us resolve the launch patient.
+    const SCOPE = 'patient/*.read openid fhirUser';
+
+    FHIR.oauth2.authorize({
+      client_id: CLIENT_ID,
+      scope: SCOPE,
+      redirect_uri: REDIRECT_URI,
+    });
+  </script>
+</head>
+<body>
+  <p style="font-family: sans-serif; padding: 1rem;">
+    Redirecting to the EHR authorisation page…
+  </p>
+</body>
+</html>
+

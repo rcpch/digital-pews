@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPEWS — SMART on FHIR</title>
+  <link rel="stylesheet" href="smart.css" />
+  <!--
+    Post-redirect landing page. fhirclient.js exchanges the OAuth code
+    for an access token, then smart.js fetches the launch patient's
+    observations and renders the NPEWS chart.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/fhirclient@2.5.0/build/fhir-client.min.js"></script>
+  <!--
+    Register the <npews-chart> custom element. Mounted same-origin via
+    the docker-compose volume (./chart -> /app/chart) so the
+    element can self-provision its stylesheet/font relative to its own
+    module URL. No chart CSS <link> needed here.
+  -->
+  <script type="module" src="./chart/npews-chart.js"></script>
+</head>
+<body data-layout="landscape">
+  <header class="smart-header">
+    <h1>NPEWS — SMART on FHIR</h1>
+  </header>
+
+  <main class="smart-main">
+    <!--
+      The chart element. smart.js sets .data once the SMART session is
+      ready and the patient's observations have been fetched + mapped.
+      Error / empty states are rendered into #chart-status below.
+    -->
+    <npews-chart id="chart"></npews-chart>
+
+    <p id="chart-status" class="chart-status chart-status--loading" aria-live="polite">
+      Initialising SMART session…
+    </p>
+  </main>
+
+  <script type="module" src="smart.js"></script>
+</body>
+</html>
