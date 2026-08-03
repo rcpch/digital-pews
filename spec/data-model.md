@@ -9,7 +9,7 @@ Derived/config structures are documented where they live:
 
 - **Scoring thresholds** → [`npews-scoring-spec.json`](./npews-scoring-spec.json) (source
   of truth) and the [generated reference table](./npews-scoring-tables.generated.md).
-- **Age bands, bounds and escalation metadata** → `pews-chart/npews-scoring-config.js`.
+- **Age bands, bounds and escalation metadata** → `chart/npews-scoring-config.js`.
 - **Escalation levels, triggers and actions** → [`escalation.md`](./escalation.md).
 
 ---
@@ -36,7 +36,7 @@ Derived/config structures are documented where they live:
 
 - `dob` is the **authoritative** input for age-band selection. The component resolves the
   applicable band per observation from `dob` + the observation timestamp using **calendar
-  completed years** (`pews-chart/age-band.js`), so the boundary lands exactly on the 1st /
+  completed years** (`chart/age-band.js`), so the boundary lands exactly on the 1st /
   5th / 13th birthday. Day-based approximations (`days/365.25`) are deliberately avoided
   because they mis-fire around leap-year birthdays.
 - `ageBand` is a **display/fallback hint only** — used only when `dob` is missing. It must

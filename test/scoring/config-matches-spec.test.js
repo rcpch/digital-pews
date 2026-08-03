@@ -1,7 +1,7 @@
 /**
  * Config-vs-spec drift guard
  *
- * Asserts that the numeric scoring bands in pews-chart/npews-scoring-config.js
+ * Asserts that the numeric scoring bands in chart/npews-scoring-config.js
  * are exactly what the canonical source of truth (spec/npews-scoring-spec.json)
  * generates. There is no second hand-maintained copy of the thresholds: the
  * expected values are built from the JSON via the same pure builder the code
@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { AGE_BANDS, AGE_BAND_BOUNDS } from '../../pews-chart/npews-scoring-config.js';
+import { AGE_BANDS, AGE_BAND_BOUNDS } from '../../chart/npews-scoring-config.js';
 import { loadSpec, buildScoringBands, buildAgeBandBounds, PARAM_ORDER } from '../../scripts/scoring-spec.mjs';
 
 const spec = loadSpec();

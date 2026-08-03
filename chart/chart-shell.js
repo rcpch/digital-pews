@@ -49,24 +49,6 @@ export const CHART_SHELL_HTML = `
 
       <div class="toolbar__spacer"></div>
 
-      <!-- Layout toggle (hidden when data-lock-layout is set on <body>) -->
-      <div class="toolbar__group layout-toggle-group" aria-label="Layout">
-        <span class="toolbar__label">Layout</span>
-        <button class="btn btn--icon" id="btn-layout-landscape" title="Landscape" aria-label="Landscape layout" aria-pressed="false">&#9644;</button>
-        <button class="btn btn--icon" id="btn-layout-portrait"  title="Portrait"  aria-label="Portrait layout"  aria-pressed="false">&#9645;</button>
-        <button class="btn btn--icon" id="btn-layout-mobile"    title="Mobile"    aria-label="Mobile layout"    aria-pressed="false">&#9647;</button>
-      </div>
-
-      <label class="cb-toggle" title="Always show exact observation values on chart">
-        <input type="checkbox" id="toggle-values" checked />
-        Show values
-      </label>
-
-      <label class="cb-toggle" title="Colour-blind friendly mode">
-        <input type="checkbox" id="toggle-cb" />
-        Colour-blind mode
-      </label>
-
     </div>
   </div>
 

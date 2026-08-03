@@ -11,7 +11,6 @@
    - Show exact values on hover (U3.5 / U3.6)
    - Zoom in/out (U3.1) and quick-range buttons (U3.3)
    - Jump to present (U3.12)
-   - Colour-blind mode (U1.1)
    - Compute the PEWS score for every observation via the scorer (single
      source of truth) and select the age band per observation from the
      patient's date of birth, joining charts seamlessly across a birthday.
@@ -493,7 +492,6 @@ function renderCategoricalRow(canvas, config) {
  *   unit: string for label
  *   viewStart: timestamp ms - left edge
  *   viewEnd:   timestamp ms - right edge
- *   showValues: bool
  *   bpMode: bool - if true, use BP special rendering
  *   isO2Delivery: bool - handle % / L/min modality breaks
  *   rightLabels: array - optional right Y-axis labels [{value, label}, ...]
@@ -502,7 +500,7 @@ function renderCategoricalRow(canvas, config) {
 function renderChart(canvas, config) {
   const {
     observations, field, bandSegments, yMin, yMax, step, unit,
-    viewStart, viewEnd, showValues, bpMode, isO2Delivery,
+    viewStart, viewEnd, bpMode, isO2Delivery,
   } = config;
 
   const dpr = window.devicePixelRatio || 1;
@@ -636,7 +634,7 @@ function renderChart(canvas, config) {
       ctx.restore();
     });
 
-    if (showValues) {
+    {
       ctx.save();
       ctx.font = chartFont('10px', 'bold');
       ctx.textAlign = 'center';
@@ -681,7 +679,7 @@ function renderChart(canvas, config) {
 
   drawTrendLine(ctx, segments);
   drawDots(ctx, allPoints);
-  if (showValues) drawValueLabels(ctx, allPoints, unit);
+  drawValueLabels(ctx, allPoints, unit);
 }
 
 // ---- State & view controls ---------------------------------
@@ -690,7 +688,6 @@ let viewState = {
   // ms timestamps for visible window
   start: null,
   end:   null,
-  showValues: true,
 };
 
 // ---- Layout helpers ----------------------------------------
@@ -1306,7 +1303,6 @@ function renderAll() {
         unit:         def.unit,
         viewStart:    viewState.start,
         viewEnd:      viewState.end,
-        showValues:   viewState.showValues,
         bpMode:       def.bpMode || false,
         isO2Delivery: def.isO2Delivery || false,
         rightLabels:  def.rightLabels || null,
@@ -1487,24 +1483,12 @@ function applyLayout(layout, persist) {
   if (persist) {
     try { localStorage.setItem(LAYOUT_STORAGE_KEY, layout); } catch (_) {}
   }
-  updateLayoutBtns(layout);
   renderAll();
-}
-
-function updateLayoutBtns(active) {
-  ['landscape', 'portrait', 'mobile'].forEach(id => {
-    const btn = document.getElementById(`btn-layout-${id}`);
-    if (!btn) return;
-    btn.classList.toggle('btn--active', id === active);
-    btn.setAttribute('aria-pressed', String(id === active));
-  });
 }
 
 function initLayout() {
   // If implementer has locked the layout, respect that and do nothing else
   if ('lockLayout' in document.body.dataset) {
-    // data-layout must already be set in HTML by the implementer
-    updateLayoutBtns(getLayout());
     return;
   }
 
@@ -1550,25 +1534,7 @@ function wireToolbar() {
     updateActiveBtn('present');
   });
 
-  // Show values toggle
-  const showValuesToggle = document.getElementById('toggle-values');
-  showValuesToggle?.addEventListener('change', e => {
-    viewState.showValues = e.target.checked;
-    renderAll();
-  });
 
-  // Colour-blind toggle
-  document.getElementById('toggle-cb')?.addEventListener('change', e => {
-    document.body.classList.toggle('cb-mode', e.target.checked);
-    renderAll();
-  });
-
-  // Layout toggle buttons (no-op if data-lock-layout is set - buttons are hidden by CSS anyway)
-  ['landscape', 'portrait', 'mobile'].forEach(layout => {
-    document.getElementById(`btn-layout-${layout}`)?.addEventListener('click', () => {
-      applyLayout(layout, true);
-    });
-  });
 }
 
 function updateActiveBtn(active) {

@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import {
   fromFhirBundleToChartModel,
   fromChartModelToFhirBundle,
-} from '../../pews-chart/fhir-adapter.js';
+} from '../../chart/fhir-adapter.js';
 import stableNormal from './fixtures/stable-normal-5-12y.json';
 import skipReasons from './fixtures/skip-reasons-0-11m.json';
 import oxygenModality from './fixtures/oxygen-modality-transition.json';

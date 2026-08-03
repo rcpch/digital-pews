@@ -30,7 +30,7 @@ Press Ctrl+C to stop the services. Docker Compose will automatically clean up co
 
 - Serves at <http://localhost:8000>
 - Uses live-server for automatic reload
-- Volume-mounted from `pews-chart/`
+- Volume-mounted from `chart/` and `demo/`
 - Open <http://localhost:8000/demo.html> for the demonstration harness (left
   sidebar of example patients); <http://localhost:8000/> renders a single chart.
 
@@ -41,7 +41,7 @@ list of observations it renders into a fixed set of DOM hooks. Data is kept
 separate from presentation - the chart never carries a specific patient in its
 markup, and it computes all PEWS scores itself (see below).
 
-`pews-chart/` is loaded as ES modules (no build step):
+The `chart/` component is loaded as ES modules (no build step):
 
 - `chart-shell.js` - the shared chart DOM scaffold (`mountChartShell(host)`), used
   by both the standalone page and the demo harness so they can't drift.
@@ -53,13 +53,13 @@ markup, and it computes all PEWS scores itself (see below).
     always computed, never hand-typed** - any score in the input data is ignored.
   - `age-band.js` - pure date maths for resolving the age band(s) an admission
     spans (supports seamless charting across a birthday boundary).
-- `styles.css` - all styling (colours, layout, colour-blind mode).
+- `styles.css` - all styling (colours, layout).
 
-Two entry points render the chart:
+Two entry points render the chart (both in `demo/`):
 
-- `index.html` - a single standalone chart. Loads `demo-data.js` (which publishes
+- `demo/index.html` - a single standalone chart. Loads `demo-data.js` (which publishes
   `window.PATIENT` / `window.OBSERVATIONS`), mounts the shell, then calls `render`.
-- `demo.html` - the **demonstration harness**. A left sidebar lists example
+- `demo/demo.html` - the **demonstration harness**. A left sidebar lists example
   patients from `scenarios.js`; selecting one mounts a fresh shell and passes the
   scenario to `render({ patient, observations })`. This replaced Storybook.
 
@@ -95,7 +95,7 @@ fonts, so a consumer only loads one module and feeds it a JSON object:
   rich object. Convenience setters `.patient` and `.observations` are also available.
 - **Scores are always computed** from the patient's date of birth and the raw
   observations — any score in the input is ignored (single source of truth).
-- See `pews-chart/embed-example.html` for a minimal, self-contained drop-in
+- See `demo/embed-example.html` for a minimal, self-contained drop-in
   (<http://localhost:8000/embed-example.html>). It links no chart stylesheet and
   calls no rendering API — it just loads the module and sets `.data`.
 
@@ -127,7 +127,7 @@ Four age bands are defined, each with different y-axis ranges, scoring threshold
 | `5-12y` | 5-12 Years | Yellow |
 | `13+y` | 13+ Years | Grey |
 
-All four age bands have demonstration scenarios in `pews-chart/scenarios.js`
+All four age bands have demonstration scenarios in `demo/scenarios.js`
 (shown in the `demo.html` sidebar), including a birthday-crossing scenario where a
 child turns 5 mid-admission and the chart seamlessly joins the `1-4y` and `5-12y`
 bands. `demo-data.js` holds the two full-day datasets reused by those scenarios.
@@ -153,7 +153,7 @@ Canvas text rendering uses the `chartFont(size, weight)` helper in `chart.js`, w
 ## Adding a demo scenario
 
 Demonstration scenarios (the example patients in the `demo.html` sidebar) live in
-`pews-chart/scenarios.js`. Add a plain object to the `SCENARIOS` array:
+`demo/scenarios.js`. Add a plain object to the `SCENARIOS` array:
 
 ```javascript
 {
@@ -171,6 +171,8 @@ escalation level and applicable age band from the patient's date of birth. The
 sidebar hot-reloads on save (live-server).
 
 ## Specs and reference materials
+
+Start at [`spec/README.md`](spec/README.md) — the spec index and landing page.
 
 - `spec/spot-npews-ui-spec.md` / `spec/spot-npews-spec.md` - NHS SPOT/NPEWS specification (transcribed from the reference `.xlsx`)
 - `spec/npews-scoring-spec.json` - canonical scoring spec (source of truth); `spec/npews-scoring-tables.generated.md` - generated reference table; `spec/npews-scoring.md` - clinical narrative

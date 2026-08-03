@@ -84,8 +84,8 @@ wait_and_open() {
 # Start the services
 case "$SERVICE" in
   demo)
-    echo "Starting demo app on http://localhost:8000"
-    wait_and_open "http://localhost:8000"
+    echo "Starting demo app — harness at http://localhost:8000/demo.html"
+    wait_and_open "http://localhost:8000/demo.html"
     docker compose up demo
     ;;
   smart)
@@ -101,9 +101,9 @@ case "$SERVICE" in
     $(compose_cmd) up smart smart-launcher r4 seed patient-browser fhir-viewer index
     ;;
   "")
-    echo "Starting demo app on http://localhost:8000 and SMART shell on http://localhost:9000"
-    wait_and_open "http://localhost:8000"
-    docker compose up
+    echo "Starting demo app — harness at http://localhost:8000/demo.html"
+    wait_and_open "http://localhost:8000/demo.html"
+    docker compose up demo
     ;;
   *)
     echo "Error: unknown service '$SERVICE'" >&2

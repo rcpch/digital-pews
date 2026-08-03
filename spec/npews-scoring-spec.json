@@ -3,7 +3,7 @@
     "title": "NPEWS scoring — canonical machine-readable specification",
     "source": "Configuration Document for SPOT NPEWS (NHS England)",
     "verified": "Manually checked against the live NHS England NPEWS charts by Marcus Baw (GMC 4712729) on 2026-06-30.",
-    "note": "THIS FILE IS THE SINGLE SOURCE OF TRUTH for NPEWS numeric scoring. Edit this file, then run `npm run generate:scoring` to regenerate pews-chart/npews-scoring-config.js (the runtime bands) and spec/npews-scoring-tables.generated.md (the human-readable unified table). Do not hand-edit the generated regions. The clinical narrative (respiratory-distress descriptors, review annotations) lives in spec/npews-scoring.md.",
+    "note": "THIS FILE IS THE SINGLE SOURCE OF TRUTH for NPEWS numeric scoring. Edit this file, then run `npm run generate:scoring` to regenerate chart/npews-scoring-config.js (the runtime bands) and spec/npews-scoring-tables.generated.md (the human-readable unified table). Do not hand-edit the generated regions. The clinical narrative (respiratory-distress descriptors, review annotations) lives in spec/npews-scoring.md.",
     "conformance": "Conformant with the national SPOT NPEWS algorithm: temperature and AVPU are NOT numerically scored — they are escalation / sepsis / specific-concern triggers (see nonScoring below)."
   },
 
@@ -18,7 +18,7 @@
 
   "ageBands": ["0-11m", "1-4y", "5-12y", "13+y"],
 
-  "comment_ageBandBounds": "Canonical age-in-years bounds per band, as half-open intervals [minAgeYears, maxAgeYears). The upper bound is EXCLUSIVE; null means open-ended. All boundaries fall on an exact birthday (1st, 5th, 13th), so band selection uses calendar completed-years (see pews-chart/age-band.js) rather than a 365.25-day approximation. This is the single source of truth for which chart applies at a given age.",
+  "comment_ageBandBounds": "Canonical age-in-years bounds per band, as half-open intervals [minAgeYears, maxAgeYears). The upper bound is EXCLUSIVE; null means open-ended. All boundaries fall on an exact birthday (1st, 5th, 13th), so band selection uses calendar completed-years (see chart/age-band.js) rather than a 365.25-day approximation. This is the single source of truth for which chart applies at a given age.",
   "ageBandBounds": {
     "0-11m": { "minAgeYears": 0,  "maxAgeYears": 1 },
     "1-4y":  { "minAgeYears": 1,  "maxAgeYears": 5 },

@@ -5,6 +5,17 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D14 — Component source (`chart/`) separated from the demo harness (`demo/`)
+**2026-07-03.** The single `pews-chart/` folder was split into `chart/` (the reusable
+component: scorer, config, age-band maths, canvas engine, chart shell, `<npews-chart>`
+element, FHIR adapter, styles) and `demo/` (harness, example pages and scenario/demo data).
+This makes the shippable surface obvious and keeps demo-only data out of the component.
+Demo pages import the component with real filesystem-relative paths (`../chart/…`), which
+resolve on disk and over HTTP. The dev server mounts `demo/` at the served root and `chart/`
+as a subdirectory (see `docker-compose.yml`), so `http://localhost:8000/` renders the demo
+(not a directory listing) and `../chart/…` resolves to `/chart/…`. Demo app URLs are
+unchanged by the split: `/demo.html` (harness), `/` (single chart), `/embed-example.html`.
+
 ## D13 — Chart packaged as a framework-neutral Web Component (not React)
 **2026-07-02.** The chart ships as a standards-based `<npews-chart>` custom element with no
 runtime framework dependency; optional thin framework wrappers are allowed but the core never
@@ -13,11 +24,11 @@ rejected: dGC benefits from React because it renders declarative SVG (Victory), 
 chart is an imperative canvas engine, so React would wrap the shell without simplifying the
 hard part. A distribution-only build (NPM/UMD + SRI CDN bundle) is acceptable; the source
 stays unbuilt. Rationale + alternatives in [`react.md`](./react.md). Implemented in
-`pews-chart/npews-chart.js`.
+`chart/npews-chart.js`.
 
 ## D12 — Storybook removed in favour of a bespoke demo harness
 **2026-07-02.** Storybook was only ever a static-page host here (no controls, Chromatic never
-wired). A dependency-free harness (`pews-chart/demo.html` + `demo.js`, scenarios in
+wired). A dependency-free harness (`demo/demo.html` + `demo.js`, scenarios in
 `scenarios.js`) demonstrates the same "stories" without a build tool or SaaS — on-message for
 a vendor-neutral, anti-lock-in NHS pitch. Visual regression, when wanted, will be PNG
 baselines captured via browser automation (e.g. Playwright `toHaveScreenshot`), not a hosted
@@ -34,13 +45,13 @@ principle governs D10.
 Respiratory Rate, Respiratory Distress, SpO₂, O₂ device, O₂ level, Heart Rate, systolic BP and
 Capillary Refill contribute to the numeric total. Temperature (sepsis trigger ≥38/<36) and
 AVPU (specific-concern trigger: V → escalate, P/U → escalate higher) drive **escalation only**.
-No "augmented" scoring mode. Implemented in `pews-chart/npews-scorer.js`; documented in
+No "augmented" scoring mode. Implemented in `chart/npews-scorer.js`; documented in
 [`npews-scoring.md`](./npews-scoring.md) and [`escalation.md`](./escalation.md).
 
 ## D9 — JSON is the canonical scoring source of truth
 **2026-06-30.** `npews-scoring-spec.json` is the single source of truth for every numeric
 threshold. A generator (`npm run generate:scoring`) produces both the runtime bands
-(`pews-chart/npews-scoring-config.js`) and the human-readable
+(`chart/npews-scoring-config.js`) and the human-readable
 [`npews-scoring-tables.generated.md`](./npews-scoring-tables.generated.md); drift tests fail if
 they diverge or if the committed artifacts are stale. Structured-data-as-truth was chosen over
 markdown-as-truth for a safety tool (least drift). Prose lives in
@@ -61,7 +72,7 @@ independently and compare (see [`fhir.md`](./fhir.md)).
 ## D6 — Canonical age bands derived from date of birth
 **Session 2 (clinical safety).** The applicable band is derived per observation from
 `patient.dob` + the observation timestamp using **calendar completed years**
-(`pews-chart/age-band.js`), not a hand-set string and not `days/365.25` (which mis-fires around
+(`chart/age-band.js`), not a hand-set string and not `days/365.25` (which mis-fires around
 leap-year birthdays). Bounds are half-open year intervals, canonical in
 `npews-scoring-spec.json` (`ageBandBounds`): `0-11m`=[0,1), `1-4y`=[1,5), `5-12y`=[5,13),
 `13+y`=[13,∞) — every boundary lands on an exact birthday. `patient.ageBand` is a
@@ -80,10 +91,7 @@ observation set, never the latest observation visible in the current zoom window
 [`implementation-notes.md`](./implementation-notes.md#RCPCH1.1).
 
 ## D3 — Colour-blindness: follow WCAG 2.2 (RCPCH 1.1)
-**Implementation.** SPOT NPEWS mandates a colour-blindness-friendly design without prescribing
-how; we follow WCAG 2.2 where it does not conflict with PEWS colour semantics. The mandated
-band/escalation palette is never changed; `.cb-mode` supplies higher-contrast overrides. See
-[`implementation-notes.md`](./implementation-notes.md).
+**Implementation.** SPOT NPEWS mandates a colour-blindness-friendly design without prescribing how; we follow WCAG 2.2 where it does not conflict with PEWS colour semantics. The mandated band/escalation palette is never changed. The `.cb-mode` toggle and its CSS overrides have been removed because Canvas rendering did not read them; an evidenced accessible mode will be reintroduced under roadmap R14. See [`implementation-notes.md`](./implementation-notes.md).
 
 ## D2 — Dependencies current + Dependabot per house style
 **Session.** All dependencies were upgraded to latest and Dependabot was configured following

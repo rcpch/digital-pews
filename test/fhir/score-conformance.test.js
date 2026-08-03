@@ -16,8 +16,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { scoreObservation, escalationLevelFromScore, scoreObservationsForPatient } from '../../pews-chart/npews-scorer.js';
-import { fromFhirBundleToChartModel } from '../../pews-chart/fhir-adapter.js';
+import { scoreObservation, escalationLevelFromScore, scoreObservationsForPatient } from '../../chart/npews-scorer.js';
+import { fromFhirBundleToChartModel } from '../../chart/fhir-adapter.js';
 import stableNormal from './fixtures/stable-normal-5-12y.json';
 import skipReasons from './fixtures/skip-reasons-0-11m.json';
 import oxygenModality from './fixtures/oxygen-modality-transition.json';
