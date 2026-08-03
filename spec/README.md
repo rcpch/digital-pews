@@ -46,6 +46,8 @@ non-negotiable; requirement IDs (`U3.10`, `C3.17`, …) are load-bearing — don
 | [`implementation-notes.md`](./implementation-notes.md) | Clarifications discovered while building, plus a manual visual-QA checklist. |
 | [`react.md`](./react.md) | The component-architecture decision: framework-neutral Web Component vs React. |
 | [`roadmap.md`](./roadmap.md) | Forward-looking work (including Web Component Phase 2). |
+| [`web-component-phase2-spec.md`](./web-component-phase2-spec.md) | Acceptance criteria for isolation, multiple instances, lifecycle, types, and distribution. |
+| [`visual-regression-testing-plan.md`](./visual-regression-testing-plan.md) | Browser interaction, screenshot, baseline-governance, and visual-CI plan. |
 
 ---
 
