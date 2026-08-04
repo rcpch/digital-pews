@@ -24,6 +24,10 @@
     <!-- Scenario picker: the "stories" that used to live in Storybook -->
     <aside class="demo-sidebar" aria-label="Demonstration scenarios">
       <div class="demo-sidebar__brand">
+        <div class="demo-logo">
+          <img src="assets/rcpch-logo.svg"
+               alt="Royal College of Paediatrics and Child Health" />
+        </div>
         <h1 class="demo-sidebar__title">Digital PEWS</h1>
         <p class="demo-sidebar__subtitle">
           Open-source NHS National Paediatric Early Warning System chart
@@ -41,6 +45,26 @@
 
     <!-- The chart component mounts here. It knows nothing about the sidebar. -->
     <div class="demo-main" id="chart-host"></div>
+
+    <!-- Foldable right-hand controls: chart colour theme picker. Themes only
+         restyle the chart chrome; the clinical band/escalation colours are
+         fixed. Contents (theme radios) are built by demo.js. -->
+    <aside class="demo-controls" id="demo-controls" aria-label="Display controls">
+      <button class="demo-controls__toggle" id="controls-toggle" type="button"
+              aria-expanded="true" aria-controls="controls-body">
+        <span class="demo-controls__toggle-label">Display</span>
+        <span class="demo-controls__toggle-icon" aria-hidden="true">&rsaquo;</span>
+      </button>
+      <div class="demo-controls__body" id="controls-body">
+        <h2 class="demo-controls__heading">Chart theme</h2>
+        <div class="theme-options" id="theme-options"
+             role="radiogroup" aria-label="Chart colour theme"></div>
+        <p class="demo-controls__note">
+          Themes restyle the chart frame only. The clinically-mandated PEWS band
+          and escalation colours never change.
+        </p>
+      </div>
+    </aside>
 
   </div>
 

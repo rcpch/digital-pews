@@ -4,7 +4,7 @@
   "type": "transaction",
   "meta": {
     "generatedBy": "scripts/generate-smart-seed.mjs",
-    "generatedAt": "2026-08-03T15:41:38.163Z",
+    "generatedAt": "2026-08-03T15:44:34.418Z",
     "scenarioCount": 5,
     "scenarioIds": [
       "5-12y-deterioration",

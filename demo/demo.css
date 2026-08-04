@@ -8,6 +8,8 @@
 
 body.demo {
   --demo-sidebar-w: 320px;
+  --demo-controls-w: 268px;
+  --demo-controls-w-collapsed: 46px;
 }
 
 .demo-shell {
@@ -20,7 +22,7 @@ body.demo {
 .demo-sidebar {
   flex: 0 0 var(--demo-sidebar-w);
   width: var(--demo-sidebar-w);
-  background: #003087; /* NHS navy */
+  background: var(--section-label-bg); /* follows the active chart theme */
   color: #ffffff;
   position: sticky;
   top: 0;
@@ -34,6 +36,24 @@ body.demo {
 .demo-sidebar__brand {
   padding: 1.25rem 1.25rem 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* White card so the full-colour RCPCH logo reads on any theme background. */
+.demo-logo {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-logo img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
 }
 
 .demo-sidebar__title {
@@ -107,7 +127,7 @@ body.demo {
   margin-top: 0.3rem;
   font-size: 0.7rem;
   font-weight: 700;
-  background: #005eb8; /* NHS blue */
+  background: var(--param-label-bg); /* follows the active chart theme */
   color: #ffffff;
   padding: 0.1rem 0.45rem;
   border-radius: 999px;
@@ -136,10 +156,148 @@ body.demo {
   min-width: 0; /* allow canvases to shrink instead of forcing overflow */
 }
 
+/* --- Right controls sidebar (foldable) ----------------------- */
+.demo-controls {
+  flex: 0 0 var(--demo-controls-w);
+  width: var(--demo-controls-w);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+  transition: flex-basis 0.15s ease, width 0.15s ease;
+}
+
+.demo-controls--collapsed {
+  flex-basis: var(--demo-controls-w-collapsed);
+  width: var(--demo-controls-w-collapsed);
+}
+
+.demo-controls__toggle {
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--section-label-bg);
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.9rem;
+}
+
+.demo-controls__toggle:focus-visible {
+  outline: 3px solid var(--focus-ring, #ffdd00);
+  outline-offset: -3px;
+}
+
+.demo-controls__toggle-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+/* Chevron points right when expanded (to fold away), left when collapsed. */
+.demo-controls--collapsed .demo-controls__toggle-icon {
+  transform: rotate(180deg);
+}
+
+.demo-controls--collapsed .demo-controls__toggle {
+  justify-content: center;
+  padding: 0;
+}
+
+.demo-controls--collapsed .demo-controls__toggle-label,
+.demo-controls--collapsed .demo-controls__body {
+  display: none;
+}
+
+.demo-controls__body {
+  padding: 0.95rem 0.9rem 1.2rem;
+}
+
+.demo-controls__heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary);
+  margin: 0 0 0.6rem;
+}
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--page-bg);
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+}
+
+.theme-option:hover {
+  border-color: var(--param-label-bg);
+}
+
+.theme-option:focus-within {
+  outline: 3px solid var(--focus-ring, #ffdd00);
+  outline-offset: 1px;
+}
+
+.theme-option input {
+  accent-color: var(--param-label-bg);
+  margin: 0;
+}
+
+.theme-option__swatch {
+  display: inline-flex;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.theme-option__swatch i {
+  display: block;
+  width: 12px;
+  height: 18px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.theme-option__label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.demo-controls__note {
+  margin-top: 0.85rem;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
 /* The chart's sticky footer is position:fixed across the viewport; shift it so
-   it aligns with the chart region rather than sitting under the sidebar. */
+   it aligns with the chart region rather than sitting under either sidebar. */
 body.demo .sticky-footer {
   left: var(--demo-sidebar-w);
+  right: var(--demo-controls-w);
+}
+
+body.demo.demo--controls-collapsed .sticky-footer {
+  right: var(--demo-controls-w-collapsed);
 }
 
 /* --- Narrow screens: stack sidebar above the chart ----------- */
@@ -147,13 +305,21 @@ body.demo .sticky-footer {
   .demo-shell {
     flex-direction: column;
   }
-  .demo-sidebar {
+  .demo-sidebar,
+  .demo-controls {
     flex-basis: auto;
     width: 100%;
     height: auto;
     position: static;
   }
-  body.demo .sticky-footer {
+  .demo-controls {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    order: 3;
+  }
+  body.demo .sticky-footer,
+  body.demo.demo--controls-collapsed .sticky-footer {
     left: 0;
+    right: 0;
   }
 }

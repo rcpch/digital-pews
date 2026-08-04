@@ -1,0 +1,11 @@
+<!doctype html><html class="theme-midnight"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet" data-npews-chart-fonts>
+<style>body{margin:0;background:var(--page-bg,#f3f2f1)}#host{padding:8px}</style>
+</head><body class="demo"><div id="host"></div>
+<script type="module">
+import '../chart/npews-chart.js';
+import { SCENARIOS } from './scenarios.js';
+const el=document.createElement('npews-chart');
+document.getElementById('host').appendChild(el);
+el.data={patient:SCENARIOS[0].patient,observations:SCENARIOS[0].observations};
+</script></body></html>
