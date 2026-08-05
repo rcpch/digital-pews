@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;npews-chart&gt; - minimal embed example</title>
+  <style>
+    body { margin: 0; background: #f3f2f1; font-family: 'Lato', 'Trebuchet MS', sans-serif; }
+    .note { max-width: 60rem; margin: 1.5rem auto 0; padding: 0 1.5rem; color: #0b0c0c; }
+    .note h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+    .note p { margin: 0.25rem 0; color: #505a5f; }
+    .note code { background: #f3f2f1; padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+
+  <div class="note">
+    <h1>&lt;npews-chart&gt; minimal embed</h1>
+    <p>
+      This page loads one ES module, drops a <code>&lt;npews-chart&gt;</code> element,
+      and sets <code>.data</code> to a plain JSON object. No chart CSS link, no
+      rendering API call, no build step. Scores are computed from DOB + vitals.
+    </p>
+  </div>
+
+  <npews-chart id="chart"></npews-chart>
+
+  <script type="module">
+    import './npews-chart.js';
+
+    document.getElementById('chart').data = {
+      patient: {
+        name: 'Alex Thompson',
+        dob: '2017-03-14',
+        nhsNumber: '943 476 5210',
+        ward: 'Paediatric Ward B',
+        bed: '12',
+        consultant: 'Dr S. Patel',
+        admittedAt: '2025-01-10T08:00:00',
+      },
+      observations: [
+        { timestamp: '2025-01-10T08:00:00', respiratoryRate: 20, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 88, bloodPressureSystolic: 98, bloodPressureDiastolic: 62, capillaryRefill: 2, avpu: 'A', temperature: 36.8 },
+        { timestamp: '2025-01-10T10:00:00', respiratoryRate: 24, respiratoryDistress: 'none', oxygenSaturation: 97, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 95, bloodPressureSystolic: 100, bloodPressureDiastolic: 64, capillaryRefill: 2, avpu: 'A', temperature: 37.0 },
+        { timestamp: '2025-01-10T12:00:00', respiratoryRate: 28, respiratoryDistress: 'mild', oxygenSaturation: 95, oxygenDevice: 'NP', oxygenDelivery: { value: 24, unit: '%' }, heartRate: 110, bloodPressureSystolic: 102, bloodPressureDiastolic: 66, capillaryRefill: 2, avpu: 'A', temperature: 37.5 },
+        { timestamp: '2025-01-10T14:00:00', respiratoryRate: 32, respiratoryDistress: 'moderate', oxygenSaturation: 92, oxygenDevice: 'NP', oxygenDelivery: { value: 40, unit: '%' }, heartRate: 125, bloodPressureSystolic: 105, bloodPressureDiastolic: 68, capillaryRefill: 3, avpu: 'A', temperature: 38.1 },
+        { timestamp: '2025-01-10T16:00:00', respiratoryRate: 36, respiratoryDistress: 'severe', oxygenSaturation: 89, oxygenDevice: 'HF', oxygenDelivery: { value: 8, unit: 'L/min' }, heartRate: 140, bloodPressureSystolic: 108, bloodPressureDiastolic: 70, capillaryRefill: 3, avpu: 'V', temperature: 38.8 },
+        { timestamp: '2025-01-10T18:00:00', respiratoryRate: 30, respiratoryDistress: 'mild', oxygenSaturation: 94, oxygenDevice: 'NP', oxygenDelivery: { value: 4, unit: 'L/min' }, heartRate: 120, bloodPressureSystolic: 104, bloodPressureDiastolic: 66, capillaryRefill: 2, avpu: 'A', temperature: 38.0 },
+        { timestamp: '2025-01-10T20:00:00', respiratoryRate: 22, respiratoryDistress: 'none', oxygenSaturation: 98, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 100, bloodPressureSystolic: 100, bloodPressureDiastolic: 64, capillaryRefill: 2, avpu: 'A', temperature: 37.2 },
+        { timestamp: '2025-01-10T22:00:00', respiratoryRate: 20, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 92, bloodPressureSystolic: 98, bloodPressureDiastolic: 62, capillaryRefill: 2, avpu: 'A', temperature: 36.9 },
+      ],
+    };
+  </script>
+</body>
+</html>
