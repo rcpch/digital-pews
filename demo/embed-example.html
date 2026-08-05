@@ -1,5 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  EMBED EXAMPLE for <npews-chart>
+
+  This page demonstrates the Web Component in a real host page: load one
+  ES module, drop the element, set .data. No chart CSS link, no rendering
+  API call.
+
+  IMPORTANT: ES modules cannot be loaded over file:// - the browser
+  blocks them with a CORS error. You MUST serve this page over HTTP.
+  The quickest way is `s/up` (or `s/up demo`), then visit:
+
+    http://localhost:8000/embed-example.html
+
+  Or use any development web server you like, e.g.:
+
+    npx live-server --port=8000
+    python3 -m http.server 8000
+-->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,6 +52,22 @@
   </div>
 
   <npews-chart id="chart"></npews-chart>
+
+  <script>
+    // ES modules cannot be loaded from file:// - the browser blocks them
+    // with a CORS error. If you see "Access to script at ... has been blocked
+    // by CORS policy", you are opening this file directly instead of serving
+    // it over HTTP. Fix: run `s/up` (or `s/up demo`) and visit
+    // http://localhost:8000/embed-example.html, or use any web server.
+    if (location.protocol === 'file:') {
+      console.error(
+        '[npews-chart] This page uses ES modules, which cannot be loaded over file://.\n' +
+        'You are seeing a CORS error because the browser blocks module imports from the file protocol.\n' +
+        'Fix: serve this page over HTTP using `s/up` or any web server, then visit\n' +
+        'http://localhost:8000/embed-example.html'
+      );
+    }
+  </script>
 
   <script type="module">
     // 1. Register the element (self-provisions its stylesheet + font).

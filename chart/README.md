@@ -117,6 +117,17 @@ Three responsive layout modes with different chart heights:
 
 User can override auto-detection via toolbar toggle. Implementers can lock layout by setting `data-lock-layout` attribute on `<body>` tag.
 
+## Web Component usage
+
+The chart is packaged as a `<npews-chart>` custom element. See
+`example.html` in this directory for a minimal, self-contained demo that
+loads one ES module and sets `.data` to inline JSON.
+
+> **ES modules require an HTTP server.** Opening `example.html` directly
+> with `file://` will fail with a CORS error. Run `s/up` (or `s/up demo`)
+> and visit `http://localhost:8000/chart/example.html`, or use any web
+> server you like (e.g. `npx live-server --port=8000`).
+
 ## Implementation Files
 
 - `npews-scoring-config.js` - Age band configurations, scoring bands, escalation metadata

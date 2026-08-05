@@ -67,8 +67,8 @@ Two entry points render the chart (both in `demo/`):
 ## Use as a Web Component
 
 The chart is also packaged as a **framework-neutral `<npews-chart>` custom element**
-so it drops into any host — a plain page, React/Angular/Vue, or a SMART-on-FHIR
-app — with no framework dependency. The element self-provisions its stylesheet and
+so it drops into any host - a plain page, React/Angular/Vue, or a SMART-on-FHIR
+app - with no framework dependency. The element self-provisions its stylesheet and
 fonts, so a consumer only loads one module and feeds it a JSON object:
 
 ```html
@@ -84,7 +84,7 @@ fonts, so a consumer only loads one module and feeds it a JSON object:
       // ...nhsNumber, ward, bed, consultant
     },
     observations: [
-      // raw vitals only — no scores; the engine computes them
+      // raw vitals only - no scores; the engine computes them
       { timestamp: '2025-01-10T08:00:00Z', respiratoryRate: 20, spo2: 99, /* ... */ },
       // ...
     ],
@@ -95,10 +95,16 @@ fonts, so a consumer only loads one module and feeds it a JSON object:
 - Data is passed as a JS **property** (`.data`), not an attribute, because it is a
   rich object. Convenience setters `.patient` and `.observations` are also available.
 - **Scores are always computed** from the patient's date of birth and the raw
-  observations — any score in the input is ignored (single source of truth).
-- See `demo/embed-example.html` for a minimal, self-contained drop-in
-  (<http://localhost:8000/embed-example.html>). It links no chart stylesheet and
-  calls no rendering API — it just loads the module and sets `.data`.
+  observations - any score in the input is ignored (single source of truth).
+- See `chart/example.html` for a minimal, fully self-contained drop-in (no demo
+  dependencies, inline JSON data) and `demo/embed-example.html` for a version that
+  imports from the demo scenario catalogue.
+
+> **ES modules require an HTTP server.** Opening these files directly with
+> `file://` will fail with a CORS error. Run `s/up` (or `s/up demo`) and visit
+> `http://localhost:8000/chart/example.html` or
+> `http://localhost:8000/embed-example.html`. Or use any web server you like
+> (e.g. `npx live-server --port=8000` or `python3 -m http.server 8000`).
 
 **Phase 1 limitation:** the engine uses fixed DOM ids, so one chart per document is
 supported today; embed additional charts in separate iframes. Shadow-DOM isolation,

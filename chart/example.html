@@ -1,5 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  MINIMAL EMBED EXAMPLE for <npews-chart>
+
+  This page is a self-contained proof-of-concept: load one ES module,
+  drop the custom element, set .data to a plain JSON object. No chart
+  CSS link, no rendering API call, no build step.
+
+  IMPORTANT: ES modules cannot be loaded over file:// - the browser
+  blocks them with a CORS error. You MUST serve this page over HTTP.
+  The quickest way is `s/up` (or `s/up demo`), then visit:
+
+    http://localhost:8000/chart/example.html
+
+  Or use any development web server you like, e.g.:
+
+    npx live-server --port=8000
+    python3 -m http.server 8000
+-->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,12 +36,27 @@
     <h1>&lt;npews-chart&gt; minimal embed</h1>
     <p>
       This page loads one ES module, drops a <code>&lt;npews-chart&gt;</code> element,
-      and sets <code>.data</code> to a plain JSON object. No chart CSS link, no
-      rendering API call, no build step. Scores are computed from DOB + vitals.
+      and sets <code>.data</code> to inline JSON. No chart CSS, no build step.
     </p>
   </div>
 
   <npews-chart id="chart"></npews-chart>
+
+  <script>
+    // ES modules cannot be loaded from file:// - the browser blocks them
+    // with a CORS error. If you see "Access to script at ... has been blocked
+    // by CORS policy", you are opening this file directly instead of serving
+    // it over HTTP. Fix: run `s/up` (or `s/up demo`) and visit
+    // http://localhost:8000/chart/example.html, or use any web server.
+    if (location.protocol === 'file:') {
+      console.error(
+        '[npews-chart] This page uses ES modules, which cannot be loaded over file://.\n' +
+        'You are seeing a CORS error because the browser blocks module imports from the file protocol.\n' +
+        'Fix: serve this page over HTTP using `s/up` or any web server, then visit\n' +
+        'http://localhost:8000/chart/example.html'
+      );
+    }
+  </script>
 
   <script type="module">
     import './npews-chart.js';
