@@ -1,0 +1,69 @@
+# Builds and deploys the Digital PEWS demo to GitHub Pages.
+#
+# The demo is a static site: HTML/CSS/JS with no build step. The workflow
+# assembles a Pages artifact by copying demo/ (served at root) and chart/
+# (mounted as /chart/ so the demo's ../chart/ module imports resolve over
+# HTTP), then uploads it for deploy-pages.
+#
+# Method: artifact-based deploy (actions/upload-pages-artifact +
+# actions/deploy-pages). The built site is handed straight to GitHub's
+# Pages servers as a workflow artifact - there is no gh-pages branch.
+#
+# Repo prerequisite (one-off): Settings -> Pages -> Source must be set to
+# "GitHub Actions". If it is set to "Deploy from a branch", deploy-pages
+# fails with "Get Pages site failed". This is set once on the repo and
+# persists.
+#
+# Action SHAs carry the matching # vX.Y.Z comment per house style.
+
+name: demo
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "chart/**"
+      - "demo/**"
+      - ".github/workflows/demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      # Assemble the Pages site: demo/ at root, chart/ as /chart/
+      # This mirrors the docker-compose volume mount (demo:/app, chart:/app/chart).
+      - run: |
+          mkdir -p _site
+          cp -r demo/* _site/
+          mkdir -p _site/chart
+          cp -r chart/* _site/chart/
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

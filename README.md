@@ -27,6 +27,14 @@ s/up smart
 
 Press Ctrl+C to stop the services. Docker Compose will automatically clean up containers. `s/down smart` tears down the FHIR sandbox stack; `s/down` (no arg) tears down everything.
 
+### Online demo
+
+A live demo is deployed to GitHub Pages from `main`:
+
+**<https://rcpch.github.io/digital-pews/>**
+
+This is the full demo harness with the scenario sidebar. It updates automatically on every push to `main`.
+
 ### Demo app
 
 - Serves at <http://localhost:8000>
