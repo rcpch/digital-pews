@@ -322,4 +322,102 @@ body.demo.demo--controls-collapsed .sticky-footer {
     left: 0;
     right: 0;
   }
+  .scrubber__bar { right: 0; }
+}
+
+/* --- Timeline scrubber (demo only) ---------------------------- */
+/* Bright azure with white outline so the marker is visible against all
+   PEWS band colours (white, yellow, orange, pink). This is a demo-only
+   token - it never enters the clinical palette in styles.css. */
+body.demo {
+  --demo-scrub: #00a3e0;
+}
+
+.scrubber[hidden] { display: none; }
+
+.scrubber {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: var(--surface, #fff);
+  border-top: 1px solid var(--border, #b1b4b6);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.scrubber__bar {
+  flex: 1;
+  position: relative;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.scrubber__slider {
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #dee0e2;
+  border-radius: 3px;
+  outline: none;
+}
+
+.scrubber__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--demo-scrub);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.scrubber__slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--demo-scrub);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+/* Vertical overlay line that drops down through the chart area.
+   Positioned by demo.js using getViewWindow() geometry. */
+.scrubber__overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  width: 2px;
+  background: var(--demo-scrub);
+  box-shadow: -1px 0 0 #fff, 1px 0 0 #fff;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.scrubber__readout {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #505a5f);
+  white-space: nowrap;
+  min-width: 12rem;
+}
+
+.scrubber__readout strong {
+  color: var(--text-primary, #0b0c0c);
+}
+
+.scrubber__readout .esc-badge {
+  display: inline-block;
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 0.35rem;
 }

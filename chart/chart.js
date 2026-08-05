@@ -20,6 +20,15 @@ import { AGE_BANDS, ESCALATION_META } from './npews-scoring-config.js';
 import { scoreObservationsForPatient } from './npews-scorer.js';
 import { resolveAgeBand, ageBandSegments, completedYears } from './age-band.js';
 
+// ---- Plot geometry -----------------------------------------
+// Horizontal padding inside every chart canvas. These are deliberately
+// uniform across the numeric rows, the categorical rows, the PEWS row and
+// the time axis so vertical grid lines and observation columns align
+// exactly down the whole chart. Defined once here rather than re-declared
+// in each render function, so the rows cannot drift apart.
+const PAD_LEFT  = 55;
+const PAD_RIGHT = 50;
+
 // ---- Module-level data references --------------------------
 //
 // These are set by init() and used by all rendering functions.
@@ -418,8 +427,6 @@ function renderCategoricalRow(canvas, config) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  const PAD_LEFT  = 55;
-  const PAD_RIGHT = 50;
   const drawW = W - PAD_LEFT - PAD_RIGHT;
   const range = viewEnd - viewStart;
 
@@ -513,8 +520,6 @@ function renderChart(canvas, config) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  const PAD_LEFT   = 55;
-  const PAD_RIGHT  = 50;  // Fixed width on both sides so vertical grid lines align across all rows
   const PAD_TOP    = 10;
   const PAD_BOTTOM = 28;
 
@@ -1129,8 +1134,6 @@ function renderPewsCanvas() {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  const PAD_LEFT  = 55;
-  const PAD_RIGHT = 50;
   const drawW = W - PAD_LEFT - PAD_RIGHT;
   const range = viewState.end - viewState.start;
 
@@ -1243,8 +1246,6 @@ function renderTimeAxis() {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  const PAD_LEFT  = 55;
-  const PAD_RIGHT = 50;  // Use widest right-pad (O2 delivery) to keep x positions consistent
   const drawW = W - PAD_LEFT - PAD_RIGHT;
   const range = viewState.end - viewState.start;
 
@@ -1312,6 +1313,24 @@ function renderAll() {
   });
   renderTimeAxis();
   renderPewsCanvas();
+
+  // Notify host pages (e.g. the demo scrubber) that a render cycle has
+  // completed and the view window may have changed (zoom, range, resize).
+  document.dispatchEvent(new CustomEvent('npews-chart:render', {
+    detail: { start: viewState.start, end: viewState.end },
+  }));
+}
+
+/**
+ * Read the chart's current view window and horizontal plot padding.
+ * Hosts that need to overlay DOM elements aligned with canvas x-positions
+ * (e.g. the demo timeline scrubber) use this instead of duplicating the
+ * geometry constants.
+ *
+ * @returns {{ start: number, end: number, padLeft: number, padRight: number }}
+ */
+export function getViewWindow() {
+  return { start: viewState.start, end: viewState.end, padLeft: PAD_LEFT, padRight: PAD_RIGHT };
 }
 
 // ---- Escalation banner -------------------------------------
@@ -1381,8 +1400,6 @@ function attachTooltip(canvasId, field, unit, bpMode, isO2Delivery) {
     if (!inView.length) return;
 
     const range = viewState.end - viewState.start;
-    const PAD_LEFT = 55;
-    const PAD_RIGHT = 50;
     const drawW    = canvas.offsetWidth - PAD_LEFT - PAD_RIGHT;
 
     let nearest = null;
@@ -1425,9 +1442,6 @@ function attachCategoricalTooltip(canvasId, getCell) {
   const canvas = document.getElementById(canvasId);
   const tip    = document.getElementById(`tip-${canvasId.replace('canvas-', '')}`);
   if (!canvas || !tip) return;
-
-  const PAD_LEFT  = 55;
-  const PAD_RIGHT = 50;
 
   canvas.addEventListener('mousemove', e => {
     const rect   = canvas.getBoundingClientRect();

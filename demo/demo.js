@@ -10,6 +10,9 @@
    ============================================================ */
 
 import '../chart/npews-chart.js';
+import { getViewWindow } from '../chart/chart.js';
+import { scoreObservationsForPatient } from '../chart/npews-scorer.js';
+import { ESCALATION_META } from '../chart/npews-scoring-config.js';
 import { SCENARIOS, scenarioById } from './scenarios.js';
 
 const host = document.getElementById('chart-host');
@@ -135,3 +138,145 @@ list.addEventListener('keydown', (e) => {
 // -- Initial selection (deep-linkable via #scenario-id) ----------------------
 const requested = location.hash.slice(1);
 select(scenarioById(requested) ? requested : SCENARIOS[0].id);
+
+// -- Timeline scrubber (demo only) --------------------------------------------
+// Lets you scroll through the scenario's observations and see the PEWS score
+// at each time point. The chart's own banner/footer always show the latest
+// observation (RCPCH 1.1 invariant); the scrubber readout is separate demo
+// chrome. Uses getViewWindow() from chart.js for x-position alignment.
+
+const scrubber      = document.getElementById('scrubber');
+const scrubSlider    = document.getElementById('scrubber-slider');
+const scrubOverlay   = document.getElementById('scrubber-overlay');
+const scrubReadout   = document.getElementById('scrubber-readout');
+
+let scoredObs = [];   // scored observations for the current scenario
+let scrubIndex = 0;   // current scrubber index into scoredObs
+
+function initScrubber(scenario) {
+  if (!scenario || !scenario.observations || scenario.observations.length === 0) {
+    scrubber.hidden = true;
+    return;
+  }
+
+  scoredObs = scoreObservationsForPatient(scenario.patient, scenario.observations);
+  scrubIndex = scoredObs.length - 1;  // start at the latest observation
+  scrubber.hidden = false;
+
+  scrubSlider.min = 0;
+  scrubSlider.max = scoredObs.length - 1;
+  scrubSlider.value = scrubIndex;
+
+  updateScrubber();
+}
+
+function updateScrubber() {
+  if (!scoredObs.length) return;
+  const obs = scoredObs[scrubIndex];
+  if (!obs) return;
+
+  // Readout: time + PEWS total + escalation badge
+  const time = new Date(obs.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const pews = obs.pewsTotal != null ? obs.pewsTotal : '—';
+  const level = obs.escalationLevel;
+  const meta = level ? ESCALATION_META[level] : null;
+  const badge = meta
+    ? `<span class="esc-badge" style="background:${meta.color};color:${meta.textColor}">${meta.label}</span>`
+    : '<span class="esc-badge" style="background:#dee0e2;color:#0b0c0c">Normal</span>';
+
+  scrubReadout.innerHTML = `<strong>${time}</strong> &middot; PEWS <strong>${pews}</strong> ${badge}`;
+
+  positionOverlay();
+}
+
+function positionOverlay() {
+  if (!scoredObs.length) return;
+  const obs = scoredObs[scrubIndex];
+  if (!obs) return;
+
+  // Find the first canvas in the chart grid to compute x offset
+  const canvas = document.querySelector('#chart-grid canvas');
+  if (!canvas) { scrubOverlay.style.display = 'none'; return; }
+
+  const vw = getViewWindow();
+  if (!vw || vw.start == null || vw.end == null) { scrubOverlay.style.display = 'none'; return; }
+
+  const range = vw.end - vw.start;
+  if (range <= 0) { scrubOverlay.style.display = 'none'; return; }
+
+  const ts = new Date(obs.timestamp).getTime();
+  const canvasW = canvas.offsetWidth;
+  const drawW = canvasW - vw.padLeft - vw.padRight;
+  const xInCanvas = vw.padLeft + ((ts - vw.start) / range) * drawW;
+
+  // The overlay sits inside .scrubber__bar, which is below the chart grid.
+  // We want the vertical line to align with the canvas x-position. Since the
+  // chart grid is in a separate container above, we position the overlay
+  // relative to the chart grid container, not the scrubber bar.
+  const chartGrid = document.getElementById('chart-grid');
+  if (!chartGrid) { scrubOverlay.style.display = 'none'; return; }
+
+  // The canvas is in the 3rd grid column (after 40px section label + 180px
+  // parameter label). The canvas starts at 220px from the grid's left edge.
+  // But the grid might have its own padding/margin. Use the canvas offsetLeft
+  // relative to the chart grid container.
+  const canvasLeftInGrid = canvas.offsetLeft;
+  const xInGrid = canvasLeftInGrid + xInCanvas;
+
+  // Position the overlay line over the chart grid, full height
+  const gridRect = chartGrid.getBoundingClientRect();
+  const barRect = scrubber.getBoundingClientRect();
+  const overlayParent = scrubOverlay.parentElement; // .scrubber__bar
+
+  // The overlay needs to be positioned relative to the chart grid area,
+  // not the scrubber bar. Move it into the chart-host container instead.
+  // Actually, let's position it absolutely within chart-host.
+  const chartHost = document.getElementById('chart-host');
+  if (!chartHost) { scrubOverlay.style.display = 'none'; return; }
+
+  // Find the chart grid's position within chart-host
+  const hostRect = chartHost.getBoundingClientRect();
+  const gridLeftInHost = gridRect.left - hostRect.left;
+  const xInHost = gridLeftInHost + xInGrid;
+
+  // Move the overlay into chart-host if it's not already there
+  if (scrubOverlay.parentElement !== chartHost) {
+    chartHost.appendChild(scrubOverlay);
+  }
+
+  // Position: absolute within chart-host (which is position: relative or static)
+  // Make chart-host position: relative so the overlay anchors correctly
+  if (getComputedStyle(chartHost).position === 'static') {
+    chartHost.style.position = 'relative';
+  }
+
+  const gridTopInHost = gridRect.top - hostRect.top;
+  const gridBottomInHost = gridRect.bottom - hostRect.top;
+
+  scrubOverlay.style.display = 'block';
+  scrubOverlay.style.position = 'absolute';
+  scrubOverlay.style.left = `${xInHost}px`;
+  scrubOverlay.style.top = `${gridTopInHost}px`;
+  scrubOverlay.style.height = `${gridBottomInHost - gridTopInHost}px`;
+}
+
+scrubSlider.addEventListener('input', () => {
+  scrubIndex = parseInt(scrubSlider.value, 10);
+  updateScrubber();
+});
+
+// Reposition overlay after chart re-renders (zoom, range, resize, scenario switch)
+document.addEventListener('npews-chart:render', () => {
+  if (!scrubber.hidden) positionOverlay();
+});
+
+window.addEventListener('resize', () => {
+  if (!scrubber.hidden) positionOverlay();
+});
+
+// Hook into scenario selection to (re)initialise the scrubber
+const _originalSelect = select;
+select = function(id) {
+  _originalSelect(id);
+  initScrubber(scenarioById(id) || SCENARIOS[0]);
+};
