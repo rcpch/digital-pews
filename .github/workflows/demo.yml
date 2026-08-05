@@ -2,7 +2,7 @@
 #
 # The demo is a static site: HTML/CSS/JS with no build step. The workflow
 # assembles a Pages artifact by copying demo/ (served at root) and chart/
-# (mounted as /chart/ so the demo's ../chart/ module imports resolve over
+# (mounted as /chart/ so the demo's ./chart/ module imports resolve over
 # HTTP), then uploads it for deploy-pages.
 #
 # Method: artifact-based deploy (actions/upload-pages-artifact +

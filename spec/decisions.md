@@ -10,11 +10,12 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 component: scorer, config, age-band maths, canvas engine, chart shell, `<npews-chart>`
 element, FHIR adapter, styles) and `demo/` (harness, example pages and scenario/demo data).
 This makes the shippable surface obvious and keeps demo-only data out of the component.
-Demo pages import the component with real filesystem-relative paths (`../chart/…`), which
-resolve on disk and over HTTP. The dev server mounts `demo/` at the served root and `chart/`
-as a subdirectory (see `docker-compose.yml`), so `http://localhost:8000/` renders the demo
-(not a directory listing) and `../chart/…` resolves to `/chart/…`. Demo app URLs are
-unchanged by the split: `/demo.html` (harness), `/` (single chart), `/embed-example.html`.
+Demo pages import the component with paths relative to the served demo root (`./chart/…`). The
+dev server mounts `demo/` at the served root and `chart/` as a subdirectory (see
+`docker-compose.yml`), so `http://localhost:8000/` renders the demo (not a directory listing)
+and `./chart/…` resolves to `/chart/…`. The same paths also retain the GitHub Pages project
+base (`/digital-pews/`). Demo app URLs are unchanged by the split: `/demo.html` (harness), `/`
+(single chart), `/embed-example.html`.
 
 ## D13 — Chart packaged as a framework-neutral Web Component (not React)
 **2026-07-02.** The chart ships as a standards-based `<npews-chart>` custom element with no

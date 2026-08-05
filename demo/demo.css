@@ -336,19 +336,18 @@ body.demo {
 .scrubber[hidden] { display: none; }
 
 .scrubber {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+  box-sizing: border-box;
+  position: fixed;
+  z-index: 201;
   background: var(--surface, #fff);
   border-top: 1px solid var(--border, #b1b4b6);
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0 0.35rem;
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .scrubber__bar {
-  flex: 1;
   position: relative;
   height: 2rem;
   display: flex;
@@ -406,7 +405,7 @@ body.demo {
   font-size: 0.8125rem;
   color: var(--text-secondary, #505a5f);
   white-space: nowrap;
-  min-width: 12rem;
+  text-align: center;
 }
 
 .scrubber__readout strong {

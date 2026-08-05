@@ -9,10 +9,10 @@
    through `chartEl.data = { patient, observations }`.
    ============================================================ */
 
-import '../chart/npews-chart.js';
-import { getViewWindow } from '../chart/chart.js';
-import { scoreObservationsForPatient } from '../chart/npews-scorer.js';
-import { ESCALATION_META } from '../chart/npews-scoring-config.js';
+import './chart/npews-chart.js';
+import { getViewWindow } from './chart/chart.js';
+import { scoreObservationsForPatient } from './chart/npews-scorer.js';
+import { ESCALATION_META } from './chart/npews-scoring-config.js';
 import { SCENARIOS, scenarioById } from './scenarios.js';
 
 const host = document.getElementById('chart-host');
@@ -186,62 +186,52 @@ function updateScrubber() {
 }
 
 function positionOverlay() {
-  if (!scoredObs.length) return;
-  const obs = scoredObs[scrubIndex];
-  if (!obs) return;
-
-  // Find the first canvas in the chart grid to compute x offset
-  const canvas = document.querySelector('#chart-grid canvas');
+  // The scrubber track must occupy exactly the same horizontal space as the
+  // canvas plot, rather than the full width of the demo page.
+  const canvas = document.getElementById('canvas-pews');
   if (!canvas) { scrubOverlay.style.display = 'none'; return; }
 
   const vw = getViewWindow();
   if (!vw || vw.start == null || vw.end == null) { scrubOverlay.style.display = 'none'; return; }
 
+  const footer = document.getElementById('sticky-footer');
+  if (!footer) { scrubOverlay.style.display = 'none'; return; }
+
+  const canvasRect = canvas.getBoundingClientRect();
+  const footerRect = footer.getBoundingClientRect();
+  const plotLeft = canvasRect.left + vw.padLeft;
+  const plotWidth = canvasRect.width - vw.padLeft - vw.padRight;
+
+  scrubber.style.left = `${plotLeft}px`;
+  scrubber.style.width = `${plotWidth}px`;
+  scrubber.style.bottom = `${footerRect.height}px`;
+
+  if (!scoredObs.length) return;
+  const obs = scoredObs[scrubIndex];
+  if (!obs) return;
+
   const range = vw.end - vw.start;
   if (range <= 0) { scrubOverlay.style.display = 'none'; return; }
 
   const ts = new Date(obs.timestamp).getTime();
-  const canvasW = canvas.offsetWidth;
+  const canvasW = canvasRect.width;
   const drawW = canvasW - vw.padLeft - vw.padRight;
   const xInCanvas = vw.padLeft + ((ts - vw.start) / range) * drawW;
 
-  // The overlay sits inside .scrubber__bar, which is below the chart grid.
-  // We want the vertical line to align with the canvas x-position. Since the
-  // chart grid is in a separate container above, we position the overlay
-  // relative to the chart grid container, not the scrubber bar.
   const chartGrid = document.getElementById('chart-grid');
   if (!chartGrid) { scrubOverlay.style.display = 'none'; return; }
 
-  // The canvas is in the 3rd grid column (after 40px section label + 180px
-  // parameter label). The canvas starts at 220px from the grid's left edge.
-  // But the grid might have its own padding/margin. Use the canvas offsetLeft
-  // relative to the chart grid container.
-  const canvasLeftInGrid = canvas.offsetLeft;
-  const xInGrid = canvasLeftInGrid + xInCanvas;
-
-  // Position the overlay line over the chart grid, full height
   const gridRect = chartGrid.getBoundingClientRect();
-  const barRect = scrubber.getBoundingClientRect();
-  const overlayParent = scrubOverlay.parentElement; // .scrubber__bar
-
-  // The overlay needs to be positioned relative to the chart grid area,
-  // not the scrubber bar. Move it into the chart-host container instead.
-  // Actually, let's position it absolutely within chart-host.
   const chartHost = document.getElementById('chart-host');
   if (!chartHost) { scrubOverlay.style.display = 'none'; return; }
 
-  // Find the chart grid's position within chart-host
   const hostRect = chartHost.getBoundingClientRect();
-  const gridLeftInHost = gridRect.left - hostRect.left;
-  const xInHost = gridLeftInHost + xInGrid;
+  const xInHost = canvasRect.left - hostRect.left + xInCanvas;
 
-  // Move the overlay into chart-host if it's not already there
   if (scrubOverlay.parentElement !== chartHost) {
     chartHost.appendChild(scrubOverlay);
   }
 
-  // Position: absolute within chart-host (which is position: relative or static)
-  // Make chart-host position: relative so the overlay anchors correctly
   if (getComputedStyle(chartHost).position === 'static') {
     chartHost.style.position = 'relative';
   }
@@ -269,6 +259,12 @@ document.addEventListener('npews-chart:render', () => {
 window.addEventListener('resize', () => {
   if (!scrubber.hidden) positionOverlay();
 });
+
+// The chart region and footer can resize without a window resize (for example,
+// when the display-controls panel folds). Keep the fixed scrubber aligned.
+new ResizeObserver(() => {
+  if (!scrubber.hidden) positionOverlay();
+}).observe(host);
 
 // Hook into scenario selection to (re)initialise the scrubber.
 // Wrap the original select function so the scrubber reinitialises on
