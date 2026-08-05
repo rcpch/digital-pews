@@ -1276,6 +1276,7 @@ function renderTimeAxis() {
 }
 
 function renderAll() {
+  if (!_ageBands) return;
   computeAgeBandView();
   const defs = getChartDefs();
   const h = getChartHeight();

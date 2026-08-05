@@ -140,10 +140,6 @@ const requested = location.hash.slice(1);
 select(scenarioById(requested) ? requested : SCENARIOS[0].id);
 
 // -- Timeline scrubber (demo only) --------------------------------------------
-// Lets you scroll through the scenario's observations and see the PEWS score
-// at each time point. The chart's own banner/footer always show the latest
-// observation (RCPCH 1.1 invariant); the scrubber readout is separate demo
-// chrome. Uses getViewWindow() from chart.js for x-position alignment.
 
 const scrubber      = document.getElementById('scrubber');
 const scrubSlider    = document.getElementById('scrubber-slider');
@@ -274,9 +270,15 @@ window.addEventListener('resize', () => {
   if (!scrubber.hidden) positionOverlay();
 });
 
-// Hook into scenario selection to (re)initialise the scrubber
+// Hook into scenario selection to (re)initialise the scrubber.
+// Wrap the original select function so the scrubber reinitialises on
+// every scenario change, including the initial load.
 const _originalSelect = select;
 select = function(id) {
   _originalSelect(id);
   initScrubber(scenarioById(id) || SCENARIOS[0]);
 };
+
+// Reinitialise for the already-selected scenario (the initial select()
+// above ran before the override was in place).
+initScrubber(scenarioById(requested) || SCENARIOS[0]);
