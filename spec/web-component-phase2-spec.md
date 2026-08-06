@@ -10,7 +10,7 @@ Phase 2 hardens the existing framework-neutral `<npews-chart>` element for isola
 
 The Phase 1 element renders into light DOM, mounts a shell containing fixed ids, and delegates to a renderer with module-global patient, observation, segment, view, and listener state. It supports one chart per document. Reassigning `.data` rebuilds the shell, while toolbar wiring is guarded globally, so newly inserted controls are not reliably rebound.
 
-Phase 1 browser correctness work in roadmap R13-R19 must land before or with Phase 2. Shadow DOM must not hide existing lifecycle defects or make visual comparison harder.
+Phase 1 browser correctness work in roadmap R14-R19 must land before or with Phase 2. Shadow DOM must not hide existing lifecycle defects or make visual comparison harder.
 
 ## Invariants
 

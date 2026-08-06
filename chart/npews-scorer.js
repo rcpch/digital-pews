@@ -41,6 +41,13 @@ function scoreFromBands(value, bands) {
 const HIGH_FLOW_DEVICES = new Set(['HF', 'BiP', 'CP']);
 // Devices where the delivery-level score applies.
 const LEVEL_DEVICES = new Set(['NP', 'FM', 'HB', 'NRB']);
+const ESCALATION_LEVEL_RANK = new Map([
+  ['low', 1],
+  ['medium', 2],
+  ['high', 3],
+  ['emergency', 4],
+]);
+const NON_SCORE_TRIGGER_CODES = new Set(['SC', 'CQ', 'CI']);
 
 /**
  * Score oxygen: device overrides take precedence over delivery level.
@@ -132,6 +139,39 @@ export function escalationLevelFromScore(total) {
 }
 
 /**
+ * Validate non-score escalation triggers supplied by the host and select the
+ * highest level across the numeric PEWS result and every trigger.
+ *
+ * @param {'low'|'medium'|'high'|'emergency'|null} scoreLevel
+ * @param {Array<{code:'SC'|'CQ'|'CI', level:'low'|'medium'|'high'|'emergency'}>} triggers
+ * @returns {{level:'low'|'medium'|'high'|'emergency'|null, reasons:Array<object>}}
+ */
+export function escalationFromScoreAndTriggers(scoreLevel, triggers = []) {
+  if (!Array.isArray(triggers)) {
+    throw new TypeError('escalationTriggers must be an array');
+  }
+
+  const reasons = scoreLevel ? [{ code: 'P', level: scoreLevel }] : [];
+  for (const trigger of triggers) {
+    if (!trigger || !NON_SCORE_TRIGGER_CODES.has(trigger.code)) {
+      throw new TypeError(`unknown escalation trigger code "${trigger?.code}"`);
+    }
+    if (!ESCALATION_LEVEL_RANK.has(trigger.level)) {
+      throw new TypeError(`unknown escalation level "${trigger.level}"`);
+    }
+    reasons.push({ code: trigger.code, level: trigger.level });
+  }
+
+  const level = reasons.reduce((highest, reason) => {
+    return (ESCALATION_LEVEL_RANK.get(reason.level) || 0) > (ESCALATION_LEVEL_RANK.get(highest) || 0)
+      ? reason.level
+      : highest;
+  }, null);
+
+  return { level, reasons };
+}
+
+/**
  * Decorate a patient's observations with their computed PEWS score, escalation
  * level and the age band that applied at each observation's timestamp.
  *
@@ -144,7 +184,8 @@ export function escalationLevelFromScore(total) {
  * @param {{dob?: string, ageBand?: string}} patient
  * @param {Array<object>} observations - ChartObservation-shaped objects
  * @returns {Array<object>} new objects with ageBand, pewsTotal, escalationLevel,
- *   scoreBreakdown added (scores are null when no age band can be resolved)
+ *   escalationReasons and scoreBreakdown added (scores are null when no age
+ *   band can be resolved)
  */
 export function scoreObservationsForPatient(patient, observations) {
   return observations.map((observation) => {
@@ -153,11 +194,15 @@ export function scoreObservationsForPatient(patient, observations) {
       return { ...observation, ageBand: null, pewsTotal: null, escalationLevel: null, scoreBreakdown: null };
     }
     const { total, fields } = scoreObservation(ageBand, observation);
+    const scoreEscalationLevel = escalationLevelFromScore(total);
+    const escalation = escalationFromScoreAndTriggers(scoreEscalationLevel, observation.escalationTriggers);
     return {
       ...observation,
       ageBand,
       pewsTotal: total,
-      escalationLevel: escalationLevelFromScore(total),
+      scoreEscalationLevel,
+      escalationLevel: escalation.level,
+      escalationReasons: escalation.reasons,
       scoreBreakdown: fields,
     };
   });

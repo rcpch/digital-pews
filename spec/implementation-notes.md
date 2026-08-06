@@ -9,9 +9,9 @@ Clarifications of ambiguities discovered during implementation and testing; a li
 
 The SPOT NPEWS specification requires a colour-blindness friendly design, but does not prescribe exactly how to implement it. [GOV.UK accessibility guidance](https://www.gov.uk/service-manual/helping-people-to-use-your-service/understanding-wcag) points to [WCAG version 2.2](https://www.w3.org/TR/wcag/). This project follows WCAG 2.2 where it does not conflict with the purpose and standards surrounding PEWS. The colour-blind toggle has been removed pending evidenced recommendations for what an accessible mode should look like in a PEWS chart; see roadmap R14.
 
-### RCPCH 1.1 — Zoom must not affect PEWS score display
+### RCPCH 1.1 — Time-window selection must not affect PEWS score display
 
-The degree of zoom **must not** affect calculation or display of the PEWS score. The escalation banner and sticky footer must always use the globally latest observation set, not the latest observation visible in the current zoom window. This was not stated in the earlier spec text and was a bug in an initial implementation.
+The selected time window **must not** affect calculation or display of the PEWS score. The escalation banner and sticky footer must always use the globally latest observation set, not the latest observation visible in the current window. This was not stated in the earlier spec text and was a bug in an initial implementation.
 
 ## Visual verification checklist
 
@@ -64,6 +64,6 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 - [ ] PEWS row cell colours match the escalation level for the observation.
 - [ ] Escalation banner appears when an escalation level exists.
 - [ ] Escalation banner displays the correct level, PEWS score, action text and colour.
-- [ ] Zoom and quick-range controls do not change the banner or sticky-footer score; both use the globally latest observation set.
-- [ ] Toolbar controls work: zoom, quick ranges.
+- [ ] Time-window selectors do not change the banner or sticky-footer score; both use the globally latest observation set.
+- [ ] Every time-window selector works and the active window remains clear after component updates.
 - [ ] Landscape, portrait and mobile layouts remain visually coherent.

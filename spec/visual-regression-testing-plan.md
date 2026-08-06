@@ -23,7 +23,7 @@ Prefer semantic assertions for behaviour that does not require pixel comparison:
 - Initial render from `.data` assigned before and after connection.
 - Repeated `.data`, `.patient`, and `.observations` updates.
 - Scenario changes after the shell has already rendered.
-- Layout, zoom, quick-range controls.
+- Layout and fixed time-window selectors.
 - Layout locking, keyboard navigation, focus visibility, and 200% zoom.
 - Empty observations, missing optional fields, malformed required fields, and skipped values.
 - Connect, disconnect, and reconnect cleanup.

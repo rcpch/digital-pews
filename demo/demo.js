@@ -22,6 +22,46 @@ const list = document.getElementById('scenario-list');
 const chartEl = document.createElement('npews-chart');
 host.appendChild(chartEl);
 
+const triggerControls = document.getElementById('demo-triggers');
+const clinicianTrigger = document.getElementById('trigger-clinician');
+const clinicianLevel = document.getElementById('trigger-clinician-level');
+const carerTrigger = document.getElementById('trigger-carer');
+const carerLevel = document.getElementById('trigger-carer-level');
+
+let selectedScenario = null;
+
+function resetDemoTriggers() {
+  clinicianTrigger.checked = false;
+  clinicianLevel.value = 'low';
+  clinicianLevel.disabled = true;
+  carerTrigger.checked = false;
+  carerLevel.value = 'low';
+  carerLevel.disabled = true;
+}
+
+function observationsWithDemoTriggers(scenario) {
+  const triggers = [];
+  if (clinicianTrigger.checked) triggers.push({ code: 'CI', level: clinicianLevel.value });
+  if (carerTrigger.checked) triggers.push({ code: 'CQ', level: carerLevel.value });
+
+  return scenario.observations.map((observation, index) => {
+    if (index !== scenario.observations.length - 1) return observation;
+    return {
+      ...observation,
+      ...(clinicianTrigger.checked ? { clinicalIntuition: 'yes' } : {}),
+      ...(carerTrigger.checked ? { carerQuestion: 'W' } : {}),
+      escalationTriggers: triggers,
+    };
+  });
+}
+
+function renderSelectedScenario() {
+  if (!selectedScenario) return;
+  const observations = observationsWithDemoTriggers(selectedScenario);
+  chartEl.data = { patient: selectedScenario.patient, observations };
+  initScrubber({ ...selectedScenario, observations });
+}
+
 // -- Chart colour themes ------------------------------------------------------
 // Each theme is a CSS class applied to <html> (see the "Optional chrome themes"
 // block in chart/styles.css). Themes only restyle the chart *chrome*; the
@@ -42,7 +82,7 @@ function applyTheme(id) {
   if (theme.cls) document.documentElement.classList.add(theme.cls);
   try { localStorage.setItem(THEME_KEY, theme.id); } catch (_) { /* private mode */ }
   // The canvas reads --chart-line/--chart-dot at render time; nudge a re-render
-  // so the trend line/dots pick up the new theme without losing zoom state.
+  // so the trend line/dots pick up the new theme without losing view state.
   window.dispatchEvent(new Event('resize'));
 }
 
@@ -104,8 +144,8 @@ const buttons = () => Array.from(list.querySelectorAll('.scenario'));
 // -- Select + render a scenario ----------------------------------------------
 function select(id) {
   const scenario = scenarioById(id) || SCENARIOS[0];
-
-  chartEl.data = { patient: scenario.patient, observations: scenario.observations };
+  selectedScenario = scenario;
+  resetDemoTriggers();
 
   buttons().forEach((btn) => {
     const active = btn.dataset.id === scenario.id;
@@ -116,6 +156,8 @@ function select(id) {
   if (location.hash.slice(1) !== scenario.id) {
     history.replaceState(null, '', `#${scenario.id}`);
   }
+
+  renderSelectedScenario();
 }
 
 list.addEventListener('click', (e) => {
@@ -135,9 +177,11 @@ list.addEventListener('keydown', (e) => {
   select(all[next].dataset.id);
 });
 
-// -- Initial selection (deep-linkable via #scenario-id) ----------------------
-const requested = location.hash.slice(1);
-select(scenarioById(requested) ? requested : SCENARIOS[0].id);
+triggerControls.addEventListener('change', () => {
+  clinicianLevel.disabled = !clinicianTrigger.checked;
+  carerLevel.disabled = !carerTrigger.checked;
+  renderSelectedScenario();
+});
 
 // -- Timeline scrubber (demo only) --------------------------------------------
 
@@ -251,7 +295,7 @@ scrubSlider.addEventListener('input', () => {
   updateScrubber();
 });
 
-// Reposition overlay after chart re-renders (zoom, range, resize, scenario switch)
+// Reposition overlay after chart re-renders (time window, resize, scenario switch)
 document.addEventListener('npews-chart:render', () => {
   if (!scrubber.hidden) positionOverlay();
 });
@@ -266,15 +310,6 @@ new ResizeObserver(() => {
   if (!scrubber.hidden) positionOverlay();
 }).observe(host);
 
-// Hook into scenario selection to (re)initialise the scrubber.
-// Wrap the original select function so the scrubber reinitialises on
-// every scenario change, including the initial load.
-const _originalSelect = select;
-select = function(id) {
-  _originalSelect(id);
-  initScrubber(scenarioById(id) || SCENARIOS[0]);
-};
-
-// Reinitialise for the already-selected scenario (the initial select()
-// above ran before the override was in place).
-initScrubber(scenarioById(requested) || SCENARIOS[0]);
+// -- Initial selection (deep-linkable via #scenario-id) ----------------------
+const requested = location.hash.slice(1);
+select(scenarioById(requested) ? requested : SCENARIOS[0].id);

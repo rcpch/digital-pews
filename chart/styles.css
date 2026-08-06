@@ -230,6 +230,12 @@ npews-chart {
   flex: 1 0 100%;
 }
 
+.escalation-banner__reason {
+  flex: 1 0 100%;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
 @media (min-width: 700px) {
   .escalation-banner__action { flex: 1; }
 }
@@ -252,7 +258,8 @@ npews-chart {
 
 .toolbar__group {
   display: flex;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.65rem;
   align-items: center;
 }
 
@@ -262,24 +269,27 @@ npews-chart {
   margin-right: 0.25rem;
 }
 
-.btn {
-  border: 1px solid var(--border);
-  background: var(--surface);
+.toolbar__range-link {
   color: var(--text-primary);
-  padding: 0.3rem 0.75rem;
-  border-radius: 3px;
-  font-size: 0.875rem;
-  transition: background 0.1s;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 0.15rem 0.1rem;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
-.btn:hover  { background: #e8e8e8; }
-.btn:focus  { outline: 3px solid var(--focus-ring); outline-offset: 0; }
-.btn--active { background: var(--text-primary); color: #fff; }
+.toolbar__range-link:hover {
+  text-decoration-thickness: 2px;
+}
 
-.btn--icon {
-  padding: 0.3rem 0.5rem;
-  font-size: 1rem;
-  line-height: 1;
+.toolbar__range-link:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.toolbar__range-link--active {
+  font-weight: 800;
+  text-decoration-thickness: 3px;
 }
 
 .toolbar__spacer { flex: 1; }
@@ -515,19 +525,9 @@ canvas.chart-canvas {
   margin-left: auto;
 }
 
-.sticky-footer__action-btn {
-  background: var(--esc-emergency);
-  color: #fff;
-  border: none;
-  padding: 0.4rem 1rem;
-  border-radius: 3px;
-  font-size: 0.875rem;
+.sticky-footer__reason {
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.sticky-footer__action-btn:focus {
-  outline: 3px solid var(--focus-ring);
 }
 
 /* --- Skip marker ------------------------------------------- */
@@ -644,11 +644,6 @@ body[data-layout="portrait"] .toolbar__inner {
   gap: 0.35rem;
 }
 
-body[data-layout="portrait"] .btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8125rem;
-}
-
 /* --- Mobile ------------------------------------------------ */
 body[data-layout="mobile"] .chart-grid {
   grid-template-columns: 24px 110px 1fr;
@@ -688,11 +683,6 @@ body[data-layout="mobile"] .patient-header__meta {
 body[data-layout="mobile"] .toolbar__inner {
   flex-wrap: wrap;
   gap: 0.25rem;
-}
-
-body[data-layout="mobile"] .btn {
-  padding: 0.2rem 0.4rem;
-  font-size: 0.8125rem;
 }
 
 body[data-layout="mobile"] .sticky-footer__score {

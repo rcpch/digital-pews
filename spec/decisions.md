@@ -5,6 +5,17 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D16 — Use fixed time windows; do not create an ED variant without evidence
+**2026-08-06.** Remove the ineffective zoom, calendar-range, and “Jump to Present” buttons.
+The component instead offers small text links for fixed windows ending at the latest observation,
+which provide the functional ability to see fewer observations in more detail or more observations
+in less detail required by `U3.1`:
+1 week, 3 days, 24, 12, 8, 4, 2, and 1 hour. This covers the currently described Emergency
+Department need for fewer observations consulted more frequently without introducing an
+ill-defined ED-specific chart. A separate ED variant requires evidence of distinct clinical
+semantics that cannot be met by these windows. Missing blood pressure in ED is not addressed by
+rescaling or altering PEWS; it remains an explicit research question under R53.
+
 ## D15 — Build a composable NPEWS component, not a complete SPOT/NPEWS solution
 **2026-08-06.** This repository owns the bounded scoring and observation-chart component. It
 does not own observation entry, EPR records, persistence, audit, operational escalation,
@@ -100,9 +111,9 @@ rather than stopping one and starting another: one continuous trend line on a un
 at the exact birthday instant, a dashed divider, and a `→ <band>` marker on the PEWS row. Only
 RR/HR/BP thresholds differ across bands, so SpO₂/O₂/temperature show no visible seam.
 
-## D4 — Zoom must not affect the PEWS score
+## D4 — The visible time window must not affect the PEWS score
 **Implementation.** The escalation banner and sticky footer always use the globally latest
-observation set, never the latest observation visible in the current zoom window. See
+observation set, never the latest observation visible in the selected time window. See
 [`implementation-notes.md`](./implementation-notes.md#RCPCH1.1).
 
 ## D3 — Colour-blindness: follow WCAG 2.2 (RCPCH 1.1)
@@ -113,8 +124,11 @@ observation set, never the latest observation visible in the current zoom window
 the local house-style rules (cooldown windows, grouping).
 
 ## D1 — Pseudonymised data must never be published
-Any pseudonymised/dummy patient data is treated as identifiable and must not be committed or
-published.
+Any pseudonymised or patient-derived row-level data is treated as identifiable and must not be
+committed or published. Small random perturbations do not make a rich longitudinal record
+synthetic: they preserve timestamps, trajectory shape, rare events, and cross-variable patterns
+that may permit linkage or singling out. Public fixtures must be independently generated from a
+documented synthetic scenario or pass a formal disclosure-risk review with recorded approval.
 
 ---
 

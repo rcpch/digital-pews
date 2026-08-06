@@ -9,8 +9,7 @@
    - Break lines at skipped observations (U3.10) and O2 modality changes (U9.7)
    - Y-axis: highest value at top, lowest at bottom (U3.7)
    - Show exact values on hover (U3.5 / U3.6)
-   - Zoom in/out (U3.1) and quick-range buttons (U3.3)
-   - Jump to present (U3.12)
+   - Select fixed clinically useful time windows ending at the latest observation
    - Compute the PEWS score for every observation via the scorer (single
      source of truth) and select the age band per observation from the
      patient's date of birth, joining charts seamlessly across a birthday.
@@ -694,6 +693,7 @@ let viewState = {
   start: null,
   end:   null,
 };
+let activeTimeWindowHours = 24;
 
 // ---- Layout helpers ----------------------------------------
 
@@ -722,57 +722,20 @@ function getCategoricalHeight() {
 }
 
 function computeDefaultView(observations) {
-  // Default: show last 24 hours of data (minimum visible window)
-  const times = observations.map(o => parseTs(o.timestamp));
-  const last  = Math.max(...times);
-  const twentyFourH = 24 * 60 * 60 * 1000;
-  return {
-    start: last - twentyFourH + 30 * 60 * 1000, // place latest obs near right edge
-    end:   last + 30 * 60 * 1000,                // 30 min padding on right
-  };
+  return computeTimeWindow(observations, activeTimeWindowHours);
 }
 
-function applyQuickRange(range, observations) {
-  const now = Math.max(...observations.map(o => parseTs(o.timestamp)));
-  const day  = 24 * 60 * 60 * 1000;
-  switch (range) {
-    case 'today':
-      const todayStart = new Date(now);
-      todayStart.setHours(0,0,0,0);
-      viewState.start = todayStart.getTime();
-      viewState.end   = now + 30 * 60 * 1000;
-      break;
-    case 'week':
-      viewState.start = now - 7 * day;
-      viewState.end   = now + 30 * 60 * 1000;
-      break;
-    case 'month':
-      viewState.start = now - 30 * day;
-      viewState.end   = now + 30 * 60 * 1000;
-      break;
-    case 'present':
-    default:
-      const def = computeDefaultView(observations);
-      viewState.start = def.start;
-      viewState.end   = def.end;
-  }
+function computeTimeWindow(observations, hours) {
+  const times = observations.map(o => parseTs(o.timestamp)).filter(Number.isFinite);
+  const end = times.length ? Math.max(...times) : Date.now();
+  return { start: end - hours * 60 * 60 * 1000, end };
 }
 
-function zoomIn(observations) {
-  const mid = (viewState.start + viewState.end) / 2;
-  const half = (viewState.end - viewState.start) / 2;
-  const minHalf = 12 * 60 * 60 * 1000; // min window = 24h (half = 12h)
-  const newHalf = Math.max(half * 0.6, minHalf);
-  viewState.start = mid - newHalf;
-  viewState.end   = mid + newHalf;
-}
-
-function zoomOut(observations) {
-  const mid = (viewState.start + viewState.end) / 2;
-  const half = (viewState.end - viewState.start) / 2;
-  const newHalf = Math.min(half * 1.5, 90 * 24 * 60 * 60 * 1000); // max 90 days
-  viewState.start = mid - newHalf;
-  viewState.end   = mid + newHalf;
+function applyTimeWindow(hours, observations) {
+  activeTimeWindowHours = hours;
+  const window = computeTimeWindow(observations, hours);
+  viewState.start = window.start;
+  viewState.end = window.end;
 }
 
 // ---- Categorical row cell definitions ----------------------
@@ -1316,7 +1279,7 @@ function renderAll() {
   renderPewsCanvas();
 
   // Notify host pages (e.g. the demo scrubber) that a render cycle has
-  // completed and the view window may have changed (zoom, range, resize).
+  // completed and the view window may have changed (time window or resize).
   document.dispatchEvent(new CustomEvent('npews-chart:render', {
     detail: { start: viewState.start, end: viewState.end },
   }));
@@ -1340,7 +1303,8 @@ function renderEscalationBanner() {
   const banner = document.getElementById('escalation-banner');
   if (!banner) return;
 
-  // Always use the globally latest observation - zoom must not affect PEWS score display
+  // Always use the globally latest observation - the selected time window must
+  // not affect PEWS score display.
   const scored = _scored || [];
   if (scored.length === 0) { banner.style.display = 'none'; return; }
 
@@ -1348,12 +1312,21 @@ function renderEscalationBanner() {
   if (!latest.escalationLevel) { banner.style.display = 'none'; return; }
 
   const meta = ESCALATION_META[latest.escalationLevel];
+  const reasonLabels = { P: 'PEWS', CI: 'Clinical intuition', CQ: 'Carer question', SC: 'Specific concern' };
+  const reasons = (latest.escalationReasons || [])
+    .map(reason => {
+      const label = reasonLabels[reason.code];
+      const level = ESCALATION_META[reason.level]?.label;
+      return label && level ? `${label} (${level})` : null;
+    })
+    .filter(Boolean);
   banner.style.display = 'flex';
   banner.className = `escalation-banner escalation-banner--${latest.escalationLevel}`;
   banner.innerHTML = `
     <span class="escalation-banner__level">${meta.label}</span>
     <span class="escalation-banner__score">PEWS ${latest.pewsTotal}</span>
     <span class="escalation-banner__action">${meta.action}</span>
+    ${reasons.length ? `<span class="escalation-banner__reason">Source: ${reasons.join(', ')}</span>` : ''}
   `;
 }
 
@@ -1368,16 +1341,18 @@ function renderFooter() {
   const latest = scored[scored.length - 1];
   const level  = latest.escalationLevel;
   const meta   = level ? ESCALATION_META[level] : null;
+  const nonScoreReasons = (latest.escalationReasons || [])
+    .filter(reason => reason.code !== 'P')
+    .map(reason => `${reason.code} ${ESCALATION_META[reason.level]?.label || reason.level}`)
+    .join(', ');
 
   footer.innerHTML = `
     <div class="sticky-footer__inner">
       <span class="sticky-footer__score-label">Latest PEWS</span>
       <span class="sticky-footer__score">${latest.pewsTotal}</span>
       ${meta ? `<span class="sticky-footer__escalation sticky-footer__escalation--${level}">${meta.label}</span>` : ''}
+      ${nonScoreReasons ? `<span class="sticky-footer__reason">Trigger: ${nonScoreReasons}</span>` : ''}
       <span class="sticky-footer__time">${fmtDateTime(latest.timestamp)}</span>
-      ${level === 'emergency' || level === 'high'
-        ? `<button class="sticky-footer__action-btn" onclick="alert('Escalation action triggered')">Escalate Now</button>`
-        : ''}
     </div>
   `;
 }
@@ -1525,37 +1500,26 @@ let _toolbarWired = false;
 function wireToolbar() {
   if (_toolbarWired) return;
   _toolbarWired = true;
-  // Zoom buttons
-  document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
-    zoomIn(_observations); renderAll(); renderEscalationBanner();
+  // Delegate from document because the Web Component replaces its light-DOM
+  // shell whenever data is reassigned.
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('.toolbar__range-link');
+    if (!link) return;
+    event.preventDefault();
+    const hours = Number(link.dataset.windowHours);
+    if (!Number.isFinite(hours) || hours <= 0) return;
+    applyTimeWindow(hours, _observations);
+    renderAll();
+    updateActiveTimeWindow(hours);
   });
-  document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
-    zoomOut(_observations); renderAll(); renderEscalationBanner();
-  });
-
-  // Quick range buttons
-  ['today', 'week', 'month'].forEach(range => {
-    document.getElementById(`btn-${range}`)?.addEventListener('click', () => {
-      applyQuickRange(range, _observations);
-      renderAll(); renderEscalationBanner();
-      updateActiveBtn(range);
-    });
-  });
-
-  // Jump to present
-  document.getElementById('btn-present')?.addEventListener('click', () => {
-    applyQuickRange('present', _observations);
-    renderAll(); renderEscalationBanner();
-    updateActiveBtn('present');
-  });
-
-
 }
 
-function updateActiveBtn(active) {
-  ['today', 'week', 'month', 'present'].forEach(id => {
-    const btn = document.getElementById(`btn-${id}`);
-    if (btn) btn.classList.toggle('btn--active', id === active);
+function updateActiveTimeWindow(activeHours) {
+  document.querySelectorAll('.toolbar__range-link').forEach(link => {
+    const active = Number(link.dataset.windowHours) === activeHours;
+    link.classList.toggle('toolbar__range-link--active', active);
+    if (active) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
   });
 }
 
@@ -1704,6 +1668,7 @@ function init(patient, observations, ageBands) {
   if (gridEl) buildChartGrid(gridEl);
 
   wireToolbar();
+  updateActiveTimeWindow(activeTimeWindowHours);
 
   // Tooltips. buildChartGrid recreates the canvases on every call, so the old
   // listeners die with the old elements and we simply (re)attach to the new ones.

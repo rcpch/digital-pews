@@ -30,22 +30,20 @@ export const CHART_SHELL_HTML = `
   <div id="escalation-banner" class="escalation-banner" style="display:none;" role="alert" aria-live="polite"></div>
 
   <!-- Toolbar -->
-  <div class="toolbar" role="toolbar" aria-label="Chart controls">
+  <div class="toolbar" aria-label="Chart time window">
     <div class="toolbar__inner">
 
-      <div class="toolbar__group" aria-label="Zoom">
-        <span class="toolbar__label">Zoom</span>
-        <button class="btn btn--icon" id="btn-zoom-in"  title="Zoom in"  aria-label="Zoom in">+</button>
-        <button class="btn btn--icon" id="btn-zoom-out" title="Zoom out" aria-label="Zoom out">-</button>
-      </div>
-
-      <div class="toolbar__group" aria-label="Quick date range">
-        <span class="toolbar__label">Range</span>
-        <button class="btn" id="btn-today"   aria-pressed="false">Today</button>
-        <button class="btn" id="btn-week"    aria-pressed="false">This Week</button>
-        <button class="btn" id="btn-month"   aria-pressed="false">This Month</button>
-        <button class="btn btn--active" id="btn-present" aria-pressed="true">Jump to Present</button>
-      </div>
+      <nav class="toolbar__group" aria-label="Visible time window">
+        <span class="toolbar__label">View</span>
+        <a class="toolbar__range-link" href="#" data-window-hours="168">1w</a>
+        <a class="toolbar__range-link" href="#" data-window-hours="72">3d</a>
+        <a class="toolbar__range-link toolbar__range-link--active" href="#" data-window-hours="24" aria-current="true">24h</a>
+        <a class="toolbar__range-link" href="#" data-window-hours="12">12h</a>
+        <a class="toolbar__range-link" href="#" data-window-hours="8">8h</a>
+        <a class="toolbar__range-link" href="#" data-window-hours="4">4h</a>
+        <a class="toolbar__range-link" href="#" data-window-hours="2">2h</a>
+        <a class="toolbar__range-link" href="#" data-window-hours="1">1h</a>
+      </nav>
 
       <div class="toolbar__spacer"></div>
 

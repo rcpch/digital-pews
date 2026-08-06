@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { scoreObservation, escalationLevelFromScore, scoreObservationsForPatient } from '../../chart/npews-scorer.js';
+import { escalationFromScoreAndTriggers, scoreObservation, escalationLevelFromScore, scoreObservationsForPatient } from '../../chart/npews-scorer.js';
 import { fromFhirBundleToChartModel } from '../../chart/fhir-adapter.js';
 import stableNormal from './fixtures/stable-normal-5-12y.json';
 import skipReasons from './fixtures/skip-reasons-0-11m.json';
@@ -226,6 +226,31 @@ describe('escalationLevelFromScore', () => {
   it('20 → emergency', () => expect(escalationLevelFromScore(20)).toBe('emergency'));
 });
 
+describe('escalationFromScoreAndTriggers', () => {
+  it('uses a non-score trigger when it is higher than the numeric PEWS level', () => {
+    expect(escalationFromScoreAndTriggers('low', [{ code: 'CI', level: 'high' }])).toEqual({
+      level: 'high',
+      reasons: [{ code: 'P', level: 'low' }, { code: 'CI', level: 'high' }],
+    });
+  });
+
+  it('retains the numeric PEWS level when it is highest', () => {
+    expect(escalationFromScoreAndTriggers('emergency', [{ code: 'CQ', level: 'medium' }]).level).toBe('emergency');
+  });
+
+  it('supports concern without a numeric PEWS escalation', () => {
+    expect(escalationFromScoreAndTriggers(null, [{ code: 'CQ', level: 'low' }])).toEqual({
+      level: 'low',
+      reasons: [{ code: 'CQ', level: 'low' }],
+    });
+  });
+
+  it('rejects unknown trigger codes and levels rather than silently ignoring them', () => {
+    expect(() => escalationFromScoreAndTriggers(null, [{ code: 'other', level: 'low' }])).toThrow(/trigger code/i);
+    expect(() => escalationFromScoreAndTriggers(null, [{ code: 'CI', level: 'critical' }])).toThrow(/escalation level/i);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // 1d. Unknown age band
 // ---------------------------------------------------------------------------
@@ -275,6 +300,29 @@ describe('scoreObservationsForPatient: age band resolved per observation from DO
     const [obsNoBand] = scoreObservationsForPatient({}, [{ timestamp: '2024-01-01T00:00:00', heartRate: 85 }]);
     expect(obsNoBand.ageBand).toBeNull();
     expect(obsNoBand.pewsTotal).toBeNull();
+  });
+
+  it('applies an explicit non-score trigger without changing the numeric PEWS total', () => {
+    const [triggered] = scoreObservationsForPatient(patient, [{
+      timestamp: '2024-03-14T01:00:00',
+      heartRate: 100,
+      clinicalIntuition: 'yes',
+      escalationTriggers: [{ code: 'CI', level: 'high' }],
+    }]);
+    expect(triggered.pewsTotal).toBe(0);
+    expect(triggered.scoreEscalationLevel).toBeNull();
+    expect(triggered.escalationLevel).toBe('high');
+    expect(triggered.escalationReasons).toEqual([{ code: 'CI', level: 'high' }]);
+  });
+
+  it('does not infer an escalation level from a raw concern response', () => {
+    const [notInferred] = scoreObservationsForPatient(patient, [{
+      timestamp: '2024-03-14T01:00:00',
+      heartRate: 100,
+      clinicalIntuition: 'yes',
+    }]);
+    expect(notInferred.pewsTotal).toBe(0);
+    expect(notInferred.escalationLevel).toBeNull();
   });
 });
 

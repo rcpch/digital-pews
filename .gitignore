@@ -32,6 +32,7 @@ Thumbs.db
 
 # Test output (screenshots etc - not source)
 test-output/screenshots/
+.playwright-mcp/
 
-# Exclude dummy-pews-data for now
+# Patient-derived longitudinal data is treated as identifiable; never commit it
 dummy-pews-data/

@@ -29,7 +29,7 @@ For emergency or life-threatening situations: call 2222 and state “Paediatric 
 
 Clinical policy from the reference charts: respond according to the highest escalation level from the PEWS score or any trigger criterion. These triggers can raise the escalation level above the numeric-score level.
 
-Implementation status: `chart/npews-scorer.js` currently hardcodes only `escalationLevelFromScore(total)`. Trigger-based overrides for Carer Question, Clinical Intuition, Specific Concern, AVPU and temperature are documented policy and are not all hardcoded in the scorer.
+Implementation status: `chart/npews-scorer.js` accepts explicit `CI`, `CQ`, and `SC` trigger levels supplied by the host, retains their provenance, and selects the highest level across those triggers and numeric PEWS. The demo can exercise Clinical Intuition and Carer Question triggers. Automatic derivation from AVPU, temperature, sepsis, and the raw question responses remains unimplemented; the host-to-EPR/FHIR representation also remains open.
 
 | Trigger criterion | Low | Medium | High | Emergency |
 | --- | --- | --- | --- | --- |
@@ -51,6 +51,8 @@ Short codes for escalation reason:
 | CI | Clinical Intuition |
 | P | PEWS |
 | 0 | None |
+
+The component input uses `escalationTriggers: [{ code, level }]` for explicit non-score trigger decisions. A raw Clinical Intuition “Yes” or Carer Question “Worse” does not determine the level by itself: the national material permits the clinician to select None, Low, Medium, High, or Emergency. The component therefore does not infer a level from the response. See [`data-model.md`](./data-model.md).
 
 ## AVPU & temperature
 

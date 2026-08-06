@@ -43,8 +43,44 @@
       </p>
     </aside>
 
-    <!-- The chart component mounts here. It knows nothing about the sidebar. -->
-    <div class="demo-main" id="chart-host"></div>
+    <!-- Demo-only trigger controls feed explicit non-score escalation inputs to
+         the component. A production host owns collection of these values. -->
+    <div class="demo-main" id="chart-host">
+      <div class="demo-triggers" id="demo-triggers" role="group" aria-labelledby="demo-triggers-title">
+        <span class="demo-triggers__legend" id="demo-triggers-title">Demo escalation triggers</span>
+        <div class="demo-trigger">
+          <label class="demo-trigger__toggle">
+            <input type="checkbox" id="trigger-clinician" />
+            Clinician concern
+          </label>
+          <label class="demo-trigger__level">
+            Level
+            <select id="trigger-clinician-level" aria-label="Clinician concern escalation level" disabled>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="emergency">Emergency</option>
+            </select>
+          </label>
+        </div>
+        <div class="demo-trigger">
+          <label class="demo-trigger__toggle">
+            <input type="checkbox" id="trigger-carer" />
+            Carer says child is worse
+          </label>
+          <label class="demo-trigger__level">
+            Level
+            <select id="trigger-carer-level" aria-label="Carer concern escalation level" disabled>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="emergency">Emergency</option>
+            </select>
+          </label>
+        </div>
+        <p class="demo-triggers__note">The checkbox records Yes/Worse. The selected escalation level is explicit; the component does not infer it.</p>
+      </div>
+    </div>
 
     <!-- Foldable right-hand controls: chart colour theme picker. Themes only
          restyle the chart chrome; the clinical band/escalation colours are

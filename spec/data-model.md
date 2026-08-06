@@ -79,6 +79,13 @@ DOB, and ignores any score present in input.
   avpu: string | null,                // 'A' | 'V' | 'P' | 'U' (escalation only, not scored)
   temperature: number | null,         // °C (escalation only, not scored)
 
+  clinicalIntuition?: 'yes' | 'no' | 'skip',
+  carerQuestion?: 'W' | 'S' | 'B' | 'A' | 'U' | 'skip',
+  escalationTriggers?: Array<{
+    code: 'CI' | 'CQ' | 'SC',
+    level: 'low' | 'medium' | 'high' | 'emergency',
+  }>,
+
   // Optional, one per vital that was skipped (value then null):
   //   <field>_skipReason?: string    e.g. respiratoryRate_skipReason: 'U4'
 }
@@ -88,6 +95,14 @@ Field constraints: `avpu` ∈ {A,V,P,U}; `respiratoryDistress` ∈ {none,mild,mo
 any vital may be `null` (skipped). `oxygenDelivery` is `null` on room air; a change of
 `unit` (`%` ↔ `L/min`) causes a deliberate line break in the chart (a real modality change,
 not a continuous trend).
+
+`clinicalIntuition` and `carerQuestion` preserve the national response codes. A concerned
+response does not imply one fixed escalation level: the host supplies the explicitly selected
+level in `escalationTriggers`. The scorer combines those triggers with numeric PEWS, selects the
+highest level, and returns `scoreEscalationLevel` plus `escalationReasons` (including derived
+`P` provenance when numeric PEWS contributes). `SC`, `CQ`, `CI`, and derived `P` are the national
+short codes documented in [`escalation.md`](./escalation.md). Mapping these fields to EPR/FHIR
+structures remains open under R38; the component contract does not prescribe an EPR workflow.
 
 ---
 
