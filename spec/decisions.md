@@ -5,6 +5,19 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D15 — Build a composable NPEWS component, not a complete SPOT/NPEWS solution
+**2026-08-06.** This repository owns the bounded scoring and observation-chart component. It
+does not own observation entry, EPR records, persistence, audit, operational escalation,
+reporting, hosting, training, support, or the supplier-level obligations in the national
+procurement specification, and it must not independently claim complete National PEWS
+compliance. Integrators can compose the component into a wider solution and are responsible for
+the surrounding workflow and deployment controls. The component deliberately does not implement
+the adjacent-form override in `C2.2`: exact calendar age selects the scoring band, while clinical
+intuition or specific concern must be recorded transparently rather than expressed by changing
+the scoring frame. Full scope, allocation matrix, permitted claims, and rationale are in
+[`product-boundary.md`](./product-boundary.md). This decision narrows D11 to conformance within
+the component's defined algorithm and rendering scope.
+
 ## D14 — Component source (`chart/`) separated from the demo harness (`demo/`)
 **2026-07-03.** The single `pews-chart/` folder was split into `chart/` (the reusable
 component: scorer, config, age-band maths, canvas engine, chart shell, `<npews-chart>`
@@ -36,10 +49,11 @@ baselines captured via browser automation (e.g. Playwright `toHaveScreenshot`), 
 service.
 
 ## D11 — Conform, don't extend
-**2026-06-30, reaffirmed 2026-07-02.** The tool implements exactly the national SPOT NPEWS
-algorithm and adds nothing not in the source specification. A trust evaluating us against
-Cerner will expect bit-for-bit NPEWS conformance, so any deviation is a hard objection. This
-principle governs D10.
+**2026-06-30, reaffirmed 2026-07-02 and scoped by D15 on 2026-08-06.** Within the component's
+defined responsibilities, the tool implements the national NPEWS scoring algorithm and chart
+semantics without locally invented scoring behaviour. Algorithmic deviations are clinical-safety
+issues. This principle governs D10; D15 separately defines which complete-solution workflow
+requirements are outside the component or deliberately excluded.
 
 ## D10 — Temperature and AVPU are not numerically scored (conformant mode)
 **2026-06-30, AVPU reconfirmed 2026-07-02** against the published PEWS PDFs and specs. Only

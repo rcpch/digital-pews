@@ -2,6 +2,10 @@
 
 Plain HTML/CSS/JS implementation of the NHS National Paediatric Early Warning System (NPEWS) observation chart. No framework, no build step, no dependencies.
 
+This repository provides a bounded scoring and charting component for integration into a wider clinical system. It is not an EPR workflow or a complete SPOT/NPEWS solution and does not independently claim National PEWS compliance. See the [product and compliance boundary](spec/product-boundary.md).
+
+Clinical safety status, known hazards, transferred controls, and release limitations are documented in [`SAFETY.md`](SAFETY.md). No clinically approved release has been designated.
+
 ## Prerequisites
 
 - **Docker** and **Docker Compose** (for running services)

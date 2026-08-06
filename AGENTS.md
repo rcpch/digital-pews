@@ -7,7 +7,9 @@ This is a **clinical safety tool**. Visual accuracy and spec compliance matter m
 ## Read First
 
 - [README.md](README.md) - setup and project overview.
+- [SAFETY.md](SAFETY.md) - clinical safety status, hazards, controls, and release limitations.
 - [spec/README.md](spec/README.md) - spec index and landing page.
+- [spec/product-boundary.md](spec/product-boundary.md) - component-only scope, responsibility allocation, and compliance claims.
 - [spec/roadmap.md](spec/roadmap.md) - forward-looking work.
 - [~/code/house-style/AGENTS.md](~/code/house-style/AGENTS.md) - cross-repo standards.
 
@@ -41,6 +43,7 @@ Files load as native ES modules and `import` their own dependencies. A host page
 4. **Do not add a build step to the `chart/` source.** The source must stay plain HTML/CSS/JS loaded as native ES modules. A distribution-only bundle (NPM/UMD for CDN publishing) is allowed as a separate packaging step.
 5. **Do not draw a line over a skipped observation** (spec U3.10). A skip must cause a break in the line.
 6. **Respect the ES-module dependency order.** `chart.js` imports its config/scorer/age-band deps; `npews-chart.js` imports `chart-shell.js` + `chart.js`. Hosts render by feeding the `<npews-chart>` element a `{ patient, observations }` object, never by relying on implicit global-script load order.
+7. **Keep the product boundary component-only.** This repository owns NPEWS scoring and observation-chart rendering, not observation entry, EPR records, persistence, audit, operational alerting, reporting, or supplier services. It must not independently claim complete National PEWS compliance. See `spec/product-boundary.md`.
 
 ## Design Tokens
 

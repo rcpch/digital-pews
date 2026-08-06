@@ -37,11 +37,13 @@ non-negotiable; requirement IDs (`U3.10`, `C3.17`, …) are load-bearing — don
 | [`escalation.md`](./escalation.md) | Escalation levels, non-score triggers, "think sepsis", and the ISBAR aide-memoire. |
 | [`data-model.md`](./data-model.md) | The two component inputs — `Patient` and `Observation` (raw vitals) — plus data-entry reference codes. |
 | [`fhir.md`](./fhir.md) | The FHIR adapter contract (as implemented) and the conformance-testing approach. |
+| [`../SAFETY.md`](../SAFETY.md) | Current clinical safety status, initial hazard log, controls, transferred responsibilities, and open assurance work. |
 
 ## Project decisions & direction
 
 | Document | What it covers |
 | --- | --- |
+| [`product-boundary.md`](./product-boundary.md) | The component-only product boundary, responsibility allocation, compliance claims, and deliberate `C2.2` non-conformance. |
 | [`decisions.md`](./decisions.md) | Durable decision log (ADR-style, newest first). Start here to understand the project's choices. |
 | [`implementation-notes.md`](./implementation-notes.md) | Clarifications discovered while building, plus a manual visual-QA checklist. |
 | [`react.md`](./react.md) | The component-architecture decision: framework-neutral Web Component vs React. |

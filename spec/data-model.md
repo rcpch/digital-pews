@@ -19,7 +19,7 @@ Derived/config structures are documented where they live:
 ```javascript
 {
   name: string,          // required — full name
-  dob: string,           // ISO 8601 (YYYY-MM-DD). Strongly recommended: drives scoring
+  dob: string,           // ISO 8601 (YYYY-MM-DD). Required for assured clinical scoring
   nhsNumber?: string,    // formatted with spaces
   ward?: string,
   bed?: string,
@@ -40,7 +40,8 @@ Derived/config structures are documented where they live:
   5th / 13th birthday. Day-based approximations (`days/365.25`) are deliberately avoided
   because they mis-fire around leap-year birthdays.
 - `ageBand` is a **display/fallback hint only** — used only when `dob` is missing. It must
-  match a key in `AGE_BANDS`.
+  match a key in `AGE_BANDS`. This compatibility fallback is not an alternate-form override
+  and is not suitable for assured clinical scoring.
 - The canonical half-open band bounds (years) live in `npews-scoring-spec.json`
   (`ageBandBounds`) → generated into `AGE_BAND_BOUNDS`: `0-11m`=[0,1), `1-4y`=[1,5),
   `5-12y`=[5,13), `13+y`=[13,∞).

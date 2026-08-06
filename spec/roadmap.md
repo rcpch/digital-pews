@@ -1,15 +1,13 @@
 # Roadmap
 
-Last reviewed: 2026-07-23 against the current implementation and test suite.
+Last reviewed: 2026-08-06 following NHSE child-health representative feedback on 2026-08-05 and review against the current implementation and test suite.
 
-Legend: `[x]` done with relevant automated evidence, `[~]` implemented but unverified or partially complete, `[ ]` not started. Item codes are stable and must not be renumbered when priorities change.
+Legend: `[~]` implemented but unverified or partially complete, `[ ]` not started. Completed items are removed from this forward-looking roadmap; item codes are stable and must not be renumbered when priorities change.
 
 Clinical correctness, safety evidence, and conformance take precedence over packaging and presentation work.
 
 ## Current Baseline
 
-- [x] **R1 - Keep numeric scoring in one canonical JSON source.** `npews-scoring-spec.json` generates the configuration consumed by the calculator and UI plus the human-readable reference tables, with drift and freshness tests preventing those surfaces from diverging.
-- [x] **R2 - Resolve age bands from date of birth.** Date arithmetic and birthday-boundary behaviour are covered by automated tests.
 - [~] **R3 - Render the observation chart.** Proportional time spacing, skipped-observation line breaks, oxygen-modality line breaks, birthday crossing, PEWS totals, escalation banners, and responsive layouts are implemented but lack browser and Canvas regression tests.
 - [~] **R4 - Provide the Phase 1 Web Component.** The light-DOM `<npews-chart>` element accepts `{ patient, observations }`, but remains limited to one chart per document and has lifecycle gaps when data is reassigned.
 - [~] **R5 - Maintain clinical review scenarios.** All four age bands, birthday crossing, rapid deterioration, recovery, non-hour observation times, skipped values, and oxygen-modality changes appear in the demo, but the scenarios are not automated browser fixtures.
@@ -17,12 +15,12 @@ Clinical correctness, safety evidence, and conformance take precedence over pack
 
 ## P0 - Clinical Safety And Conformance
 
-- [ ] **R7 - Define the product and compliance boundary.** State whether this repository is only an NPEWS chart component or is intended to satisfy the complete SPOT/NPEWS workflow and Must requirements.
-- [ ] **R8 - Establish the clinical safety file.** Add a root `SAFETY.md`, named safety ownership, intended use, known hazards, and links from mitigations to specifications and tests; grow this into a hazard log and safety case as governance requires.
-- [ ] **R9 - Add requirements traceability.** Map applicable `U*` and `C*` requirements to implementation, tests, exclusions, and clinical review without changing the authoritative source transcriptions.
+- [ ] **R9 - Add requirements traceability.** Extend the capability allocation in [`product-boundary.md`](./product-boundary.md) into an individual requirement matrix mapping applicable `U*`, `C*`, and `T*` requirements to the component, host, deployment, supplier, deliberate exclusion, implementation, tests, and clinical review without changing the authoritative source transcriptions.
 - [ ] **R10 - Implement or explicitly exclude non-score escalation triggers.** Resolve carer concern, clinical intuition, specific concern, AVPU change, temperature/sepsis triggers, highest-level selection, trigger provenance, and reason display against `escalation.md` and the national requirements.
 - [ ] **R11 - Expand source-derived scorer vectors.** Exercise every age band and threshold boundary using cases independently derived from the canonical specification, not only generated-config equality.
 - [ ] **R12 - Add general CI.** Run installation from the lockfile, the complete test suite, scoring-generation checks, licence checks, and workflow security checks on pull requests and `main` before adding release automation.
+- [ ] **R46 - Define clinical policy at age-band boundaries.** Preserve the current deterministic switch and explicit divider at the 1st, 5th, and 13th birthdays, without the `C2.2` alternate-form override excluded by the product boundary. Document that the scientifically preferred treatment at or near a boundary remains an open research question and a matter for senior clinical discretion, including the current behaviour, hazard implications, research question, and governance route before presenting it as settled clinical policy.
+- [ ] **R52 - Complete formal clinical safety assurance before clinical release.** Appoint a competent Clinical Safety Officer, determine manufacturer/supplier and regulatory roles, agree a risk-scoring method, conduct a multidisciplinary hazard workshop, review control effectiveness, accept or transfer residual risks, define release safety gates, and create the Tier 2 hazard log, safety case, and safety plan required by the resulting governance assessment. The current draft position and initial hazards are recorded in [`../SAFETY.md`](../SAFETY.md).
 
 ## P1 - Browser And Visual Safety Evidence
 
@@ -35,6 +33,10 @@ Clinical correctness, safety evidence, and conformance take precedence over pack
 - [ ] **R19 - Reuse scenarios as automated fixtures.** Import the scenario catalogue into browser and regression checks instead of maintaining separate test data.
 - [~] **R40 - Make the local development experience reliable.** `s/up` serves the current demo, but a clean checkout must have one documented setup path, reproducible locked serving dependencies, useful startup errors, automatic browser opening, and a straightforward way to run tests and scoring-generation checks.
 - [~] **R41 - Complete the clinical UI quality pass.** Preserve fidelity to the NHS chart while making the interface coherent, readable, responsive, accessible, and professionally finished across realistic patient data, supported themes, and mobile/tablet/desktop layouts; verify through human review and R15-R18 rather than subjective polish alone.
+- [ ] **R47 - Increase parameter-heading legibility.** Raise chart parameter headings such as “Blood Pressure” from 14pt Lato to 16pt or 18pt where space permits, then verify wrapping, row height, truncation, and readability across every supported layout and at 200% zoom.
+- [ ] **R48 - Replace the decorative age-band strip with a chart identifier.** Show the deterministically selected chart identifier (for example, `0-11m`) in large black text at the right of the toolbar containing the zoom controls, and remove the coloured top strip once requirements traceability confirms it is not required. Define what the identifier shows when the displayed admission crosses an age-band boundary, and cover both ordinary and birthday-crossing cases in browser tests.
+- [ ] **R49 - Refine blood-pressure markers.** Rework the current blocky endpoint triangles into smaller, lighter standard inward- or outward-pointing arrow marks while retaining the exact systolic and diastolic positions and their joining vertical line required by the UI specification. Compare against the NHS reference chart and approve the result through visual regression review.
+- [ ] **R50 - Verify exact reference-chart colours.** Sample and document the authoritative PDF shades, compare them with the existing clinical colour tokens, and retain the exact reference shades unless NHSE-approved screen-colour research establishes a replacement standard. Treat any token change as a clinically governed visual-baseline change and assess display-profile limitations separately from print intent.
 
 ## P2 - Component API And Configuration
 
@@ -43,6 +45,7 @@ Clinical correctness, safety evidence, and conformance take precedence over pack
 - [~] **R22 - Complete respiratory-support handling.** Known support codes are scored; configurable additions, national-code governance, and clinically useful device-change display remain incomplete.
 - [ ] **R23 - Define typed presentation options.** Keep options separate from `Patient` and `Observation`, covering initial layout, show-values state, time window, and zoom.
 - [ ] **R24 - Define branding and explanatory-content extension points.** Separate demo-owner branding, embedding-organisation branding, NHS identity approval, and host-supplied helper text.
+- [ ] **R51 - Make the demographics bar optional.** Add an explicit presentation option that shows or hides the patient-identification header without inferring presentation state from missing demographic data, so an EPR that already identifies the patient can avoid duplication. Add a “Show demographics bar” checkbox to the demo controls, preserve the default standalone behaviour, and test both states across supported layouts.
 
 ## P3 - Web Component Phase 2
 
@@ -71,5 +74,3 @@ See the [Web Component Phase 2 Specification](./web-component-phase2-spec.md) fo
 - [ ] **R39 - Add SMART-on-FHIR conformance coverage.** Test the adapter and component contract in a representative SMART host after the component API is stable.
 - [ ] **R42 - Create an Oracle Health developer account.** Establish the approved project account needed to access Oracle Health SMART-on-FHIR testing tools, record ownership and credential handling outside the repository, and document the local testing workflow without committing secrets.
 - [~] **R43 - Establish reusable synthetic test patients.** The demo already includes synthetic patients across all age bands and key trajectories; review them for clinical plausibility, document expected scores and escalation outcomes, add any missing edge cases, and reuse them through R19, R34, and R37-R39.
-- [x] **R44 - Publish the demo to GitHub Pages.** Artifact-based deploy via `.github/workflows/demo.yml` on push to `main`; live at <https://rcpch.github.io/digital-pews/>.
-- [x] **R45 - Add CONTRIBUTING.md and issue templates.** Non-technical contributor guide, GitHub issue templates for bug reports and feature requests (with EPR data source prompt), and SECURITY.md with private reporting via pews@rcpch.ac.uk.
