@@ -144,14 +144,17 @@ npews-chart {
   padding: 0 0 5rem; /* space for sticky footer */
 }
 
-/* --- Patient header ---------------------------------------- */
+/* --- Sticky patient and escalation status ------------------ */
+.chart-status {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
 .patient-header {
   background: var(--surface);
   border-bottom: 3px solid var(--text-primary);
   padding: 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 .patient-header__inner {

@@ -17,16 +17,18 @@
 export const CHART_SHELL_HTML = `
 <div class="app-layout">
 
-  <!-- Patient header (sticky) - populated by chart.js from the patient object -->
-  <header class="patient-header" role="banner">
-    <div class="patient-header__inner">
-      <span class="patient-header__name"></span>
-      <div class="patient-header__meta"></div>
-    </div>
-  </header>
+  <!-- Patient identity and current escalation remain visible while reviewing the chart. -->
+  <div class="chart-status">
+    <header class="patient-header" role="banner">
+      <div class="patient-header__inner">
+        <span class="patient-header__name"></span>
+        <div class="patient-header__meta"></div>
+      </div>
+    </header>
 
-  <!-- Escalation banner (rendered by chart.js) -->
-  <div id="escalation-banner" class="escalation-banner" style="display:none;" role="alert" aria-live="polite"></div>
+    <!-- Escalation banner (rendered by chart.js) -->
+    <div id="escalation-banner" class="escalation-banner" style="display:none;" role="alert" aria-live="polite"></div>
+  </div>
 
   <!-- Toolbar -->
   <div class="toolbar" aria-label="Chart time window">

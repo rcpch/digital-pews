@@ -27,7 +27,7 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 
 - [ ] The toolbar identifies the visible chart age band; a boundary-crossing view shows both age-band codes in chronological order.
 - [ ] Patient details are populated correctly from data.
-- [ ] Header remains sticky while scrolling.
+- [ ] The combined patient-identification and current-escalation status remains sticky while scrolling.
 
 ### Chart layout and sidebars
 
