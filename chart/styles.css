@@ -366,7 +366,7 @@ npews-chart {
 }
 
 .chart-grid__label-title {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -618,7 +618,7 @@ body[data-layout="portrait"] .chart-grid {
 }
 
 body[data-layout="portrait"] .chart-grid__label-title {
-  font-size: 0.8125rem;
+  font-size: 1rem;
 }
 
 body[data-layout="portrait"] .chart-grid__label-desc {
@@ -654,7 +654,7 @@ body[data-layout="mobile"] .chart-grid__label {
 }
 
 body[data-layout="mobile"] .chart-grid__label-title {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 body[data-layout="mobile"] .chart-grid__label-desc {
