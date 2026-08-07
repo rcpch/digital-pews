@@ -1290,8 +1290,7 @@ function renderEscalationBanner() {
   if (scored.length === 0) { banner.style.display = 'none'; return; }
 
   const latest = scored[scored.length - 1];
-  if (!latest.escalationLevel) { banner.style.display = 'none'; return; }
-
+  const level = latest.escalationLevel || 'normal';
   const meta = ESCALATION_META[latest.escalationLevel];
   const reasonLabels = { P: 'PEWS', CI: 'Clinical intuition', CQ: 'Carer question', SC: 'Specific concern' };
   const reasons = (latest.escalationReasons || [])
@@ -1302,12 +1301,12 @@ function renderEscalationBanner() {
     })
     .filter(Boolean);
   banner.style.display = 'flex';
-  banner.className = `escalation-banner escalation-banner--${latest.escalationLevel}`;
+  banner.className = `escalation-banner escalation-banner--${level}`;
   banner.innerHTML = `
-    <span class="escalation-banner__level">${meta.label}</span>
+    <span class="escalation-banner__level">${meta?.label || 'Normal'}</span>
     <span class="escalation-banner__score">PEWS ${latest.pewsTotal}</span>
-    <span class="escalation-banner__action">${meta.action}</span>
-    ${reasons.length ? `<span class="escalation-banner__reason">Source: ${reasons.join(', ')}</span>` : ''}
+    <span class="escalation-banner__action">${meta?.action || 'No escalation indicated by the latest supplied observation.'}</span>
+    <span class="escalation-banner__reason">Source: ${reasons.length ? reasons.join(', ') : 'PEWS (Normal)'}</span>
   `;
 }
 
