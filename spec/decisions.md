@@ -129,6 +129,9 @@ committed or published. Small random perturbations do not make a rich longitudin
 synthetic: they preserve timestamps, trajectory shape, rare events, and cross-variable patterns
 that may permit linkage or singling out. Public fixtures must be independently generated from a
 documented synthetic scenario or pass a formal disclosure-risk review with recorded approval.
+The assessed ED resource, cohort-level statistics, replacement strategy, and rules for any
+controlled local robustness exercise are documented in
+[`patient-derived-data-assessment.md`](./patient-derived-data-assessment.md).
 
 ---
 

@@ -62,6 +62,8 @@ There is therefore no approved clinical release. The component must not be used 
 | Information security | Secure development and deployment controls | Repository vulnerability reporting exists; deployment security is outside the component | [`SECURITY.md`](SECURITY.md), supplier, and deployer |
 | Data protection and records management | UK GDPR, DPA 2018, local information governance | Component does not persist records; host handling of patient data requires local assessment | [`spec/product-boundary.md`](spec/product-boundary.md) and deployer evidence |
 
+The project has access to a gitignored patient-derived ED resource for controlled analysis. It is not part of the component or public demo and will be replaced by independently generated fixtures. See [`spec/patient-derived-data-assessment.md`](spec/patient-derived-data-assessment.md).
+
 ## Assumptions and transferred controls
 
 The component safety argument depends on the integrating system satisfying these controls:
