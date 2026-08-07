@@ -1305,7 +1305,7 @@ function renderEscalationBanner() {
   banner.innerHTML = `
     <span class="escalation-banner__level">${meta?.label || 'Normal'}</span>
     <span class="escalation-banner__score">PEWS ${latest.pewsTotal}</span>
-    <span class="escalation-banner__action">${meta?.action || 'No escalation indicated by the latest supplied observation.'}</span>
+    <span class="escalation-banner__action">${meta?.action || 'No escalation indicated.'}</span>
     <span class="escalation-banner__reason">Source: ${reasons.length ? reasons.join(', ') : 'PEWS (Normal)'}</span>
   `;
 }
