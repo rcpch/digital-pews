@@ -796,8 +796,8 @@ function spannedAgeBands() {
   return set;
 }
 
-// The age band the patient is in *now* (at the latest observation) — drives the
-// header banner colour and the unit labels.
+// The age band the patient is in *now* (at the latest observation) - drives the
+// unit labels.
 function currentAgeBand() {
   if (_observations && _observations.length) {
     const latestTs = _observations[_observations.length - 1].timestamp;
@@ -1241,6 +1241,7 @@ function renderTimeAxis() {
 function renderAll() {
   if (!_ageBands) return;
   computeAgeBandView();
+  renderChartIdentifier();
   const defs = getChartDefs();
   const h = getChartHeight();
   const hCat = getCategoricalHeight();
@@ -1601,23 +1602,15 @@ function renderPatientHeader() {
   }
 }
 
-// ---- Age band banner ---------------------------------------
+// ---- Chart identifier --------------------------------------
 
-function renderAgeBandBanner() {
-  const banner = document.querySelector('.age-band-banner');
-  if (!banner) return;
+function renderChartIdentifier() {
+  const identifier = document.querySelector('.toolbar__chart-identifier');
+  if (!identifier) return;
 
-  const ageBand = currentAgeBand();
-  const config = _ageBands[ageBand];
-  if (config && config.headerColor) {
-    banner.style.background = config.headerColor;
-    // If the patient crosses a band boundary within the loaded data, note it.
-    const spanned = spannedAgeBands();
-    const label = spanned.length > 1
-      ? `${(_ageBands[spanned[0]] || {}).label || spanned[0]} \u2192 ${config.label}`
-      : `Age band: ${config.label}`;
-    banner.setAttribute('aria-label', label);
-  }
+  const spanned = spannedAgeBands();
+  identifier.textContent = spanned.join(' \u2192 ');
+  identifier.setAttribute('aria-label', `Chart age ${spanned.length === 1 ? 'band' : 'bands'}: ${spanned.join(' to ')}`);
 }
 
 // ---- Init --------------------------------------------------
@@ -1659,9 +1652,8 @@ function init(patient, observations, ageBands) {
   // Resolve layout before building panels so initial canvas heights are correct
   initLayout();
 
-  // Header + age band banner (both pure functions of the patient/observations)
+  // Header is a pure function of the patient and observations.
   renderPatientHeader();
-  renderAgeBandBanner();
 
   // Build chart grid (sidebar labels + canvases as a single CSS grid)
   const gridEl = document.getElementById('chart-grid');

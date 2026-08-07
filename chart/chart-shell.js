@@ -19,7 +19,6 @@ export const CHART_SHELL_HTML = `
 
   <!-- Patient header (sticky) - populated by chart.js from the patient object -->
   <header class="patient-header" role="banner">
-    <div class="age-band-banner"></div>
     <div class="patient-header__inner">
       <span class="patient-header__name"></span>
       <div class="patient-header__meta"></div>
@@ -46,6 +45,8 @@ export const CHART_SHELL_HTML = `
       </nav>
 
       <div class="toolbar__spacer"></div>
+
+      <span class="toolbar__chart-identifier" aria-label="Chart age band"></span>
 
     </div>
   </div>
