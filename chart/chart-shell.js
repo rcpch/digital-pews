@@ -14,7 +14,7 @@
    specific patient is baked into the markup.
    ============================================================ */
 
-export const CHART_SHELL_HTML = `
+export const CHART_SHELL_HTML = /* html */ `
 <div class="app-layout">
 
   <!-- Patient identity and current escalation remain visible while reviewing the chart. -->
