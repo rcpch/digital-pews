@@ -78,7 +78,7 @@ function ensureStyles() {
   }
 
   // Lato approximates Frutiger (the NHS typeface). Non-critical for colour; if the
-  // request is blocked the chart falls back to Trebuchet MS / Arial via --font.
+  // request is blocked the chart uses the open Noto Sans / Liberation Sans fallbacks.
   let fontLink = document.querySelector('link[data-npews-chart-fonts]');
   if (!fontLink) {
     fontLink = document.createElement('link');

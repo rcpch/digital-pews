@@ -72,7 +72,7 @@ These values are sampled from the web-rendered NHS PDF pending authoritative NHS
 ### Typography
 
 ```css
---font: 'Lato', 'Trebuchet MS', Helvetica, Arial, sans-serif;
+--font: 'Lato', 'Noto Sans', 'Liberation Sans', sans-serif;
 ```
 
 Lato approximates Frutiger (the NHS typeface). Implementers with a Frutiger licence override `--font` in a local stylesheet - the canvas `chartFont()` helper reads this at render time automatically.

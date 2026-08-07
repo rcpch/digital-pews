@@ -52,7 +52,7 @@ function cssVar(name) {
 // Returns the chart font stack from --font, for use in ctx.font assignments.
 // Canvas ctx.font doesn't read CSS variables directly, so we resolve it here.
 function chartFont(size, weight) {
-  const stack = cssVar('--font') || 'Lato, sans-serif';
+  const stack = cssVar('--font') || "Lato, 'Noto Sans', 'Liberation Sans', sans-serif";
   return weight ? `${weight} ${size} ${stack}` : `${size} ${stack}`;
 }
 

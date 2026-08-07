@@ -49,8 +49,8 @@
      Implementers with a Frutiger license can override this single variable:
        :root { --font: 'Frutiger', 'Frutiger LT Std', Lato, sans-serif; }
   */
-  --font: 'Lato', 'Trebuchet MS', Helvetica, Arial, sans-serif;
-  --font-mono: 'Courier New', Courier, monospace;
+  --font: 'Lato', 'Noto Sans', 'Liberation Sans', sans-serif;
+  --font-mono: 'Noto Sans Mono', 'Liberation Mono', monospace;
 }
 
 /* --- Optional chrome themes ------------------------------------------------

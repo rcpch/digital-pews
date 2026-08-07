@@ -17,7 +17,7 @@
   --section-bg:     #003087; /* NHS navy */
   --section-text:   #ffffff;
 
-  --font: 'Lato', 'Trebuchet MS', Helvetica, Arial, sans-serif;
+  --font: 'Lato', 'Noto Sans', 'Liberation Sans', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
