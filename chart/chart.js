@@ -1276,24 +1276,6 @@ function renderAll() {
   });
   renderTimeAxis();
   renderPewsCanvas();
-
-  // Notify host pages (e.g. the demo scrubber) that a render cycle has
-  // completed and the view window may have changed (time window or resize).
-  document.dispatchEvent(new CustomEvent('npews-chart:render', {
-    detail: { start: viewState.start, end: viewState.end },
-  }));
-}
-
-/**
- * Read the chart's current view window and horizontal plot padding.
- * Hosts that need to overlay DOM elements aligned with canvas x-positions
- * (e.g. the demo timeline scrubber) use this instead of duplicating the
- * geometry constants.
- *
- * @returns {{ start: number, end: number, padLeft: number, padRight: number }}
- */
-export function getViewWindow() {
-  return { start: viewState.start, end: viewState.end, padLeft: PAD_LEFT, padRight: PAD_RIGHT };
 }
 
 // ---- Escalation banner -------------------------------------

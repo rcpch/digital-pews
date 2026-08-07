@@ -10,6 +10,7 @@ body.demo {
   --demo-sidebar-w: 320px;
   --demo-controls-w: 268px;
   --demo-controls-w-collapsed: 46px;
+  --demo-playback-h: 0px;
 }
 
 .demo-shell {
@@ -375,12 +376,17 @@ body.demo {
 /* The chart's sticky footer is position:fixed across the viewport; shift it so
    it aligns with the chart region rather than sitting under either sidebar. */
 body.demo .sticky-footer {
+  bottom: var(--demo-playback-h);
   left: var(--demo-sidebar-w);
   right: var(--demo-controls-w);
 }
 
 body.demo.demo--controls-collapsed .sticky-footer {
   right: var(--demo-controls-w-collapsed);
+}
+
+body.demo .main-content {
+  padding-bottom: calc(5rem + var(--demo-playback-h));
 }
 
 /* --- Narrow screens: stack sidebar above the chart ----------- */
@@ -405,102 +411,136 @@ body.demo.demo--controls-collapsed .sticky-footer {
     left: 0;
     right: 0;
   }
-  .scrubber__bar { right: 0; }
+  body.demo .playback,
+  body.demo.demo--controls-collapsed .playback {
+    left: 0;
+    right: 0;
+  }
   .demo-triggers { align-items: flex-start; }
 }
 
-/* --- Timeline scrubber (demo only) ---------------------------- */
-/* Bright azure with white outline so the marker is visible against all
-   PEWS band colours (white, yellow, orange, pink). This is a demo-only
-   token - it never enters the clinical palette in styles.css. */
+/* --- Observation playback (demo only) ------------------------- */
 body.demo {
   --demo-scrub: #00a3e0;
 }
 
-.scrubber[hidden] { display: none; }
+.playback[hidden] { display: none; }
 
-.scrubber {
+.playback {
   box-sizing: border-box;
   position: fixed;
+  bottom: 0;
+  left: var(--demo-sidebar-w);
+  right: var(--demo-controls-w);
   z-index: 201;
-  background: var(--surface, #fff);
-  border-top: 1px solid var(--border, #b1b4b6);
-  padding: 0.25rem 0 0.35rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.scrubber__bar {
-  position: relative;
-  height: 2rem;
-  display: flex;
+  background: var(--surface);
+  border-top: 3px solid var(--demo-scrub);
+  padding: 0.55rem 1rem 0.65rem;
+  display: grid;
+  grid-template-columns: minmax(15rem, auto) minmax(16rem, 1fr);
+  gap: 0.5rem 1.25rem;
   align-items: center;
 }
 
-.scrubber__slider {
-  width: 100%;
-  margin: 0;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  background: #dee0e2;
-  border-radius: 3px;
-  outline: none;
+.demo--controls-collapsed .playback {
+  right: var(--demo-controls-w-collapsed);
 }
 
-.scrubber__slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--demo-scrub);
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
-  cursor: pointer;
+.playback__summary,
+.playback__control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
-.scrubber__slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--demo-scrub);
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
-  cursor: pointer;
+.playback__label {
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* Vertical overlay line that drops down through the chart area.
-   Positioned by demo.js using getViewWindow() geometry. */
-.scrubber__overlay {
-  display: none;
-  position: absolute;
-  top: 0;
-  width: 2px;
-  background: var(--demo-scrub);
-  box-shadow: -1px 0 0 #fff, 1px 0 0 #fff;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.scrubber__readout {
+.playback__readout {
+  color: var(--text-secondary);
   font-size: 0.8125rem;
-  color: var(--text-secondary, #505a5f);
-  white-space: nowrap;
-  text-align: center;
+  line-height: 1.3;
 }
 
-.scrubber__readout strong {
-  color: var(--text-primary, #0b0c0c);
+.playback__readout strong {
+  color: var(--text-primary);
 }
 
-.scrubber__readout .esc-badge {
+.playback__readout .esc-badge {
   display: inline-block;
   padding: 0.05rem 0.4rem;
   border-radius: 3px;
   font-size: 0.75rem;
   font-weight: 700;
   margin-left: 0.35rem;
+}
+
+.playback__control {
+  justify-content: center;
+}
+
+.playback__slider {
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--demo-scrub);
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.playback__slider:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.playback__slider:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.playback__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--demo-scrub);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.playback__slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--demo-scrub);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.playback__hint {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .playback {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .playback__hint {
+    text-align: left;
+  }
 }

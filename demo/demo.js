@@ -10,7 +10,6 @@
    ============================================================ */
 
 import './chart/npews-chart.js';
-import { getViewWindow } from './chart/chart.js';
 import { scoreObservationsForPatient } from './chart/npews-scorer.js';
 import { ESCALATION_META } from './chart/npews-scoring-config.js';
 import { SCENARIOS, scenarioById } from './scenarios.js';
@@ -42,27 +41,31 @@ function resetDemoTriggers() {
   carerLevel.disabled = true;
 }
 
-function observationsWithDemoTriggers(scenario) {
+function observationsWithDemoTriggers(scenario, targetIndex) {
   const triggers = [];
   if (clinicianTrigger.checked) triggers.push({ code: 'CI', level: clinicianLevel.value });
   if (carerTrigger.checked) triggers.push({ code: 'CQ', level: carerLevel.value });
 
   return scenario.observations.map((observation, index) => {
-    if (index !== scenario.observations.length - 1) return observation;
+    if (index !== targetIndex || triggers.length === 0) return observation;
     return {
       ...observation,
       ...(clinicianTrigger.checked ? { clinicalIntuition: 'yes' } : {}),
       ...(carerTrigger.checked ? { carerQuestion: 'W' } : {}),
-      escalationTriggers: triggers,
+      escalationTriggers: [...(observation.escalationTriggers || []), ...triggers],
     };
   });
 }
 
 function renderSelectedScenario() {
   if (!selectedScenario) return;
-  const observations = observationsWithDemoTriggers(selectedScenario);
-  chartEl.data = { patient: selectedScenario.patient, observations };
-  initScrubber({ ...selectedScenario, observations });
+  const observations = observationsWithDemoTriggers(selectedScenario, playbackIndex);
+  const scored = scoreObservationsForPatient(selectedScenario.patient, observations);
+  chartEl.data = {
+    patient: selectedScenario.patient,
+    observations: observations.slice(0, playbackIndex + 1),
+  };
+  updatePlayback(scored[playbackIndex], observations.length);
 }
 
 // -- Chart colour themes ------------------------------------------------------
@@ -164,7 +167,7 @@ function select(id) {
     history.replaceState(null, '', `#${scenario.id}`);
   }
 
-  renderSelectedScenario();
+  initPlayback(scenario);
 }
 
 list.addEventListener('click', (e) => {
@@ -190,40 +193,39 @@ triggerControls.addEventListener('change', () => {
   renderSelectedScenario();
 });
 
-// -- Timeline scrubber (demo only) --------------------------------------------
+// -- Observation playback (demo only) -----------------------------------------
 
-const scrubber      = document.getElementById('scrubber');
-const scrubSlider    = document.getElementById('scrubber-slider');
-const scrubOverlay   = document.getElementById('scrubber-overlay');
-const scrubReadout   = document.getElementById('scrubber-readout');
+const playback = document.getElementById('playback');
+const playbackSlider = document.getElementById('playback-slider');
+const playbackReadout = document.getElementById('playback-readout');
 
-let scoredObs = [];   // scored observations for the current scenario
-let scrubIndex = 0;   // current scrubber index into scoredObs
+let playbackIndex = 0;
 
-function initScrubber(scenario) {
+function initPlayback(scenario) {
   if (!scenario || !scenario.observations || scenario.observations.length === 0) {
-    scrubber.hidden = true;
+    playback.hidden = true;
     return;
   }
 
-  scoredObs = scoreObservationsForPatient(scenario.patient, scenario.observations);
-  scrubIndex = scoredObs.length - 1;  // start at the latest observation
-  scrubber.hidden = false;
-
-  scrubSlider.min = 0;
-  scrubSlider.max = scoredObs.length - 1;
-  scrubSlider.value = scrubIndex;
-
-  updateScrubber();
+  playbackIndex = scenario.observations.length - 1;
+  playback.hidden = false;
+  playbackSlider.min = 0;
+  playbackSlider.max = playbackIndex;
+  playbackSlider.value = playbackIndex;
+  playbackSlider.disabled = scenario.observations.length === 1;
+  renderSelectedScenario();
 }
 
-function updateScrubber() {
-  if (!scoredObs.length) return;
-  const obs = scoredObs[scrubIndex];
+function updatePlayback(obs, observationCount) {
   if (!obs) return;
 
-  // Readout: time + PEWS total + escalation badge
-  const time = new Date(obs.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const dateTime = new Date(obs.timestamp).toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
   const pews = obs.pewsTotal != null ? obs.pewsTotal : '—';
   const level = obs.escalationLevel;
   const meta = level ? ESCALATION_META[level] : null;
@@ -231,91 +233,22 @@ function updateScrubber() {
     ? `<span class="esc-badge" style="background:${meta.color};color:${meta.textColor}">${meta.label}</span>`
     : '<span class="esc-badge" style="background:#dee0e2;color:#0b0c0c">Normal</span>';
 
-  scrubReadout.innerHTML = `<strong>${time}</strong> &middot; PEWS <strong>${pews}</strong> ${badge}`;
-
-  positionOverlay();
+  const position = `Observation ${playbackIndex + 1} of ${observationCount}`;
+  playbackReadout.innerHTML = `${position} &middot; <strong>${dateTime}</strong> &middot; PEWS <strong>${pews}</strong> ${badge}`;
+  playbackSlider.value = playbackIndex;
+  playbackSlider.setAttribute('aria-valuetext', `${position}, ${dateTime}, PEWS ${pews}${meta ? `, ${meta.label}` : ', Normal'}`);
 }
 
-function positionOverlay() {
-  // The scrubber track must occupy exactly the same horizontal space as the
-  // canvas plot, rather than the full width of the demo page.
-  const canvas = document.getElementById('canvas-pews');
-  if (!canvas) { scrubOverlay.style.display = 'none'; return; }
-
-  const vw = getViewWindow();
-  if (!vw || vw.start == null || vw.end == null) { scrubOverlay.style.display = 'none'; return; }
-
-  const footer = document.getElementById('sticky-footer');
-  if (!footer) { scrubOverlay.style.display = 'none'; return; }
-
-  const canvasRect = canvas.getBoundingClientRect();
-  const footerRect = footer.getBoundingClientRect();
-  const plotLeft = canvasRect.left + vw.padLeft;
-  const plotWidth = canvasRect.width - vw.padLeft - vw.padRight;
-
-  scrubber.style.left = `${plotLeft}px`;
-  scrubber.style.width = `${plotWidth}px`;
-  scrubber.style.bottom = `${footerRect.height}px`;
-
-  if (!scoredObs.length) return;
-  const obs = scoredObs[scrubIndex];
-  if (!obs) return;
-
-  const range = vw.end - vw.start;
-  if (range <= 0) { scrubOverlay.style.display = 'none'; return; }
-
-  const ts = new Date(obs.timestamp).getTime();
-  const canvasW = canvasRect.width;
-  const drawW = canvasW - vw.padLeft - vw.padRight;
-  const xInCanvas = vw.padLeft + ((ts - vw.start) / range) * drawW;
-
-  const chartGrid = document.getElementById('chart-grid');
-  if (!chartGrid) { scrubOverlay.style.display = 'none'; return; }
-
-  const gridRect = chartGrid.getBoundingClientRect();
-  const chartHost = document.getElementById('chart-host');
-  if (!chartHost) { scrubOverlay.style.display = 'none'; return; }
-
-  const hostRect = chartHost.getBoundingClientRect();
-  const xInHost = canvasRect.left - hostRect.left + xInCanvas;
-
-  if (scrubOverlay.parentElement !== chartHost) {
-    chartHost.appendChild(scrubOverlay);
-  }
-
-  if (getComputedStyle(chartHost).position === 'static') {
-    chartHost.style.position = 'relative';
-  }
-
-  const gridTopInHost = gridRect.top - hostRect.top;
-  const gridBottomInHost = gridRect.bottom - hostRect.top;
-
-  scrubOverlay.style.display = 'block';
-  scrubOverlay.style.position = 'absolute';
-  scrubOverlay.style.left = `${xInHost}px`;
-  scrubOverlay.style.top = `${gridTopInHost}px`;
-  scrubOverlay.style.height = `${gridBottomInHost - gridTopInHost}px`;
-}
-
-scrubSlider.addEventListener('input', () => {
-  scrubIndex = parseInt(scrubSlider.value, 10);
-  updateScrubber();
+playbackSlider.addEventListener('input', () => {
+  playbackIndex = parseInt(playbackSlider.value, 10);
+  renderSelectedScenario();
 });
 
-// Reposition overlay after chart re-renders (time window, resize, scenario switch)
-document.addEventListener('npews-chart:render', () => {
-  if (!scrubber.hidden) positionOverlay();
-});
-
-window.addEventListener('resize', () => {
-  if (!scrubber.hidden) positionOverlay();
-});
-
-// The chart region and footer can resize without a window resize (for example,
-// when the display-controls panel folds). Keep the fixed scrubber aligned.
-new ResizeObserver(() => {
-  if (!scrubber.hidden) positionOverlay();
-}).observe(host);
+new ResizeObserver(([entry]) => {
+  const borderBox = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
+  const height = playback.hidden ? 0 : (borderBox?.blockSize || playback.offsetHeight);
+  document.body.style.setProperty('--demo-playback-h', `${height}px`);
+}).observe(playback);
 
 // -- Initial selection (deep-linkable via #scenario-id) ----------------------
 const requested = location.hash.slice(1);

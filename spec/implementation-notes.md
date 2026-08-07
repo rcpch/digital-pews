@@ -13,6 +13,8 @@ The SPOT NPEWS specification requires a colour-blindness friendly design, but do
 
 The selected time window **must not** affect calculation or display of the PEWS score. The escalation banner and sticky footer must always use the globally latest observation set, not the latest observation visible in the current window. This was not stated in the earlier spec text and was a bug in an initial implementation.
 
+The demo's observation playback does not add a historical-status mode to the component. Instead, the harness supplies only the selected observation and its preceding history, so the selected point is the latest observation in that explicitly labelled simulated dataset. Production consumers receive no playback control or API and continue to show status for the latest supplied observation.
+
 ### RCPCH 1.2 - Reference chart colours
 
 The default PEWS band colours come from the supplied NHS observation-chart PDFs, not from generic warning colours or screen-palette substitutions. On 2026-08-07, the four authoritative PDFs were rendered to sRGB with Poppler and sampled inside uniform scoring-band fills away from text and grid lines. The samples were confirmed against all four supplied reference PNGs. The resulting palette is white `#ffffff`, yellow `#fffa99`, orange `#fbc07b`, and pink `#fabfda`.

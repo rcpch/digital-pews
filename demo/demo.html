@@ -109,19 +109,21 @@
 
   </div>
 
-  <!-- Timeline scrubber (demo only - not part of the clinical chart component).
-       Lets you scroll through the scenario's observations and see the PEWS score
-       at each time point. The chart's own escalation banner and sticky footer
-       always show the globally latest observation (RCPCH 1.1 invariant); the
-       scrubber readout is separate demo chrome labelled as a review tool. -->
-  <div class="scrubber" id="scrubber" hidden>
-    <div class="scrubber__bar">
-      <input type="range" class="scrubber__slider" id="scrubber-slider"
-             min="0" max="0" value="0" step="1"
-             aria-label="Timeline scrubber" />
-      <div class="scrubber__overlay" id="scrubber-overlay"></div>
+  <!-- Observation playback is demo-only. The harness supplies the chart only the
+       selected observation and its history, so the component still treats its
+       latest supplied observation as current and exposes no historical mode. -->
+  <div class="playback" id="playback" aria-label="Demo admission playback" hidden>
+    <div class="playback__summary">
+      <strong class="playback__label">Demo playback - simulated current observation</strong>
+      <output class="playback__readout" id="playback-readout" aria-live="polite"></output>
     </div>
-    <div class="scrubber__readout" id="scrubber-readout"></div>
+    <div class="playback__control">
+      <input type="range" class="playback__slider" id="playback-slider"
+             min="0" max="0" value="0" step="1"
+             aria-label="Simulated current observation"
+             aria-describedby="playback-hint" />
+      <span class="playback__hint" id="playback-hint">Drag or use &larr; &rarr; to move one observation at a time</span>
+    </div>
   </div>
 
   <!-- The harness is the entry point; it imports the chart engine and the
