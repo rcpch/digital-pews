@@ -49,13 +49,15 @@ Files load as native ES modules and `import` their own dependencies. A host page
 
 All colours, spacing, and typography are defined as CSS custom properties in `chart/styles.css`.
 
-### PEWS band colours (clinically mandated - do not change)
+### PEWS band colours (interim screen palette - govern changes)
+
+These values are sampled from the web-rendered NHS PDF pending authoritative NHSE RGB values under [issue #5](https://github.com/rcpch/digital-pews/issues/5). Do not change them without updated evidence, documentation, and clinical review.
 
 ```css
 --band-white:  #ffffff   /* normal */
---band-yellow: #fffa99   /* low concern */
---band-orange: #fbc07b   /* moderate concern */
---band-pink:   #fabfda   /* high concern */
+--band-yellow: #fff8ae   /* low concern */
+--band-orange: #fcc88e   /* moderate concern */
+--band-pink:   #f9cbd7   /* high concern */
 ```
 
 ### Escalation level colours

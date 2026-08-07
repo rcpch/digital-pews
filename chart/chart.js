@@ -60,9 +60,9 @@ function getBandColour(bandName) {
   const s = getComputedStyle(document.documentElement);
   return {
     white:  s.getPropertyValue('--band-white').trim()  || '#ffffff',
-    yellow: s.getPropertyValue('--band-yellow').trim() || '#fffa99',
-    orange: s.getPropertyValue('--band-orange').trim() || '#fbc07b',
-    pink:   s.getPropertyValue('--band-pink').trim()   || '#fabfda',
+    yellow: s.getPropertyValue('--band-yellow').trim() || '#fff8ae',
+    orange: s.getPropertyValue('--band-orange').trim() || '#fcc88e',
+    pink:   s.getPropertyValue('--band-pink').trim()   || '#f9cbd7',
   }[bandName] || '#ffffff';
 }
 

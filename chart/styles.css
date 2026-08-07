@@ -5,11 +5,11 @@
 
 /* --- Design tokens ----------------------------------------- */
 :root {
-  /* PEWS band colours - matched to the NHS NPEWS paper chart PDF */
+  /* Interim screen palette sampled from the web-rendered NHS PDF; see issue #5. */
   --band-white:  #ffffff;
-  --band-yellow: #fffa99;
-  --band-orange: #fbc07b;
-  --band-pink:   #fabfda;
+  --band-yellow: #fff8ae;
+  --band-orange: #fcc88e;
+  --band-pink:   #f9cbd7;
 
   /* Escalation level colours */
   --esc-low:       #1d70b8;

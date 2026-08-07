@@ -17,9 +17,9 @@ The demo's observation playback does not add a historical-status mode to the com
 
 ### RCPCH 1.2 - Reference chart colours
 
-The default PEWS band colours come from the supplied NHS observation-chart PDFs, not from generic warning colours or screen-palette substitutions. On 2026-08-07, the four authoritative PDFs were rendered to sRGB with Poppler and sampled inside uniform scoring-band fills away from text and grid lines. The samples were confirmed against all four supplied reference PNGs. The resulting palette is white `#ffffff`, yellow `#fffa99`, orange `#fbc07b`, and pink `#fabfda`.
+NHSE has advised that Human Factors research informed the NPEWS colours, but the project does not yet have an authoritative written specification of their RGB values or screen colour-space intent. PDF rendering is not normative: print-oriented colours can be converted differently by PDF renderer, browser, operating system, output intent, and colour profile. [Issue #5](https://github.com/rcpch/digital-pews/issues/5) requests the requisite values and supporting governance from NHSE.
 
-The previous yellow `#ffeda0`, orange `#ffb366`, and pink `#ffb3d9` tokens were approximations and have been replaced. Any future change to this palette requires an updated authoritative source or documented NHSE-approved screen-colour research, clinical review, and a governed visual-baseline update. Display profiles and browser colour management may affect physical appearance, but do not change the source sRGB values used by the component.
+On 2026-08-07, Poppler rendering of the supplied PDFs and the repository reference PNGs produced yellow `#fffa99`, orange `#fbc07b`, and pink `#fabfda`. A screenshot of the same PDF rendered on the web produced the lighter yellow `#fff8ae`, orange `#fcc88e`, and pink `#f9cbd7`; white remained `#ffffff`. Because this component is viewed in a browser, it uses the web-rendered screenshot values as an explicitly interim screen approximation. These values are not represented as NHSE-approved RGB values and must be replaced or confirmed when NHSE supplies the normative specification.
 
 ## Visual verification checklist
 
@@ -54,7 +54,7 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 
 ### PEWS bands and plotted observations
 
-- [ ] PEWS band colours match the measured reference values: `--band-white` `#ffffff`, `--band-yellow` `#fffa99`, `--band-orange` `#fbc07b`, `--band-pink` `#fabfda`.
+- [ ] PEWS band colours match the interim web-rendered screenshot values: `--band-white` `#ffffff`, `--band-yellow` `#fff8ae`, `--band-orange` `#fcc88e`, `--band-pink` `#f9cbd7`; authoritative NHSE RGB values remain open under issue #5.
 - [ ] Accessible rendering meets WCAG 2.2 AA contrast and target-size requirements without changing the mandated default palette.
 - [ ] 5-12 years RR thresholds match the reference: pink 0-9 and 50+; orange 10-14 and 40-49; yellow 15-19 and 25-39; white 20-24 breaths/min.
 - [ ] 5–12 years HR thresholds match the reference: pink 0–59 and 160+; orange 60–69 and 140–159; yellow 70–79 and 120–139; white 80–119 bpm.
