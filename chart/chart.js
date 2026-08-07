@@ -339,16 +339,16 @@ function drawDots(ctx, points) {
 }
 
 // ---- Blood pressure special rendering (U11.5) --------------
-// Draws inward-pointing triangles (systolic above, diastolic below) with vertical join line
+// Draws open inward-pointing arrows at the exact systolic and diastolic values.
 
 function drawBPPoints(ctx, bpPoints) {
   // bpPoints: [{x, ySys, yDia}]
   bpPoints.forEach(p => {
     ctx.save();
-    const arrowSize = 6;
+    const arrowHalfWidth = 4;
+    const arrowDepth = 3;
     ctx.strokeStyle = cssVar('--chart-line') || '#0b0c0c';
-    ctx.fillStyle   = cssVar('--chart-line') || '#0b0c0c';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
 
     // Vertical join line
     ctx.beginPath();
@@ -356,21 +356,19 @@ function drawBPPoints(ctx, bpPoints) {
     ctx.lineTo(p.x, p.yDia);
     ctx.stroke();
 
-    // Systolic: inward-pointing triangle (pointing down = towards centre)
+    // Systolic: open arrow points down towards the diastolic value.
     ctx.beginPath();
-    ctx.moveTo(p.x, p.ySys + arrowSize);
-    ctx.lineTo(p.x - arrowSize, p.ySys - arrowSize / 2);
-    ctx.lineTo(p.x + arrowSize, p.ySys - arrowSize / 2);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(p.x - arrowHalfWidth, p.ySys - arrowDepth);
+    ctx.lineTo(p.x, p.ySys);
+    ctx.lineTo(p.x + arrowHalfWidth, p.ySys - arrowDepth);
+    ctx.stroke();
 
-    // Diastolic: inward-pointing triangle (pointing up = towards centre)
+    // Diastolic: open arrow points up towards the systolic value.
     ctx.beginPath();
-    ctx.moveTo(p.x, p.yDia - arrowSize);
-    ctx.lineTo(p.x - arrowSize, p.yDia + arrowSize / 2);
-    ctx.lineTo(p.x + arrowSize, p.yDia + arrowSize / 2);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(p.x - arrowHalfWidth, p.yDia + arrowDepth);
+    ctx.lineTo(p.x, p.yDia);
+    ctx.lineTo(p.x + arrowHalfWidth, p.yDia + arrowDepth);
+    ctx.stroke();
 
     ctx.restore();
   });
@@ -940,7 +938,7 @@ const SIDEBAR_META = {
   oxygenSaturation: { unit: 'SpO\u2082 %', description: 'Peripheral O\u2082 saturation. Record probe site.', extra: '\u2265 95% normal | 92\u201394% low concern | \u2264 91% high concern' },
   oxygenDelivery:   { unit: 'FiO\u2082 % / L/min', description: 'HF = High Flow \u2022 BiPAP/CPAP \u2022 NP = Nasal Prongs \u2022 FM = Face Mask \u2022 HB = Head Box \u2022 NMR = Non-rebreather', extra: 'Left = FiO\u2082 % | Right = L/min' },
   heartRate:        { unit: 'bpm', description: 'Record pulse rate in beats per minute', extra: null },
-  bloodPressure:    { unit: 'mmHg', description: 'Position: LA \u2022 RA \u2022 LL \u2022 RL. Derogation code if not attempted (NC).', extra: '\u25be systolic \u25b4 diastolic' },
+  bloodPressure:    { unit: 'mmHg', description: 'Position: LA \u2022 RA \u2022 LL \u2022 RL. Derogation code if not attempted (NC).', extra: '\u2228 systolic \u2227 diastolic' },
   temperature:      { unit: '\u00b0C', description: 'Route: Tympanic \u2022 Axillary \u2022 Rectal', extra: null },
 };
 

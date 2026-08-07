@@ -53,7 +53,7 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 - [ ] Observation dots and trend lines are visible at the correct plotted positions.
 - [ ] Trend lines break over skipped observations.
 - [ ] O₂ Delivery trend lines break when modality changes between percentage and L/min.
-- [ ] Blood pressure renders as the expected systolic/diastolic marker pair rather than an ordinary trend line.
+- [ ] Blood pressure renders as small open inward-pointing systolic/diastolic arrows at the exact values, joined by a vertical line, rather than an ordinary trend line.
 - [ ] Value labels and hover tooltips show the underlying observation values accurately.
 - [ ] Categorical-cell hover tooltips show the label and observation time.
 
