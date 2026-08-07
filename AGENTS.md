@@ -53,9 +53,9 @@ All colours, spacing, and typography are defined as CSS custom properties in `ch
 
 ```css
 --band-white:  #ffffff   /* normal */
---band-yellow: #ffeda0   /* low concern */
---band-orange: #ffb366   /* moderate concern */
---band-pink:   #ffb3d9   /* high concern */
+--band-yellow: #fffa99   /* low concern */
+--band-orange: #fbc07b   /* moderate concern */
+--band-pink:   #fabfda   /* high concern */
 ```
 
 ### Escalation level colours

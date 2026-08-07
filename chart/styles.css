@@ -7,9 +7,9 @@
 :root {
   /* PEWS band colours - matched to the NHS NPEWS paper chart PDF */
   --band-white:  #ffffff;
-  --band-yellow: #ffeda0;  /* more saturated yellow */
-  --band-orange: #ffb366;  /* more saturated orange */
-  --band-pink:   #ffb3d9;  /* more saturated pink */
+  --band-yellow: #fffa99;
+  --band-orange: #fbc07b;
+  --band-pink:   #fabfda;
 
   /* Escalation level colours */
   --esc-low:       #1d70b8;

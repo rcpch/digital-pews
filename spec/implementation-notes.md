@@ -13,6 +13,12 @@ The SPOT NPEWS specification requires a colour-blindness friendly design, but do
 
 The selected time window **must not** affect calculation or display of the PEWS score. The escalation banner and sticky footer must always use the globally latest observation set, not the latest observation visible in the current window. This was not stated in the earlier spec text and was a bug in an initial implementation.
 
+### RCPCH 1.2 - Reference chart colours
+
+The default PEWS band colours come from the supplied NHS observation-chart PDFs, not from generic warning colours or screen-palette substitutions. On 2026-08-07, the four authoritative PDFs were rendered to sRGB with Poppler and sampled inside uniform scoring-band fills away from text and grid lines. The samples were confirmed against all four supplied reference PNGs. The resulting palette is white `#ffffff`, yellow `#fffa99`, orange `#fbc07b`, and pink `#fabfda`.
+
+The previous yellow `#ffeda0`, orange `#ffb366`, and pink `#ffb3d9` tokens were approximations and have been replaced. Any future change to this palette requires an updated authoritative source or documented NHSE-approved screen-colour research, clinical review, and a governed visual-baseline update. Display profiles and browser colour management may affect physical appearance, but do not change the source sRGB values used by the component.
+
 ## Visual verification checklist
 
 Use this as a manual QA checklist when comparing the rendered chart with the PDF/image references. See `README.md` for how to run the chart and demonstration harness; keep the current render beside the reference image, especially `reference-sources/images/chart-5-12-years-1.png`.
@@ -46,7 +52,7 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 
 ### PEWS bands and plotted observations
 
-- [ ] PEWS band colours match the mandated tokens and reference image: `--band-white` `#ffffff`, `--band-yellow` `#ffeda0`, `--band-orange` `#ffb366`, `--band-pink` `#ffb3d9`.
+- [ ] PEWS band colours match the measured reference values: `--band-white` `#ffffff`, `--band-yellow` `#fffa99`, `--band-orange` `#fbc07b`, `--band-pink` `#fabfda`.
 - [ ] Accessible rendering meets WCAG 2.2 AA contrast and target-size requirements without changing the mandated default palette.
 - [ ] 5-12 years RR thresholds match the reference: pink 0-9 and 50+; orange 10-14 and 40-49; yellow 15-19 and 25-39; white 20-24 breaths/min.
 - [ ] 5–12 years HR thresholds match the reference: pink 0–59 and 160+; orange 60–69 and 140–159; yellow 70–79 and 120–139; white 80–119 bpm.
