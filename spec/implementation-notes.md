@@ -49,6 +49,7 @@ Use this as a manual QA checklist when comparing the rendered chart with the PDF
 - [ ] O₂ Delivery / Respiratory Support shows dual labelling: FiO₂ percentage on the left and support / L/min labels on the right.
 - [ ] Subtle horizontal gridlines appear at y-axis ticks.
 - [ ] Prominent vertical gridlines create the observation/time column structure and align across numeric rows, categorical rows, the PEWS row and the time axis.
+- [ ] Numeric scoring bands finish immediately below the minimum-axis label and marker clearance, without a large blank strip at the bottom of each canvas.
 - [ ] The time axis shows clock times in `HH:MM` format.
 - [ ] Time spacing is proportional to timestamps, not forced into equal-width columns.
 

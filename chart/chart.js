@@ -518,7 +518,7 @@ function renderChart(canvas, config) {
   ctx.clearRect(0, 0, W, H);
 
   const PAD_TOP    = 10;
-  const PAD_BOTTOM = 28;
+  const PAD_BOTTOM = 8;
 
   const drawW = W - PAD_LEFT - PAD_RIGHT;
 
