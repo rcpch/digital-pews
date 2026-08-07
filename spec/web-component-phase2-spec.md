@@ -105,7 +105,7 @@ Phase 2 is complete only when:
 
 ## Open Decisions
 
-- Whether presentation options are mutable properties, methods, or a separate options object.
+- Which additional fields join `showDemographics` in the separate assignable `.options` object, and when generated types become authoritative.
 - Whether Canvas resizing uses one `ResizeObserver` per instance or another root-scoped mechanism.
 - Whether the browser artifact should use UMD, IIFE, or another format based on actual consumer requirements.
 - Which framework consumer fixtures are maintained in this repository versus downstream wrapper repositories.

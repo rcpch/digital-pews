@@ -15,8 +15,9 @@
 
    Data is passed as a JS *property* (not an attribute) because it is a rich
    object - `.data = { patient, observations }`, or the `.patient` / `.observations`
-   convenience setters. Observations carry raw vitals only; the engine computes the
-   PEWS score, escalation level and applicable age band from the patient's DOB.
+   convenience setters. Presentation is configured separately through `.options`.
+   Observations carry raw vitals only; the engine computes the PEWS score, escalation
+   level and applicable age band from the patient's DOB.
 
    Phase 1 (this file): light DOM, one chart per page (the engine uses fixed DOM
    ids). For a SMART-on-FHIR deployment the app runs in its own EHR iframe, so the
@@ -98,6 +99,7 @@ let _liveInstances = 0;
 
 class NpewsChartElement extends HTMLElement {
   #data = null;
+  #options = { showDemographics: true };
 
   /** @param {{patient: object, observations: object[]}|null} value */
   set data(value) {
@@ -126,6 +128,19 @@ class NpewsChartElement extends HTMLElement {
     return this.#data ? this.#data.observations ?? null : null;
   }
 
+  /**
+   * Presentation options remain separate from clinical patient/observation data.
+   * @param {{showDemographics?: boolean}|null} value
+   */
+  set options(value) {
+    const options = value && typeof value === 'object' ? value : {};
+    this.#options = { showDemographics: options.showDemographics !== false };
+    if (this.isConnected) this.#renderNow();
+  }
+  get options() {
+    return { ...this.#options };
+  }
+
   connectedCallback() {
     _liveInstances += 1;
     if (_liveInstances > 1) {
@@ -145,6 +160,7 @@ class NpewsChartElement extends HTMLElement {
 
   #renderNow() {
     const data = this.#data;
+    const options = this.#options;
     if (!data || !data.patient || !Array.isArray(data.observations)) {
       // Not enough to draw yet - wait for `.data` to be set.
       return;
@@ -153,9 +169,11 @@ class NpewsChartElement extends HTMLElement {
     // clinically-mandated band/escalation colours rather than fallback defaults.
     ensureStyles().then(() => {
       // Bail if we were disconnected or re-fed different data while waiting.
-      if (!this.isConnected || this.#data !== data) return;
+      if (!this.isConnected || this.#data !== data || this.#options !== options) return;
       // Fresh shell each time so re-setting data re-mounts cleanly into empty DOM.
       mountChartShell(this);
+      const patientHeader = this.querySelector('.patient-header');
+      if (patientHeader) patientHeader.hidden = !options.showDemographics;
       render({ patient: data.patient, observations: data.observations });
     });
   }

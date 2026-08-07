@@ -5,6 +5,10 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D17 — Keep presentation options separate from clinical data
+
+**2026-08-07.** `<npews-chart>` exposes assignable presentation settings through a separate `.options` object rather than adding them to `Patient`, `Observation`, or inferring them from missing data. `showDemographics` defaults to `true` for standalone use; an embedding host must explicitly set it to `false` when patient identification is already provided elsewhere. Data reassignment preserves the selected presentation options. Roadmap R23 will type and extend this object without changing that separation.
+
 ## D16 — Use fixed time windows; do not create an ED variant without evidence
 **2026-08-06.** Remove the ineffective zoom, calendar-range, and “Jump to Present” buttons.
 The component instead offers small text links for fixed windows ending at the latest observation,

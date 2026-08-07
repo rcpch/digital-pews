@@ -289,6 +289,30 @@ body.demo {
   margin: 0 0 0.6rem;
 }
 
+.demo-controls__heading--spaced {
+  margin-top: 1.25rem;
+}
+
+.demo-display-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.demo-display-option input {
+  accent-color: var(--param-label-bg);
+  margin: 0;
+}
+
+.demo-display-option:focus-within {
+  outline: 3px solid var(--focus-ring, #ffdd00);
+  outline-offset: 3px;
+}
+
 .theme-options {
   display: flex;
   flex-direction: column;

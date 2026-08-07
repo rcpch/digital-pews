@@ -5,8 +5,8 @@
    Drives the demonstration page: renders the scenario picker in the sidebar and,
    when a scenario is chosen, feeds it to a single <npews-chart> Web Component as a
    JSON object. The harness is now a plain *consumer* of the element - it owns the
-   scenario data and knows nothing about how the chart renders; the two meet only
-   through `chartEl.data = { patient, observations }`.
+   scenario data and knows nothing about how the chart renders; clinical data is
+   passed through `.data` and display choices through `.options`.
    ============================================================ */
 
 import './chart/npews-chart.js';
@@ -27,6 +27,9 @@ const clinicianTrigger = document.getElementById('trigger-clinician');
 const clinicianLevel = document.getElementById('trigger-clinician-level');
 const carerTrigger = document.getElementById('trigger-carer');
 const carerLevel = document.getElementById('trigger-carer-level');
+const showDemographics = document.getElementById('show-demographics');
+
+chartEl.options = { showDemographics: showDemographics.checked };
 
 let selectedScenario = null;
 
@@ -106,6 +109,10 @@ themeOptions.addEventListener('change', (e) => {
 });
 
 applyTheme(savedTheme);
+
+showDemographics.addEventListener('change', () => {
+  chartEl.options = { ...chartEl.options, showDemographics: showDemographics.checked };
+});
 
 // -- Foldable controls sidebar ------------------------------------------------
 const controls = document.getElementById('demo-controls');

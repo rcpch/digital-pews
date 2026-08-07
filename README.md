@@ -106,6 +106,9 @@ fonts, so a consumer only loads one module and feeds it a JSON object:
 
 - Data is passed as a JS **property** (`.data`), not an attribute, because it is a
   rich object. Convenience setters `.patient` and `.observations` are also available.
+- Presentation stays separate from clinical data. Set
+  `.options = { showDemographics: false }` when the embedding host already provides
+  patient identification; the standalone default is `true`.
 - **Scores are always computed** from the patient's date of birth and the raw
   observations - any score in the input is ignored (single source of truth).
 - See `chart/example.html` for a minimal, fully self-contained drop-in (no demo

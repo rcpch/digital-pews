@@ -1,9 +1,10 @@
 # NPEWS Data Model
 
-The `<npews-chart>` component consumes exactly **two inputs**: a `Patient` and an array
-of `Observation`s (raw vital signs). Everything else — the applicable age band, the PEWS
-score, the escalation level — is **computed by the component**, never supplied. This
-document defines those two input shapes plus the data-entry reference codes.
+The `<npews-chart>` component consumes exactly **two clinical inputs**: a `Patient` and an
+array of `Observation`s (raw vital signs). Everything else — the applicable age band, the
+PEWS score, the escalation level — is **computed by the component**, never supplied. An
+optional presentation-options object remains separate from both clinical inputs. This
+document defines those inputs, presentation options, and the data-entry reference codes.
 
 Derived/config structures are documented where they live:
 
@@ -106,7 +107,24 @@ structures remains open under R38; the component contract does not prescribe an 
 
 ---
 
-## 3. Data-entry reference
+## 3. Presentation options
+
+Presentation options configure how the component is embedded without becoming part of the
+patient or observation record. They are assigned through the Web Component's `.options`
+property and persist when `.data` is replaced.
+
+```javascript
+chart.options = {
+  showDemographics: false, // optional boolean; defaults to true
+};
+```
+
+`showDemographics` controls the complete patient-identification header. The component does
+not infer this setting from absent patient fields: only an explicit `false` hides the header.
+
+---
+
+## 4. Data-entry reference
 
 > Source: Configuration Document for SPOT NPEWS (NHS England).
 
@@ -141,7 +159,7 @@ A skipped vital sets its value to `null` and records a `<field>_skipReason` code
 
 ---
 
-## 4. Data files
+## 5. Data files
 
 - **`npews-scoring-config.js`** — `AGE_BANDS`, `AGE_BAND_BOUNDS`, `ESCALATION_META` and the
   generated `SCORING_BANDS_BY_AGE`. Loaded as an ES module by `chart.js`, `npews-scorer.js`
