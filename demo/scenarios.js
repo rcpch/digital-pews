@@ -112,6 +112,45 @@ const OBSERVATIONS_BIRTHDAY_CROSSING = [
   { id: 'obs-9', timestamp: '2025-01-11T12:00:00', respiratoryRate: 21, respiratoryDistress: 'none', oxygenSaturation: 99, oxygenDevice: 'air', oxygenDelivery: null, heartRate: 89, bloodPressureSystolic: 103, bloodPressureDiastolic: 66, capillaryRefill: 2, avpu: 'A', temperature: 36.9 },
 ];
 
+// -- Non-score escalation: each round isolates one R10 rule ------------------
+const PATIENT_NON_SCORE_ESCALATION = {
+  name: 'Taylor Brooks',
+  dob: '2018-04-12',
+  age: '7 years',
+  ageBracket: '5-12',
+  ageBand: '5-12y',
+  nhsNumber: '634 915 2078',
+  ward: 'Paediatric Assessment Unit',
+  bed: '4',
+  consultant: 'Dr S. Patel',
+  admittedAt: '2026-02-10T08:00:00',
+};
+
+const NORMAL_NON_SCORE_VITALS = {
+  respiratoryRate: 20,
+  respiratoryDistress: 'none',
+  oxygenSaturation: 99,
+  oxygenDevice: 'air',
+  oxygenDelivery: null,
+  heartRate: 90,
+  bloodPressureSystolic: 100,
+  bloodPressureDiastolic: 60,
+  capillaryRefill: 2,
+};
+
+const OBSERVATIONS_NON_SCORE_ESCALATION = [
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-1', timestamp: '2026-02-10T08:00:00', avpu: 'A', temperature: 37 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-asleep', timestamp: '2026-02-10T08:30:00', avpu: 'asleep', temperature: 37 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-2', timestamp: '2026-02-10T09:00:00', avpu: 'V', temperature: 37 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-3', timestamp: '2026-02-10T10:00:00', avpu: 'A', temperature: 38.2 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-cold', timestamp: '2026-02-10T10:30:00', avpu: 'A', temperature: 35.8 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-4', timestamp: '2026-02-10T11:00:00', avpu: 'A', temperature: 37, newSepsisSuspicion: 'sepsis' },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-5', timestamp: '2026-02-10T12:00:00', avpu: 'A', temperature: 37, newSepsisSuspicion: 'septic-shock' },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-6', timestamp: '2026-02-10T13:00:00', avpu: 'P', temperature: 37 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-u', timestamp: '2026-02-10T13:30:00', avpu: 'U', temperature: 37 },
+  { ...NORMAL_NON_SCORE_VITALS, id: 'obs-7', timestamp: '2026-02-10T14:00:00', avpu: 'A', temperature: 37, abnormalPupillaryResponse: true },
+];
+
 /**
  * Ordered catalogue of demonstration scenarios. Each entry is passed straight to
  * the chart as props: NPEWSChart.render({ patient, observations }).
@@ -158,6 +197,14 @@ export const SCENARIOS = [
     description: 'Turns 5 at midnight mid-admission. The chart joins the 1-4y and 5-12y charts seamlessly; identical vitals score 1 then 0 across the seam.',
     patient: PATIENT_BIRTHDAY_CROSSING,
     observations: OBSERVATIONS_BIRTHDAY_CROSSING,
+  },
+  {
+    id: 'non-score-escalation',
+    title: 'Taylor Brooks - non-score triggers',
+    ageBand: '5-12y',
+    description: 'Normal PEWS vitals isolate AVPU, temperature, sepsis and pupillary-response escalation behaviour.',
+    patient: PATIENT_NON_SCORE_ESCALATION,
+    observations: OBSERVATIONS_NON_SCORE_ESCALATION,
   },
 ];
 

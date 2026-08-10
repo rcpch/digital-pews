@@ -18,6 +18,7 @@
 import { AGE_BANDS, ESCALATION_META } from './npews-scoring-config.js';
 import { scoreObservationsForPatient } from './npews-scorer.js';
 import { resolveAgeBand, ageBandSegments, completedYears } from './age-band.js';
+import { escalationStatusLabel } from './escalation-presentation.js';
 
 // ---- Plot geometry -----------------------------------------
 // Horizontal padding inside every chart canvas. These are deliberately
@@ -770,6 +771,7 @@ function getAVPUCell(obs) {
     V: { label: 'V', color: getBandColour('orange'), textColor: '#0b0c0c' },
     P: { label: 'P', color: getBandColour('pink'),   textColor: '#0b0c0c' },
     U: { label: 'U', color: getBandColour('pink'),   textColor: '#0b0c0c' },
+    asleep: { label: 'Asleep', color: getBandColour('white'), textColor: '#0b0c0c' },
   };
   return map[v] || { label: v, color: '#ffffff', textColor: '#0b0c0c' };
 }
@@ -1102,6 +1104,17 @@ function renderPewsCanvas() {
     const t = parseTs(o.timestamp);
     return t >= viewState.start && t <= viewState.end;
   });
+  canvas.title = '! indicates a clinical warning; CI:? or CQ:? indicates that an escalation level is required.';
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', inView.map(observation => {
+    const reasons = (observation.escalationReasons || []).map(escalationReasonText).filter(Boolean);
+    const noneDecisions = (observation.escalationDecisions || [])
+      .filter(decision => decision.level === 'none')
+      .map(escalationReasonText)
+      .filter(Boolean);
+    const notices = observationNotices(observation);
+    return `${fmtDateTime(observation.timestamp)}: PEWS ${observation.pewsTotal ?? 'unavailable'}${reasons.length ? `; ${reasons.join(', ')}` : ''}${noneDecisions.length ? `; recorded ${noneDecisions.join(', ')}` : ''}${notices.length ? `; ${notices.join(', ')}` : ''}`;
+  }).join('. '));
 
   // White background for the draw area
   ctx.fillStyle = '#ffffff';
@@ -1136,14 +1149,32 @@ function renderPewsCanvas() {
     ctx.fillStyle = escColor(level);
     ctx.fillRect(x, 0, colW, H);
 
-    // Score number centred in the column
+    const activeTriggerCodes = new Set((o.escalationDecisions || [])
+      .filter(decision => decision.level !== 'none')
+      .map(decision => decision.code));
+    const decisionCodes = (o.escalationDecisions || [])
+      .map(decision => decision.level === 'none' && !activeTriggerCodes.has(decision.code) ? `${decision.code}:0` : decision.code)
+      .filter((code, index, codes) => codes.indexOf(code) === index);
+    const pendingCodes = (o.pendingEscalationResponses || []).map(response => `${response.code}:?`);
+    const triggerCodes = [
+      ...decisionCodes,
+      ...pendingCodes,
+      ...((o.clinicalWarnings || []).length ? ['!'] : []),
+    ]
+      .join('+');
+
+    // Score number and any national non-score trigger codes centred in the column.
     ctx.save();
-    ctx.font = chartFont('16px', 'bold');
     ctx.fillStyle = escTextColor(level);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     if (score != null) {
-      ctx.fillText(String(score), x + colW / 2, H / 2);
+      ctx.font = chartFont('16px', 'bold');
+      ctx.fillText(String(score), x + colW / 2, triggerCodes ? H * 0.37 : H / 2);
+    }
+    if (triggerCodes) {
+      ctx.font = chartFont('9px', 'bold');
+      ctx.fillText(triggerCodes, x + colW / 2, H * 0.72);
     }
     ctx.restore();
   });
@@ -1280,6 +1311,38 @@ function renderAll() {
 
 // ---- Escalation banner -------------------------------------
 
+const ESCALATION_REASON_LABELS = {
+  P: 'PEWS',
+  CI: 'Clinical intuition',
+  CQ: 'Carer question',
+  SC: 'Specific concern',
+};
+
+const ESCALATION_CRITERION_LABELS = {
+  'other-specific-concern': 'Other specific concern',
+  'avpu-v': 'AVPU V',
+  'avpu-p': 'AVPU P',
+  'avpu-u': 'AVPU U',
+  'abnormal-pupillary-response': 'abnormal pupillary response',
+  'new-suspicion-of-sepsis': 'new suspicion of sepsis',
+  'new-suspicion-of-septic-shock': 'new suspicion of septic shock',
+};
+
+function escalationReasonText(reason) {
+  const label = ESCALATION_CRITERION_LABELS[reason.criterion] || ESCALATION_REASON_LABELS[reason.code];
+  const level = reason.level === 'none' ? 'None' : ESCALATION_META[reason.level]?.label;
+  return label && level ? `${label} (${level})` : null;
+}
+
+function observationNotices(observation) {
+  const warnings = (observation.clinicalWarnings || []).map(warning => warning.message);
+  const pending = (observation.pendingEscalationResponses || []).map(response => {
+    const label = ESCALATION_REASON_LABELS[response.code] || response.code;
+    return `${label} escalation level required`;
+  });
+  return [...warnings, ...pending];
+}
+
 function renderEscalationBanner() {
   const banner = document.getElementById('escalation-banner');
   if (!banner) return;
@@ -1292,21 +1355,30 @@ function renderEscalationBanner() {
   const latest = scored[scored.length - 1];
   const level = latest.escalationLevel || 'normal';
   const meta = ESCALATION_META[latest.escalationLevel];
-  const reasonLabels = { P: 'PEWS', CI: 'Clinical intuition', CQ: 'Carer question', SC: 'Specific concern' };
   const reasons = (latest.escalationReasons || [])
-    .map(reason => {
-      const label = reasonLabels[reason.code];
-      const level = ESCALATION_META[reason.level]?.label;
-      return label && level ? `${label} (${level})` : null;
-    })
+    .map(escalationReasonText)
     .filter(Boolean);
+  const noneDecisions = (latest.escalationDecisions || [])
+    .filter(decision => decision.level === 'none')
+    .map(escalationReasonText)
+    .filter(Boolean);
+  const notices = observationNotices(latest);
+  const source = reasons.length ? reasons.join(', ') : 'PEWS (Normal)';
+  const detail = [
+    `Source: ${source}`,
+    noneDecisions.length ? `Recorded: ${noneDecisions.join(', ')}` : null,
+    ...notices,
+  ].filter(Boolean).join(' · ');
+  const pending = (latest.pendingEscalationResponses || []).length > 0;
+  const hasClinicalWarning = (latest.clinicalWarnings || []).length > 0;
+  const statusLabel = escalationStatusLabel(latest, ESCALATION_META);
   banner.style.display = 'flex';
   banner.className = `escalation-banner escalation-banner--${level}`;
   banner.innerHTML = `
-    <span class="escalation-banner__level">${meta?.label || 'Normal'}</span>
+    <span class="escalation-banner__level">${statusLabel}</span>
     <span class="escalation-banner__score">PEWS ${latest.pewsTotal}</span>
-    <span class="escalation-banner__action">${meta?.action || 'No escalation indicated.'}</span>
-    <span class="escalation-banner__reason">Source: ${reasons.length ? reasons.join(', ') : 'PEWS (Normal)'}</span>
+    <span class="escalation-banner__action">${meta?.action || (pending ? 'Record an escalation level.' : hasClinicalWarning ? 'Think sepsis and assess for other signs.' : 'No escalation indicated.')}</span>
+    <span class="escalation-banner__reason">${detail}</span>
   `;
 }
 
@@ -1323,8 +1395,13 @@ function renderFooter() {
   const meta   = level ? ESCALATION_META[level] : null;
   const nonScoreReasons = (latest.escalationReasons || [])
     .filter(reason => reason.code !== 'P')
-    .map(reason => `${reason.code} ${ESCALATION_META[reason.level]?.label || reason.level}`)
+    .map(escalationReasonText)
     .join(', ');
+  const noneDecisions = (latest.escalationDecisions || [])
+    .filter(decision => decision.level === 'none')
+    .map(escalationReasonText)
+    .join(', ');
+  const notices = observationNotices(latest).join(' · ');
 
   footer.innerHTML = `
     <div class="sticky-footer__inner">
@@ -1332,6 +1409,8 @@ function renderFooter() {
       <span class="sticky-footer__score">${latest.pewsTotal}</span>
       ${meta ? `<span class="sticky-footer__escalation sticky-footer__escalation--${level}">${meta.label}</span>` : ''}
       ${nonScoreReasons ? `<span class="sticky-footer__reason">Trigger: ${nonScoreReasons}</span>` : ''}
+      ${noneDecisions ? `<span class="sticky-footer__reason">Recorded: ${noneDecisions}</span>` : ''}
+      ${notices ? `<span class="sticky-footer__reason">${notices}</span>` : ''}
       <span class="sticky-footer__time">${fmtDateTime(latest.timestamp)}</span>
     </div>
   `;

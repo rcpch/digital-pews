@@ -77,14 +77,16 @@ DOB, and ignores any score present in input.
   bloodPressureDiastolic: number | null, // mmHg (carried for display; not scored)
   capillaryRefill: number | null,     // seconds
 
-  avpu: string | null,                // 'A' | 'V' | 'P' | 'U' (escalation only, not scored)
-  temperature: number | null,         // °C (escalation only, not scored)
+  avpu: string | null,                // 'A' | 'V' | 'P' | 'U' | 'asleep' (escalation only)
+  abnormalPupillaryResponse?: boolean | null,
+  temperature: number | null,         // °C (Think sepsis warning only, not scored)
+  newSepsisSuspicion?: 'none' | 'sepsis' | 'septic-shock' | null,
 
   clinicalIntuition?: 'yes' | 'no' | 'skip',
   carerQuestion?: 'W' | 'S' | 'B' | 'A' | 'U' | 'skip',
   escalationTriggers?: Array<{
     code: 'CI' | 'CQ' | 'SC',
-    level: 'low' | 'medium' | 'high' | 'emergency',
+    level: 'none' | 'low' | 'medium' | 'high' | 'emergency',
   }>,
 
   // Optional, one per vital that was skipped (value then null):
@@ -92,18 +94,23 @@ DOB, and ignores any score present in input.
 }
 ```
 
-Field constraints: `avpu` ∈ {A,V,P,U}; `respiratoryDistress` ∈ {none,mild,moderate,severe};
+Field constraints: `avpu` ∈ {A,V,P,U,asleep}; `respiratoryDistress` ∈ {none,mild,moderate,severe};
 any vital may be `null` (skipped). `oxygenDelivery` is `null` on room air; a change of
 `unit` (`%` ↔ `L/min`) causes a deliberate line break in the chart (a real modality change,
 not a continuous trend).
 
-`clinicalIntuition` and `carerQuestion` preserve the national response codes. A concerned
-response does not imply one fixed escalation level: the host supplies the explicitly selected
-level in `escalationTriggers`. The scorer combines those triggers with numeric PEWS, selects the
-highest level, and returns `scoreEscalationLevel` plus `escalationReasons` (including derived
-`P` provenance when numeric PEWS contributes). `SC`, `CQ`, `CI`, and derived `P` are the national
-short codes documented in [`escalation.md`](./escalation.md). Mapping these fields to EPR/FHIR
-structures remains open under R38; the component contract does not prescribe an EPR workflow.
+`clinicalIntuition` and `carerQuestion` preserve the national response codes. A concerned response does not imply one fixed escalation level: the host supplies the explicitly selected level in `escalationTriggers`. An explicit `none` records that the response was assessed without activating escalation. The scorer automatically derives Specific Concern decisions from AVPU `V`/`P`/`U`, abnormal pupillary response, and new sepsis/septic-shock suspicion. Temperature ≥38°C or <36°C produces a “Think sepsis” warning but no escalation level. The scorer combines active decisions with numeric PEWS and selects the highest level.
+
+The scorer adds these derived output fields to each observation:
+
+- `scoreEscalationLevel`: the level from numeric PEWS alone.
+- `escalationLevel`: the highest active level across PEWS and non-score decisions.
+- `escalationReasons`: active contributors, including derived `P` provenance when numeric PEWS contributes.
+- `escalationDecisions`: every non-score decision with `{ code, level, criterion, origin }`; `origin` is `host-selected` or `derived`.
+- `pendingEscalationResponses`: raw Yes/Worse responses for which the host has not supplied a level.
+- `clinicalWarnings`: non-escalating prompts such as `{ code: 'THINK_SEPSIS', criterion, message }`.
+
+`SC`, `CQ`, `CI`, and derived `P` are the national short codes documented in [`escalation.md`](./escalation.md). Mapping these fields to EPR/FHIR structures remains open under R38; the component contract does not prescribe an EPR workflow.
 
 ---
 

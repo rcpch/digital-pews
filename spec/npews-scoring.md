@@ -14,9 +14,9 @@
 > Source: Configuration Document for SPOT NPEWS (NHS England). Scores are colour-coded
 > **White (0)**, **Yellow (1)**, **Orange (2)**, **Pink (4)**.
 
-**Conformance note.** Temperature and AVPU are **not** numerically scored — they are
-recorded and drive escalation only (temperature = sepsis/escalation trigger; AVPU =
-specific-concern escalation trigger), matching the national SPOT NPEWS algorithm. See
+**Conformance note.** Temperature and AVPU are **not** numerically scored. Temperature
+produces a “Think sepsis” warning without independently assigning an escalation level; AVPU
+produces a specific-concern escalation decision, matching the national SPOT NPEWS algorithm. See
 [`escalation.md`](./escalation.md).
 
 **Clinical verification.** The numeric thresholds in the source JSON were manually

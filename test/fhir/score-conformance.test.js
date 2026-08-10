@@ -230,7 +230,11 @@ describe('escalationFromScoreAndTriggers', () => {
   it('uses a non-score trigger when it is higher than the numeric PEWS level', () => {
     expect(escalationFromScoreAndTriggers('low', [{ code: 'CI', level: 'high' }])).toEqual({
       level: 'high',
-      reasons: [{ code: 'P', level: 'low' }, { code: 'CI', level: 'high' }],
+      reasons: [
+        { code: 'P', level: 'low', criterion: 'pews', origin: 'derived' },
+        { code: 'CI', level: 'high', criterion: 'clinical-intuition', origin: 'host-selected' },
+      ],
+      decisions: [{ code: 'CI', level: 'high', criterion: 'clinical-intuition', origin: 'host-selected' }],
     });
   });
 
@@ -241,7 +245,8 @@ describe('escalationFromScoreAndTriggers', () => {
   it('supports concern without a numeric PEWS escalation', () => {
     expect(escalationFromScoreAndTriggers(null, [{ code: 'CQ', level: 'low' }])).toEqual({
       level: 'low',
-      reasons: [{ code: 'CQ', level: 'low' }],
+      reasons: [{ code: 'CQ', level: 'low', criterion: 'carer-question', origin: 'host-selected' }],
+      decisions: [{ code: 'CQ', level: 'low', criterion: 'carer-question', origin: 'host-selected' }],
     });
   });
 
@@ -312,7 +317,9 @@ describe('scoreObservationsForPatient: age band resolved per observation from DO
     expect(triggered.pewsTotal).toBe(0);
     expect(triggered.scoreEscalationLevel).toBeNull();
     expect(triggered.escalationLevel).toBe('high');
-    expect(triggered.escalationReasons).toEqual([{ code: 'CI', level: 'high' }]);
+    expect(triggered.escalationReasons).toEqual([
+      { code: 'CI', level: 'high', criterion: 'clinical-intuition', origin: 'host-selected' },
+    ]);
   });
 
   it('does not infer an escalation level from a raw concern response', () => {

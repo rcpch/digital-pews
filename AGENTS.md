@@ -30,7 +30,9 @@ chart/                                    demo/
   npews-scoring-config.js -> chart.js -> npews-chart.js  <- demo.js / scenarios.js
   npews-scorer.js         -> chart.js
   age-band.js             -> chart.js
+  escalation-presentation.js -> chart.js / demo.js
   chart-shell.js          -> npews-chart.js
+                                          playback-math.js -> demo.js
 ```
 
 Files load as native ES modules and `import` their own dependencies. A host page just imports `chart/npews-chart.js` (module) and feeds the `<npews-chart>` element its `{ patient, observations }` data.

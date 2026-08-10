@@ -11,7 +11,7 @@
 > Colours: **White (0)**, **Yellow (1)**, **Orange (2)**, **Pink (4)**. Each cell lists every
 > band as `range → score (Colour)`; bands are inclusive and meet at `x.99` boundaries.
 >
-> **Conformance:** Conformant with the national SPOT NPEWS algorithm: temperature and AVPU are NOT numerically scored — they are escalation / sepsis / specific-concern triggers (see nonScoring below).
+> **Conformance:** Conformant with the national SPOT NPEWS algorithm: temperature and AVPU are NOT numerically scored — temperature produces a sepsis warning and AVPU produces a specific-concern escalation decision (see nonScoring below).
 
 ## Numerically scored vital signs
 
@@ -81,8 +81,8 @@
 These are recorded and drive escalation only — they do **not** add to the PEWS total
 (national SPOT NPEWS conformance).
 
-- **Temperature** — Sepsis / escalation trigger: high >= 38, low < 36.
-- **AVPU** — Specific-concern escalation trigger: V → escalate; P/U → escalate higher.
+- **Temperature** — Think sepsis warning; does not independently assign an escalation level: high >= 38, low < 36.
+- **AVPU** — Specific-concern escalation trigger: V → high; P/U → emergency.
 
 ## Escalation (PEWS total → level)
 

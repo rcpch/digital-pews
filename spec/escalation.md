@@ -4,7 +4,7 @@ Sources: Configuration Document for SPOT NPEWS (NHS England); SPOT Decision Path
 
 ## Escalation levels
 
-The scorer derives `escalationLevel` from the numeric PEWS total only.
+The scorer derives `escalationLevel` from the highest of the numeric PEWS result and every active non-score trigger.
 
 | PEWS total | Escalation level | Colour |
 | --- | --- | --- |
@@ -29,7 +29,7 @@ For emergency or life-threatening situations: call 2222 and state “Paediatric 
 
 Clinical policy from the reference charts: respond according to the highest escalation level from the PEWS score or any trigger criterion. These triggers can raise the escalation level above the numeric-score level.
 
-Implementation status: `chart/npews-scorer.js` accepts explicit `CI`, `CQ`, and `SC` trigger levels supplied by the host, retains their provenance, and selects the highest level across those triggers and numeric PEWS. The demo can exercise Clinical Intuition and Carer Question triggers. Automatic derivation from AVPU, temperature, sepsis, and the raw question responses remains unimplemented; the host-to-EPR/FHIR representation also remains open.
+Implementation status: `chart/npews-scorer.js` accepts explicit `CI`, `CQ`, and `SC` decisions supplied by the host, including an explicit None, and automatically derives `SC` decisions from current AVPU, abnormal pupillary response, new suspicion of sepsis, and new suspicion of septic shock. It retains each criterion and whether the decision was host-selected or derived, then selects the highest level across active decisions and numeric PEWS. Raw Clinical Intuition Yes and Carer Question Worse responses remain unresolved until the host supplies the clinician-selected level. Temperature produces a separate “Think sepsis” warning and does not independently assign escalation. The demo exercises explicit decisions and each automatic rule; the host-to-EPR/FHIR representation remains open under R38.
 
 | Trigger criterion | Low | Medium | High | Emergency |
 | --- | --- | --- | --- | --- |
@@ -52,11 +52,11 @@ Short codes for escalation reason:
 | P | PEWS |
 | 0 | None |
 
-The component input uses `escalationTriggers: [{ code, level }]` for explicit non-score trigger decisions. A raw Clinical Intuition “Yes” or Carer Question “Worse” does not determine the level by itself: the national material permits the clinician to select None, Low, Medium, High, or Emergency. The component therefore does not infer a level from the response. See [`data-model.md`](./data-model.md).
+The component input uses `escalationTriggers: [{ code, level }]` for explicit non-score trigger decisions. A raw Clinical Intuition “Yes” or Carer Question “Worse” does not determine the level by itself: the national material permits the clinician to select None, Low, Medium, High, or Emergency. The component therefore does not infer a level from the response and exposes the unresolved response in `pendingEscalationResponses`. An explicit None is retained in `escalationDecisions` for provenance but is not an active `escalationReason`. See [`data-model.md`](./data-model.md).
 
 ## AVPU & temperature
 
-AVPU and temperature do not contribute to the numeric PEWS total. In `chart/npews-scorer.js`, the numeric total includes respiratory rate, respiratory distress, oxygen saturation, oxygen support, heart rate, systolic blood pressure and capillary refill time only. AVPU and temperature feed the escalation/trigger grid: AVPU change to V/P/U or abnormal pupillary response; temperature ≥38°C or <36°C as a sepsis trigger.
+AVPU and temperature do not contribute to the numeric PEWS total. In `chart/npews-scorer.js`, the numeric total includes respiratory rate, respiratory distress, oxygen saturation, oxygen support, heart rate, systolic blood pressure and capillary refill time only. The scorer maps current AVPU `V` to High and current `P` or `U` to Emergency as Specific Concern. The source table says “AVPU change”, while the available chart input records state rather than a governed transition; this fail-safe current-value interpretation requires clinical confirmation under R10. `asleep` is a recordable non-escalating AVPU state. Abnormal pupillary response maps to Emergency. Temperature ≥38°C or <36°C produces a “Think sepsis” warning but no automatic escalation level.
 
 ## Think sepsis
 

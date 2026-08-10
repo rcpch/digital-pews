@@ -5,6 +5,10 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D18 — Derive observation-state triggers without inventing concern levels
+
+**2026-08-07.** The scorer derives Specific Concern escalation from the current observation: AVPU `V` is High; `P` or `U` and abnormal pupillary response are Emergency; new suspicion of sepsis is Medium; and new suspicion of septic shock is High. The national table says “AVPU change”, but the available component input and wireframe identify the current AVPU value rather than a governed longitudinal transition rule. Current-value derivation is therefore the deterministic, fail-safe interpretation pending clinical review. Temperature ≥38°C or <36°C produces a visible “Think sepsis” warning but does not independently assign an escalation level. Raw Clinical Intuition Yes and Carer Question Worse responses likewise do not imply a level because the source permits an explicit selection from None through Emergency; unresolved responses are surfaced for the host to complete. Every non-score decision retains its criterion and whether it was derived or host-selected.
+
 ## D17 — Keep presentation options separate from clinical data
 
 **2026-08-07.** `<npews-chart>` exposes assignable presentation settings through a separate `.options` object rather than adding them to `Patient`, `Observation`, or inferring them from missing data. `showDemographics` defaults to `true` for standalone use; an embedding host must explicitly set it to `false` when patient identification is already provided elsewhere. Data reassignment preserves the selected presentation options. Roadmap R23 will type and extend this object without changing that separation.
@@ -73,8 +77,9 @@ requirements are outside the component or deliberately excluded.
 ## D10 — Temperature and AVPU are not numerically scored (conformant mode)
 **2026-06-30, AVPU reconfirmed 2026-07-02** against the published PEWS PDFs and specs. Only
 Respiratory Rate, Respiratory Distress, SpO₂, O₂ device, O₂ level, Heart Rate, systolic BP and
-Capillary Refill contribute to the numeric total. Temperature (sepsis trigger ≥38/<36) and
-AVPU (specific-concern trigger: V → escalate, P/U → escalate higher) drive **escalation only**.
+Capillary Refill contribute to the numeric total. Temperature (sepsis warning ≥38/<36) does not
+alter the total or independently assign an escalation level; AVPU (specific-concern trigger:
+V → High, P/U → Emergency) drives **escalation only**.
 No "augmented" scoring mode. Implemented in `chart/npews-scorer.js`; documented in
 [`npews-scoring.md`](./npews-scoring.md) and [`escalation.md`](./escalation.md).
 

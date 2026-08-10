@@ -56,6 +56,7 @@
           <label class="demo-trigger__level">
             Level
             <select id="trigger-clinician-level" aria-label="Clinician concern escalation level" disabled>
+              <option value="none">None</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -71,6 +72,7 @@
           <label class="demo-trigger__level">
             Level
             <select id="trigger-carer-level" aria-label="Carer concern escalation level" disabled>
+              <option value="none">None</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -78,7 +80,23 @@
             </select>
           </label>
         </div>
-        <p class="demo-triggers__note">The checkbox records Yes/Worse. The selected escalation level is explicit; the component does not infer it.</p>
+        <div class="demo-trigger">
+          <label class="demo-trigger__toggle">
+            <input type="checkbox" id="trigger-specific" />
+            Other specific concern
+          </label>
+          <label class="demo-trigger__level">
+            Level
+            <select id="trigger-specific-level" aria-label="Specific concern escalation level" disabled>
+              <option value="none">None</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="emergency">Emergency</option>
+            </select>
+          </label>
+        </div>
+        <p class="demo-triggers__note">Yes/Worse and other host-recorded concerns use the explicitly selected level. AVPU, pupils and new sepsis suspicion are derived from observation data.</p>
       </div>
     </div>
 

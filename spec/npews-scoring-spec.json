@@ -4,7 +4,7 @@
     "source": "Configuration Document for SPOT NPEWS (NHS England)",
     "verified": "Manually checked against the live NHS England NPEWS charts by Marcus Baw (GMC 4712729) on 2026-06-30.",
     "note": "THIS FILE IS THE SINGLE SOURCE OF TRUTH for NPEWS numeric scoring. Edit this file, then run `npm run generate:scoring` to regenerate chart/npews-scoring-config.js (the runtime bands) and spec/npews-scoring-tables.generated.md (the human-readable unified table). Do not hand-edit the generated regions. The clinical narrative (respiratory-distress descriptors, review annotations) lives in spec/npews-scoring.md.",
-    "conformance": "Conformant with the national SPOT NPEWS algorithm: temperature and AVPU are NOT numerically scored — they are escalation / sepsis / specific-concern triggers (see nonScoring below)."
+    "conformance": "Conformant with the national SPOT NPEWS algorithm: temperature and AVPU are NOT numerically scored — temperature produces a sepsis warning and AVPU produces a specific-concern escalation decision (see nonScoring below)."
   },
 
   "scoreColors": { "0": "white", "1": "yellow", "2": "orange", "4": "pink" },
@@ -126,15 +126,15 @@
   },
 
   "nonScoring": {
-    "comment": "Per the national SPOT NPEWS Configuration Document these parameters do NOT contribute numeric points. They are recorded and drive escalation only.",
+    "comment": "Per the national SPOT NPEWS Configuration Document these parameters do NOT contribute numeric points. Temperature produces a sepsis warning; AVPU produces a specific-concern escalation decision.",
     "temperature": {
-      "role": "Sepsis / escalation trigger",
+      "role": "Think sepsis warning; does not independently assign an escalation level",
       "triggers": { "high": ">= 38", "low": "< 36" },
       "display": { "hotZoneFrom": 38, "coldZoneTo": 36 }
     },
     "avpu": {
       "role": "Specific-concern escalation trigger",
-      "triggers": { "V": "escalate", "P": "escalate higher", "U": "escalate higher" }
+      "triggers": { "V": "high", "P": "emergency", "U": "emergency" }
     }
   },
 

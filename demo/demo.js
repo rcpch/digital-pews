@@ -12,7 +12,9 @@
 import './chart/npews-chart.js';
 import { scoreObservationsForPatient } from './chart/npews-scorer.js';
 import { ESCALATION_META } from './chart/npews-scoring-config.js';
+import { escalationStatusLabel } from './chart/escalation-presentation.js';
 import { SCENARIOS, scenarioById } from './scenarios.js';
+import { nearestObservationIndex, observationTimelinePositions } from './playback-math.js';
 
 const host = document.getElementById('chart-host');
 const list = document.getElementById('scenario-list');
@@ -26,6 +28,8 @@ const clinicianTrigger = document.getElementById('trigger-clinician');
 const clinicianLevel = document.getElementById('trigger-clinician-level');
 const carerTrigger = document.getElementById('trigger-carer');
 const carerLevel = document.getElementById('trigger-carer-level');
+const specificTrigger = document.getElementById('trigger-specific');
+const specificLevel = document.getElementById('trigger-specific-level');
 const showDemographics = document.getElementById('show-demographics');
 
 chartEl.options = { showDemographics: showDemographics.checked };
@@ -39,12 +43,16 @@ function resetDemoTriggers() {
   carerTrigger.checked = false;
   carerLevel.value = 'low';
   carerLevel.disabled = true;
+  specificTrigger.checked = false;
+  specificLevel.value = 'low';
+  specificLevel.disabled = true;
 }
 
 function observationsWithDemoTriggers(scenario, targetIndex) {
   const triggers = [];
   if (clinicianTrigger.checked) triggers.push({ code: 'CI', level: clinicianLevel.value });
   if (carerTrigger.checked) triggers.push({ code: 'CQ', level: carerLevel.value });
+  if (specificTrigger.checked) triggers.push({ code: 'SC', level: specificLevel.value });
 
   return scenario.observations.map((observation, index) => {
     if (index !== targetIndex || triggers.length === 0) return observation;
@@ -190,6 +198,7 @@ list.addEventListener('keydown', (e) => {
 triggerControls.addEventListener('change', () => {
   clinicianLevel.disabled = !clinicianTrigger.checked;
   carerLevel.disabled = !carerTrigger.checked;
+  specificLevel.disabled = !specificTrigger.checked;
   renderSelectedScenario();
 });
 
@@ -200,6 +209,7 @@ const playbackSlider = document.getElementById('playback-slider');
 const playbackReadout = document.getElementById('playback-readout');
 
 let playbackIndex = 0;
+let playbackPositions = [];
 
 function initPlayback(scenario) {
   if (!scenario || !scenario.observations || scenario.observations.length === 0) {
@@ -208,10 +218,12 @@ function initPlayback(scenario) {
   }
 
   playbackIndex = scenario.observations.length - 1;
+  playbackPositions = observationTimelinePositions(scenario.observations);
   playback.hidden = false;
   playbackSlider.min = 0;
-  playbackSlider.max = playbackIndex;
-  playbackSlider.value = playbackIndex;
+  playbackSlider.max = 1;
+  playbackSlider.step = 'any';
+  playbackSlider.value = playbackPositions[playbackIndex];
   playbackSlider.disabled = scenario.observations.length === 1;
   renderSelectedScenario();
 }
@@ -229,18 +241,55 @@ function updatePlayback(obs, observationCount) {
   const pews = obs.pewsTotal != null ? obs.pewsTotal : '—';
   const level = obs.escalationLevel;
   const meta = level ? ESCALATION_META[level] : null;
+  const statusLabel = escalationStatusLabel(obs, ESCALATION_META);
   const badge = meta
     ? `<span class="esc-badge" style="background:${meta.color};color:${meta.textColor}">${meta.label}</span>`
-    : '<span class="esc-badge" style="background:#dee0e2;color:#0b0c0c">Normal</span>';
+    : `<span class="esc-badge" style="background:#dee0e2;color:#0b0c0c">${statusLabel}</span>`;
 
   const position = `Observation ${playbackIndex + 1} of ${observationCount}`;
-  playbackReadout.innerHTML = `${position} &middot; <strong>${dateTime}</strong> &middot; PEWS <strong>${pews}</strong> ${badge}`;
-  playbackSlider.value = playbackIndex;
-  playbackSlider.setAttribute('aria-valuetext', `${position}, ${dateTime}, PEWS ${pews}${meta ? `, ${meta.label}` : ', Normal'}`);
+  const activeCodes = (obs.escalationReasons || [])
+    .filter(reason => reason.code !== 'P')
+    .map(reason => reason.code)
+    .filter((code, index, codes) => codes.indexOf(code) === index);
+  const noneCodes = (obs.escalationDecisions || [])
+    .filter(decision => decision.level === 'none')
+    .map(decision => `${decision.code}:0`);
+  const notices = [
+    ...(obs.clinicalWarnings || []).map(warning => warning.message),
+    ...(obs.pendingEscalationResponses || []).map(response => `${response.code} level required`),
+  ];
+  const detail = [
+    activeCodes.length ? `Trigger ${activeCodes.join('+')}` : null,
+    noneCodes.length ? `Recorded ${noneCodes.join('+')}` : null,
+    ...notices,
+  ].filter(Boolean);
+  playbackReadout.innerHTML = `${position} &middot; <strong>${dateTime}</strong> &middot; PEWS <strong>${pews}</strong> ${badge}${detail.length ? ` &middot; ${detail.join(' &middot; ')}` : ''}`;
+  playbackSlider.value = playbackPositions[playbackIndex];
+  playbackSlider.setAttribute('aria-valuetext', `${position}, ${dateTime}, PEWS ${pews}, ${statusLabel}${detail.length ? `, ${detail.join(', ')}` : ''}`);
 }
 
 playbackSlider.addEventListener('input', () => {
-  playbackIndex = parseInt(playbackSlider.value, 10);
+  const nearestIndex = nearestObservationIndex(playbackPositions, Number(playbackSlider.value));
+  if (nearestIndex === playbackIndex) {
+    playbackSlider.value = playbackPositions[playbackIndex];
+    return;
+  }
+  playbackIndex = nearestIndex;
+  renderSelectedScenario();
+});
+
+playbackSlider.addEventListener('keydown', (event) => {
+  const direction = ['ArrowLeft', 'ArrowDown'].includes(event.key)
+    ? -1
+    : ['ArrowRight', 'ArrowUp'].includes(event.key)
+      ? 1
+      : 0;
+  if (direction === 0 && !['Home', 'End'].includes(event.key)) return;
+
+  event.preventDefault();
+  if (event.key === 'Home') playbackIndex = 0;
+  else if (event.key === 'End') playbackIndex = playbackPositions.length - 1;
+  else playbackIndex = Math.max(0, Math.min(playbackPositions.length - 1, playbackIndex + direction));
   renderSelectedScenario();
 });
 
