@@ -29,12 +29,44 @@ const clinicianLevel = document.getElementById('trigger-clinician-level');
 const carerTrigger = document.getElementById('trigger-carer');
 const carerLevel = document.getElementById('trigger-carer-level');
 const specificTrigger = document.getElementById('trigger-specific');
-const specificLevel = document.getElementById('trigger-specific-level');
 const showDemographics = document.getElementById('show-demographics');
 
 chartEl.options = { showDemographics: showDemographics.checked };
 
 let selectedScenario = null;
+
+const SPECIFIC_CONCERN_DATA = {
+  sepsis: {
+    avpu: 'A',
+    abnormalPupillaryResponse: false,
+    newSepsisSuspicion: 'sepsis',
+  },
+  'avpu-v': {
+    avpu: 'V',
+    abnormalPupillaryResponse: false,
+    newSepsisSuspicion: 'none',
+  },
+  'septic-shock': {
+    avpu: 'A',
+    abnormalPupillaryResponse: false,
+    newSepsisSuspicion: 'septic-shock',
+  },
+  'avpu-p': {
+    avpu: 'P',
+    abnormalPupillaryResponse: false,
+    newSepsisSuspicion: 'none',
+  },
+  'avpu-u': {
+    avpu: 'U',
+    abnormalPupillaryResponse: false,
+    newSepsisSuspicion: 'none',
+  },
+  'abnormal-pupils': {
+    avpu: 'A',
+    abnormalPupillaryResponse: true,
+    newSepsisSuspicion: 'none',
+  },
+};
 
 function resetDemoTriggers() {
   clinicianTrigger.checked = false;
@@ -43,21 +75,20 @@ function resetDemoTriggers() {
   carerTrigger.checked = false;
   carerLevel.value = 'low';
   carerLevel.disabled = true;
-  specificTrigger.checked = false;
-  specificLevel.value = 'low';
-  specificLevel.disabled = true;
+  specificTrigger.value = '';
 }
 
 function observationsWithDemoTriggers(scenario, targetIndex) {
   const triggers = [];
   if (clinicianTrigger.checked) triggers.push({ code: 'CI', level: clinicianLevel.value });
   if (carerTrigger.checked) triggers.push({ code: 'CQ', level: carerLevel.value });
-  if (specificTrigger.checked) triggers.push({ code: 'SC', level: specificLevel.value });
+  const specificConcern = SPECIFIC_CONCERN_DATA[specificTrigger.value];
 
   return scenario.observations.map((observation, index) => {
-    if (index !== targetIndex || triggers.length === 0) return observation;
+    if (index !== targetIndex || (triggers.length === 0 && !specificConcern)) return observation;
     return {
       ...observation,
+      ...specificConcern,
       ...(clinicianTrigger.checked ? { clinicalIntuition: 'yes' } : {}),
       ...(carerTrigger.checked ? { carerQuestion: 'W' } : {}),
       escalationTriggers: [...(observation.escalationTriggers || []), ...triggers],
@@ -198,7 +229,6 @@ list.addEventListener('keydown', (e) => {
 triggerControls.addEventListener('change', () => {
   clinicianLevel.disabled = !clinicianTrigger.checked;
   carerLevel.disabled = !carerTrigger.checked;
-  specificLevel.disabled = !specificTrigger.checked;
   renderSelectedScenario();
 });
 
