@@ -1,6 +1,6 @@
 # SPOT / NPEWS User Interface Specification V1.0
 
-This Markdown version was created programmatically from the Excel spreadsheet [reference-sources/SPOT-NPEWS UI Specification V2.0.xlsx](reference-sources/SPOT-NPEWS%20UI%20Specification%20V2.0.xlsx). All efforts have been made to preserve the exact wording and formatting of the original document, but some minor changes may have been made to adapt it to the Markdown format. If you notice any discrepancies or errors, please report them so they can be corrected.
+This Markdown version was created programmatically from the Excel spreadsheet [SPOT-NPEWS UI Specification V2.0.xlsx](../reference-sources/SPOT-NPEWS%20UI%20Specification%20V2.0.xlsx). All efforts have been made to preserve the exact wording and formatting of the original document, but some minor changes may have been made to adapt it to the Markdown format. If you notice any discrepancies or errors, please report them so they can be corrected.
 
 This document is the baseline user interface specification for SPOT NPEWS systems. This has been created based on solutions previously procured by Trusts and feedback from clinicians and technical colleagues.
 
@@ -80,7 +80,7 @@ The solution **must** be able to support a colour blindness friendly mode for cl
 
 #### U3.1
 
-The solution **must** allow the clinician to zoom in and out when viewing charts to see them in more or less detail as needed. This is to let them see fewer observations in more detail, or more observations in less detail. See also [RCPCH 1.1](spec/implementation-notes.md#RCPCH1.1) for the requirement that the zoom level must not affect the PEWS score calculation
+The solution **must** allow the clinician to zoom in and out when viewing charts to see them in more or less detail as needed. This is to let them see fewer observations in more detail, or more observations in less detail. See also [RCPCH 1.1](./implementation-notes.md#rcpch-11-time-window-selection-must-not-affect-pews-score-display) for the requirement that the zoom level must not affect the PEWS score calculation
 
 #### U3.2
 

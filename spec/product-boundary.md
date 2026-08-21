@@ -43,7 +43,7 @@ An embedding EPR may provide these capabilities. That does not move them into th
 
 ## Responsibility allocation
 
-This is a capability-level boundary matrix, not the requirement-by-requirement traceability evidence planned under R9.
+This is a capability-level boundary matrix. The requirement-by-requirement evidence is in [`requirements-traceability.md`](./requirements-traceability.md).
 
 | Capability | Representative requirements | Allocation |
 | --- | --- | --- |

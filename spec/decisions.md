@@ -7,7 +7,7 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ## D18 — Derive observation-state triggers without inventing concern levels
 
-**2026-08-07.** The scorer derives Specific Concern escalation from the current observation: AVPU `V` is High; `P` or `U` and abnormal pupillary response are Emergency; new suspicion of sepsis is Medium; and new suspicion of septic shock is High. The national table says “AVPU change”, but the available component input and wireframe identify the current AVPU value rather than a governed longitudinal transition rule. Current-value derivation is therefore the deterministic, fail-safe interpretation pending clinical review. Temperature ≥38°C or <36°C produces a visible “Think sepsis” warning but does not independently assign an escalation level. Raw Clinical Intuition Yes and Carer Question Worse responses likewise do not imply a level because the source permits an explicit selection from None through Emergency; unresolved responses are surfaced for the host to complete. Every non-score decision retains its criterion and whether it was derived or host-selected.
+**2026-08-07, clinically reviewed 2026-08-11.** The scorer derives Specific Concern escalation from the current observation: AVPU `V` is High; `P` or `U` and abnormal pupillary response are Emergency; new suspicion of sepsis is Medium; and new suspicion of septic shock is High. The NHS England reference chart confirms this mapping: AVPU `V` is High; AVPU `P` or `U` and abnormal pupillary response are Emergency. The source table says “AVPU change”, but the available component input records the current AVPU value rather than a governed longitudinal transition rule. Current-value derivation is therefore the implemented deterministic interpretation. Temperature ≥38°C or <36°C produces a visible “Think sepsis” warning but does not independently assign an escalation level. Raw Clinical Intuition Yes and Carer Question Worse responses likewise do not imply a level because the source permits an explicit selection from None through Emergency; unresolved responses are surfaced for the host to complete. Every non-score decision retains its criterion and whether it was derived or host-selected.
 
 ## D17 — Keep presentation options separate from clinical data
 
@@ -123,7 +123,7 @@ RR/HR/BP thresholds differ across bands, so SpO₂/O₂/temperature show no visi
 ## D4 — The visible time window must not affect the PEWS score
 **Implementation.** The escalation banner and sticky footer always use the globally latest
 observation set, never the latest observation visible in the selected time window. See
-[`implementation-notes.md`](./implementation-notes.md#RCPCH1.1).
+[`implementation-notes.md`](./implementation-notes.md#u11-rcpch-11-accessible-design).
 
 ## D3 — Colour-blindness: follow WCAG 2.2 (RCPCH 1.1)
 **Implementation.** SPOT NPEWS mandates a colour-blindness-friendly design without prescribing how; we follow WCAG 2.2 where it does not conflict with PEWS colour semantics. The mandated band/escalation palette is never changed. The `.cb-mode` toggle and its CSS overrides have been removed because Canvas rendering did not read them; an evidenced accessible mode will be reintroduced under roadmap R14. See [`implementation-notes.md`](./implementation-notes.md).

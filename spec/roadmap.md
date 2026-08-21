@@ -1,12 +1,12 @@
 # Roadmap
 
-Last reviewed: 2026-08-06 following NHSE child-health representative feedback on 2026-08-05 and review against the current implementation and test suite.
+Last reviewed: 2026-08-21 against the current implementation and test suite, following clinician review of non-score escalation on 2026-08-11 and NHSE child-health representative feedback on 2026-08-05. Open findings from that review are recorded in [`bug-log.md`](./bug-log.md).
 
 Legend: `[x]` delivered, `[~]` implemented but incomplete, `[ ]` not started. Item codes are stable and must not be renumbered when priorities change.
 
 Clinical correctness, safety evidence, and conformance take precedence over packaging and presentation work.
 
-The immediate priority is to settle the chart's visual design. Deterministic visual baselines should not be approved while known UI changes are still in motion. Once R54 records design agreement, the project moves through clinical/API refinement, test-fixture preparation, browser and visual evidence, component hardening, interoperability, and distribution.
+The immediate priority is requirements traceability and source-derived clinical fixtures. The current chart UI is clinically acceptable for this stage; a formal design baseline is deferred until later clinical review and should not delay component-contract or fixture work.
 
 ## Completed Foundation
 
@@ -20,9 +20,9 @@ The immediate priority is to settle the chart's visual design. Deterministic vis
 - [x] **R44 - Publish the demo to GitHub Pages.** Artifact-based deployment serves the demo at <https://rcpch.github.io/digital-pews/>.
 - [x] **R45 - Add contributor and reporting routes.** `CONTRIBUTING.md`, issue templates, and `SECURITY.md` provide public, private, clinical-safety, and security reporting paths.
 
-## Doing Next - Settle The Chart UI
+## Chart UI Changes From Clinical Review
 
-These are the granular changes requested in the latest clinical review. Complete them before approving visual baselines.
+These are the granular changes requested in the 2026-08-05 clinical review. All are delivered except `R41`, which continues as a running quality pass, and `R50`, which is blocked externally on NHSE and cannot be progressed here.
 
 - [x] **R47 - Increase parameter-heading legibility.** Chart parameter headings use 16px type in landscape and portrait layouts and 14px in the constrained mobile label column, increased from 14px, 13px, and 12px respectively. Wrapping, row height, truncation, and readability have been checked across every supported layout and at 200% browser zoom.
 - [x] **R48 - Replace the decorative age-band strip with a chart identifier.** The toolbar shows the deterministically resolved visible age-band code in large text and the decorative coloured header strip has been removed. A visible window crossing a boundary shows both codes in chronological order, for example `1-4y → 5-12y`.
@@ -34,13 +34,12 @@ These are the granular changes requested in the latest clinical review. Complete
 - [x] **R58 - Keep the current PEWS status bar structurally stable.** The sticky status always renders a neutral PEWS 0 state when no escalation is indicated, preventing playback layout jumps. Escalation source provenance sits at the right end of the main status line on supported widths, reducing banner height while remaining visible on narrow layouts.
 - [x] **R59 - Remove excess space below numeric plots.** Numeric Canvas rows retain only the clearance required for minimum-axis labels and endpoint markers, reducing bottom padding from 28px to 8px so scoring bands end close to the row boundary.
 - [~] **R41 - Complete the clinical UI quality pass.** Apply the agreed changes coherently across realistic data, supported themes, and mobile/tablet/desktop layouts while preserving NHS chart fidelity and clinical semantics.
-- [ ] **R54 - Approve the chart UI design baseline.** Review R47-R51, R56-R59, and the complete chart against the authoritative NHS references with the clinical reviewers, resolve remaining visual feedback, record who approved the result and when, and declare the UI sufficiently stable for deterministic screenshot baselines. This is a design gate, not a claim that browser regression evidence already exists.
 
 ## Stage 1 - Clinical Behaviour And Component Contract
 
 Settle what the component calculates, accepts, displays, and deliberately excludes before freezing its API or generating broad evidence.
 
-- [~] **R10 - Complete non-score escalation triggers.** Implementation is complete for explicit `CI`, `CQ`, and `SC` decisions including None; automatic current-value AVPU, abnormal-pupil, sepsis, and septic-shock Specific Concern rules; non-escalating temperature warnings; unresolved raw-response semantics; provenance; and display across the banner, PEWS row, sticky footer, and demo playback. Clinical review must confirm the source interpretation, especially current AVPU state versus longitudinal “change”, before completion. See [`escalation.md`](./escalation.md) and D18 in [`decisions.md`](./decisions.md).
+- [x] **R10 - Complete non-score escalation triggers.** Explicit `CI`, `CQ`, and `SC` decisions including None; automatic current-value AVPU, abnormal-pupil, sepsis, and septic-shock Specific Concern rules; non-escalating temperature warnings; unresolved raw-response semantics; provenance; and display across the banner, PEWS row, sticky footer, and demo playback are implemented. Clinician review on 2026-08-11 confirmed the current-value AVPU interpretation against the NHS England reference chart. See [`escalation.md`](./escalation.md) and D18 in [`decisions.md`](./decisions.md).
 - [ ] **R46 - Define clinical policy at age-band boundaries.** Preserve the deterministic switch and explicit divider at the 1st, 5th, and 13th birthdays without the `C2.2` alternate-form override. Document the open research question, current behaviour, hazard implications, senior-discretion context, and governance route.
 - [ ] **R53 - Resolve PEWS scoring when blood pressure is unavailable in ED.** Establish current clinical practice, whether the national specification defines a permitted pathway, and whether evidence supports rescaling or another adjustment. Until governed guidance exists, do not rescale, change the starting value, or invent substitute scoring; make the missing BP explicit with its applicable reason.
 - [ ] **R20 - Decide which clinical configuration may be overridden.** Define the governed boundary between canonical national defaults and any host-configurable clinical behaviour.
@@ -48,8 +47,8 @@ Settle what the component calculates, accepts, displays, and deliberately exclud
 - [~] **R22 - Complete respiratory-support handling.** Known support codes are scored; configurable additions, national-code governance, and clinically useful device-change display remain incomplete.
 - [~] **R23 - Define typed presentation options.** The separate assignable `.options` object now controls demographics visibility. Define and type the remaining initial layout, show-values, and initial time-window fields.
 - [ ] **R24 - Define branding and explanatory-content extension points.** Separate demo-owner branding, embedding-organisation branding, NHS identity approval, and host-supplied helper text.
-- [ ] **R9 - Add requirements traceability.** Extend [`product-boundary.md`](./product-boundary.md) into an individual matrix allocating applicable `U*`, `C*`, and `T*` requirements to the component, host, deployment, supplier, deliberate exclusion, implementation, tests, and clinical review.
-- [ ] **R11 - Expand source-derived scorer vectors.** Exercise every age band and threshold boundary using cases independently derived from the canonical specification, not only generated-config equality.
+- [~] **R9 - Add requirements traceability.** The component critical-path matrix now records individual `U*` and `C*` allocation/evidence in [`requirements-traceability.md`](./requirements-traceability.md), and automated tests verify local Markdown links. Expand the matrix to every applicable `U*`, `C*`, and `T*` source requirement, including host, deployment, supplier, and deliberate-exclusion allocation.
+- [x] **R11 - Expand source-derived scorer vectors.** [`test/scoring/scorer-source-vectors.test.js`](../test/scoring/scorer-source-vectors.test.js) enumerates vectors from the canonical JSON and exercises the scorer itself, rather than re-checking the generator as `config-matches-spec.test.js` does. It covers every age band and numeric parameter at each band's lower bound, upper bound, interior and both sides of every transition, plus field isolation, respiratory-distress and capillary-refill categories, high-flow override, level devices in both delivery units, total summation, temperature/AVPU exclusion, and the escalation thresholds. Fallback paths through `scoreFromBands` and `scoreOxygen` are pinned as characterisation tests; the behaviour they record is not endorsed and is raised as `B-01`-`B-06` in [`bug-log.md`](./bug-log.md).
 
 ## Stage 2 - Reproducible Development And Test Fixtures
 
@@ -86,6 +85,7 @@ See the [Web Component Phase 2 Specification](./web-component-phase2-spec.md) fo
 
 ## Stage 5 - Clinical Review And Interoperability
 
+- [ ] **R54 - Approve the chart UI design baseline.** At a later clinical-review point, review R47-R51 and R56-R59 against the authoritative NHS references, resolve remaining visual feedback, record the review outcome, and decide whether the UI is stable enough for deterministic screenshot baselines. This is a design gate, not a claim of formal clinical release approval.
 - [ ] **R34 - Show raw inputs and computed results together.** Add a review table beside the demo chart for observation values, skipped reasons, component scores, total PEWS, escalation level, and trigger provenance.
 - [ ] **R35 - Add side-by-side age-band comparison.** Provide a clinical review view for comparing threshold and rendering differences without implying manual age-band selection.
 - [~] **R6 - Maintain the FHIR adapter.** Bidirectional conversion and current conformance fixtures are tested, but reverse round trips, national coding decisions, trigger mapping, and strict profile validation remain open.

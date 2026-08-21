@@ -45,7 +45,9 @@ non-negotiable; requirement IDs (`U3.10`, `C3.17`, …) are load-bearing — don
 | Document | What it covers |
 | --- | --- |
 | [`product-boundary.md`](./product-boundary.md) | The component-only product boundary, responsibility allocation, compliance claims, and deliberate `C2.2` non-conformance. |
+| [`requirements-traceability.md`](./requirements-traceability.md) | Requirement-by-requirement allocation and evidence for the component critical path; remaining source requirements are explicitly queued for allocation. |
 | [`decisions.md`](./decisions.md) | Durable decision log (ADR-style, newest first). Start here to understand the project's choices. |
+| [`bug-log.md`](./bug-log.md) | Open findings awaiting review, including scorer behaviours pinned by characterisation tests but not clinically endorsed. |
 | [`implementation-notes.md`](./implementation-notes.md) | Clarifications discovered while building, plus a manual visual-QA checklist. |
 | [`react.md`](./react.md) | The component-architecture decision: framework-neutral Web Component vs React. |
 | [`roadmap.md`](./roadmap.md) | Forward-looking work (including Web Component Phase 2). |

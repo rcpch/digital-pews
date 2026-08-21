@@ -56,7 +56,7 @@ The component input uses `escalationTriggers: [{ code, level }]` for explicit no
 
 ## AVPU & temperature
 
-AVPU and temperature do not contribute to the numeric PEWS total. In `chart/npews-scorer.js`, the numeric total includes respiratory rate, respiratory distress, oxygen saturation, oxygen support, heart rate, systolic blood pressure and capillary refill time only. The scorer maps current AVPU `V` to High and current `P` or `U` to Emergency as Specific Concern. The source table says “AVPU change”, while the available chart input records state rather than a governed transition; this fail-safe current-value interpretation requires clinical confirmation under R10. `asleep` is a recordable non-escalating AVPU state. Abnormal pupillary response maps to Emergency. Temperature ≥38°C or <36°C produces a “Think sepsis” warning but no automatic escalation level.
+AVPU and temperature do not contribute to the numeric PEWS total. In `chart/npews-scorer.js`, the numeric total includes respiratory rate, respiratory distress, oxygen saturation, oxygen support, heart rate, systolic blood pressure and capillary refill time only. The scorer maps current AVPU `V` to High and current `P` or `U` to Emergency as Specific Concern. The source table says “AVPU change”, while the component records state rather than a governed transition; clinician review on 2026-08-11 confirmed the current-value interpretation against the NHS England reference chart. `asleep` is a recordable non-escalating AVPU state. Abnormal pupillary response maps to Emergency. Temperature ≥38°C or <36°C produces a “Think sepsis” warning but no automatic escalation level.
 
 ## Think sepsis
 
