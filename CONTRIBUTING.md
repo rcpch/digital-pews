@@ -54,4 +54,4 @@ Keep pull requests focused on one change. Explain the rationale and link to any 
 
 ## Licence
 
-By contributing, you agree that your contribution is licensed under this repository's licence.
+This repository is licensed under [LGPL-3.0-or-later](LICENSE). By contributing, you agree that your contribution is licensed under the same terms.

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 import { describe, expect, it } from 'vitest';
 import { nearestObservationIndex, observationTimelinePositions } from '../../demo/playback-math.js';
 

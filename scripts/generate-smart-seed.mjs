@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 
 /* ============================================================
    generate-smart-seed.mjs

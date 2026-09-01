@@ -204,3 +204,7 @@ Start at [`spec/README.md`](spec/README.md) — the spec index and landing page.
 - `spec/decisions.md` - durable decision log; `spec/implementation-notes.md` - implementation notes + QA checklist; `spec/roadmap.md` - roadmap
 - `reference-sources/images/` - PNG exports of the NHS NPEWS paper charts for each age band
 - `reference-sources/*.pdf` - source PDFs and specifications
+
+## Licence
+
+Source code is licensed under [LGPL-3.0-or-later](LICENSE). Documentation and clinical content are licensed under CC-BY-SA-4.0. The NHS SPOT/NPEWS specification and reference chart images remain the property of NHS England.

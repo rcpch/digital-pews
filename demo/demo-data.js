@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 // Fictional test data for NPEWS chart UI
 // Patient: 7-year-old (age bracket 5-12 years)
 // 18 observation sets over 24 hours, showing normal -> deterioration -> escalation -> recovery

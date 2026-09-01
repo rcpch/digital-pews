@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 /**
  * Map observation timestamps onto a normalized 0..1 timeline so range-input
  * geometry represents elapsed time rather than observation count.

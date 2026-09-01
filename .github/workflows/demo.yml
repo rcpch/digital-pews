@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
 # Builds and deploys the Digital PEWS demo to GitHub Pages.
 #
 # The demo is a static site: HTML/CSS/JS with no build step. The workflow
