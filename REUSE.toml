@@ -8,6 +8,8 @@ path = [
   "demo/**/*.md",
   "smart/**/*.md",
   "test/fhir/fixtures/README.md",
+  ".github/ISSUE_TEMPLATE/*.md",
+  "reference-sources/*.md",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The Royal College of Paediatrics and Child Health"
