@@ -58,10 +58,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
         with:
           persist-credentials: false
-      - uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
-        with:
-          tool: zizmor@1.30.0
-          fallback: none
+      - run: pip install --user zizmor==1.30.0
       - run: zizmor --strict-collection .
         env:
           GH_TOKEN: ${{ github.token }}
