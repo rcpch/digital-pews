@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
+# General CI for the Digital PEWS component.
+#
+# Runs the same checks a contributor runs locally before committing:
+#   - npm ci (reproducible install from lockfile)
+#   - npm test (the full Vitest suite)
+#   - npm run generate:scoring:check (generated artifacts in sync with the canonical spec)
+#
+# Plus two governance jobs:
+#   - REUSE licence compliance (fsfe/reuse-action)
+#   - GitHub Actions security scan (zizmor via taiki-e/install-action)
+#
+# Action SHAs carry the matching # vX.Y.Z comment per house style.
+
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and scoring check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: lts/*
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run generate:scoring:check
+
+  licence-compliance:
+    name: REUSE licence compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: fsfe/reuse-action@772649cfa03a64a08c458c7cca9a6a473d74e7f9 # v6.0.0
+
+  workflow-security:
+    name: GitHub Actions security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: taiki-e/install-action@1ed6d7be6168f6c9046541087ff549b6bc581fdf # v2.87.2
+        with:
+          tool: zizmor@1.30.0
+          fallback: none
+      - run: zizmor --strict-collection .
+        env:
+          GH_TOKEN: ${{ github.token }}
