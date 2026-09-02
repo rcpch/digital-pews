@@ -33,8 +33,14 @@ const carerTrigger = document.getElementById('trigger-carer');
 const carerLevel = document.getElementById('trigger-carer-level');
 const specificTrigger = document.getElementById('trigger-specific');
 const showDemographics = document.getElementById('show-demographics');
+const showValues = document.getElementById('show-values');
+const initialTimeWindow = document.getElementById('initial-time-window');
 
-chartEl.options = { showDemographics: showDemographics.checked };
+chartEl.options = {
+  showDemographics: showDemographics.checked,
+  showValues: showValues.checked,
+  initialTimeWindow: Number(initialTimeWindow.value),
+};
 
 let selectedScenario = null;
 
@@ -157,6 +163,14 @@ applyTheme(savedTheme);
 
 showDemographics.addEventListener('change', () => {
   chartEl.options = { ...chartEl.options, showDemographics: showDemographics.checked };
+});
+
+showValues.addEventListener('change', () => {
+  chartEl.options = { ...chartEl.options, showValues: showValues.checked };
+});
+
+initialTimeWindow.addEventListener('change', () => {
+  chartEl.options = { ...chartEl.options, initialTimeWindow: Number(initialTimeWindow.value) };
 });
 
 // -- Foldable controls sidebar ------------------------------------------------

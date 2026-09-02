@@ -46,6 +46,12 @@ const PAD_RIGHT = 50;
 
 let _patient, _observations, _ageBands, _scored, _segments;
 
+// Presentation options set by the host through the Web Component's
+// .options property. These are visual controls, not clinical data.
+let _chartOptions = {
+  showValues: true,
+};
+
 // ---- Colour helpers ----------------------------------------
 
 // Returns the resolved value of a CSS custom property.
@@ -685,7 +691,7 @@ function renderChart(canvas, config) {
 
   drawTrendLine(ctx, segments);
   drawDots(ctx, allPoints);
-  drawValueLabels(ctx, allPoints, unit);
+  if (_chartOptions.showValues !== false) drawValueLabels(ctx, allPoints, unit);
 }
 
 // ---- State & view controls ---------------------------------
@@ -1690,15 +1696,27 @@ function renderChartIdentifier() {
  * `pewsTotal` / `escalationLevel` in the observations are ignored — scores are
  * always computed from the vitals (the algorithm is the single source of truth).
  */
-function init(patient, observations, ageBands) {
-  // Props-object form: init({ patient, observations, ageBands })
+function init(patient, observations, ageBands, options) {
+  // Props-object form: init({ patient, observations, ageBands, options })
   if (patient && !observations && Array.isArray(patient.observations)) {
-    ({ patient, observations, ageBands } = patient);
+    ({ patient, observations, ageBands, options } = patient);
   }
 
   _patient      = patient      || (typeof window !== 'undefined' ? window.PATIENT : null);
   _observations = observations || (typeof window !== 'undefined' ? window.OBSERVATIONS : null) || [];
   _ageBands     = ageBands     || AGE_BANDS;
+
+  // Apply presentation options from the host (visual controls only).
+  if (options && typeof options === 'object') {
+    if (Number.isFinite(options.initialTimeWindow) && options.initialTimeWindow > 0) {
+      activeTimeWindowHours = options.initialTimeWindow;
+    }
+    _chartOptions = {
+      showValues: options.showValues !== false,
+    };
+  } else {
+    _chartOptions = { showValues: true };
+  }
 
   // Compute the PEWS score, escalation level and applicable age band for every
   // observation from the patient's date of birth — the algorithm is the single

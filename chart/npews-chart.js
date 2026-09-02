@@ -32,6 +32,14 @@
 import { mountChartShell } from './chart-shell.js';
 import { render } from './chart.js';
 
+/**
+ * @typedef {Object} NpewsChartOptions
+ * @property {boolean} [showDemographics] - Show the patient identification header. Default `true`.
+ * @property {boolean} [showValues] - Show numeric value labels on plotted observations. Default `true`.
+ * @property {'landscape'|'portrait'|'mobile'|'auto'} [initialLayout] - Lock the chart layout or auto-detect from viewport width. Default `'auto'`.
+ * @property {number} [initialTimeWindow] - Initial visible time window in hours (e.g. `24`, `4`, `1`). Default `24`.
+ */
+
 // The chart's stylesheet lives next to this module. Inject it once (resolved
 // relative to this file) so the element is a genuine drop-in: a consumer only has
 // to load npews-chart.js, not remember to link styles.css.
@@ -102,7 +110,7 @@ let _liveInstances = 0;
 
 class NpewsChartElement extends HTMLElement {
   #data = null;
-  #options = { showDemographics: true };
+  #options = { showDemographics: true, showValues: true };
 
   /** @param {{patient: object, observations: object[]}|null} value */
   set data(value) {
@@ -132,12 +140,29 @@ class NpewsChartElement extends HTMLElement {
   }
 
   /**
-   * Presentation options remain separate from clinical patient/observation data.
-   * @param {{showDemographics?: boolean}|null} value
+   * Presentation options - visual controls separate from clinical data.
+   *
+   * @param {NpewsChartOptions|null} value
    */
   set options(value) {
-    const options = value && typeof value === 'object' ? value : {};
-    this.#options = { showDemographics: options.showDemographics !== false };
+    const o = value && typeof value === 'object' ? value : {};
+    this.#options = {
+      showDemographics:  o.showDemographics !== false,
+      showValues:        o.showValues !== false,
+      initialLayout:     o.initialLayout || 'auto',
+      initialTimeWindow: Number.isFinite(o.initialTimeWindow) && o.initialTimeWindow > 0
+        ? o.initialTimeWindow
+        : undefined,
+    };
+
+    // Apply layout immediately so canvas heights are correct on first render.
+    if (this.#options.initialLayout && this.#options.initialLayout !== 'auto') {
+      document.body.dataset.layout = this.#options.initialLayout;
+      document.body.dataset.lockLayout = '';
+    } else {
+      delete document.body.dataset.lockLayout;
+    }
+
     if (this.isConnected) this.#renderNow();
   }
   get options() {
@@ -177,7 +202,7 @@ class NpewsChartElement extends HTMLElement {
       mountChartShell(this);
       const patientHeader = this.querySelector('.patient-header');
       if (patientHeader) patientHeader.hidden = !options.showDemographics;
-      render({ patient: data.patient, observations: data.observations });
+      render({ patient: data.patient, observations: data.observations, options: this.#options });
     });
   }
 }
