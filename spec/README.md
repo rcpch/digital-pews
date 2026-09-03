@@ -45,6 +45,7 @@ non-negotiable; requirement IDs (`U3.10`, `C3.17`, …) are load-bearing — don
 | Document | What it covers |
 | --- | --- |
 | [`product-boundary.md`](./product-boundary.md) | The component-only product boundary, responsibility allocation, compliance claims, and deliberate `C2.2` non-conformance. |
+| [`age-band-boundary-policy.md`](./age-band-boundary-policy.md) | The open clinical policy question at age-band boundaries, current behaviour, hazard implications, and governance route. |
 | [`requirements-traceability.md`](./requirements-traceability.md) | Requirement-by-requirement allocation and evidence for the component critical path; remaining source requirements are explicitly queued for allocation. |
 | [`decisions.md`](./decisions.md) | Durable decision log (ADR-style, newest first). Start here to understand the project's choices. |
 | [`bug-log.md`](./bug-log.md) | Open findings awaiting review, including scorer behaviours pinned by characterisation tests but not clinically endorsed. |
