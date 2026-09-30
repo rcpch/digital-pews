@@ -51,6 +51,7 @@ non-negotiable; requirement IDs (`U3.10`, `C3.17`, …) are load-bearing — don
 | [`bug-log.md`](./bug-log.md) | Open findings awaiting review, including scorer behaviours pinned by characterisation tests but not clinically endorsed. |
 | [`implementation-notes.md`](./implementation-notes.md) | Clarifications discovered while building, plus a manual visual-QA checklist. |
 | [`react.md`](./react.md) | The component-architecture decision: framework-neutral Web Component vs React. |
+| [`oracle-cerner-registration.md`](./oracle-cerner-registration.md) | How to register the SMART app with Oracle Health (Cerner) code Console, and the separate per-tenant go-live process a customer must initiate. |
 | [`roadmap.md`](./roadmap.md) | Forward-looking work (including Web Component Phase 2). |
 | [`web-component-phase2-spec.md`](./web-component-phase2-spec.md) | Acceptance criteria for isolation, multiple instances, lifecycle, types, and distribution. |
 | [`visual-regression-testing-plan.md`](./visual-regression-testing-plan.md) | Browser interaction, screenshot, baseline-governance, and visual-CI plan. |

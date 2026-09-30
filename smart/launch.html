@@ -31,9 +31,14 @@ SPDX-License-Identifier: LGPL-3.0-or-later -->
     // exchanged. Lives next to this file.
     const REDIRECT_URI = new URL('index.html', window.location.href).href;
 
-    // Scopes. patient/*.read gives us read access to the patient's
-    // resources; openid + fhirUser lets us resolve the launch patient.
-    const SCOPE = 'patient/*.read openid fhirUser';
+    // Scopes. Oracle Health's authorisation server rejects wildcard scopes
+    // outright (no patient/*.read), so each resource read must be listed
+    // explicitly - see spec/oracle-cerner-registration.md. patient/Patient.read
+    // and patient/Observation.read match what smart.js actually fetches;
+    // launch resolves the EHR launch context; openid + fhirUser resolve the
+    // launch patient/user; online_access covers the refresh-token flow for a
+    // session longer than the ~10-minute access token.
+    const SCOPE = 'patient/Patient.read patient/Observation.read launch online_access openid fhirUser';
 
     FHIR.oauth2.authorize({
       client_id: CLIENT_ID,

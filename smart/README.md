@@ -63,7 +63,7 @@ docker compose up smart
 Use the SMART launcher at <https://launch.smarthealthit.org> with:
 
 - **Launch URL**: `http://localhost:9000/launch.html`
-- **Simulated scopes**: `patient/*.read openid fhirUser`
+- **Simulated scopes**: `patient/Patient.read patient/Observation.read launch online_access openid fhirUser`
 
 Note: the public sandbox gives random patients who usually have no PEWS-relevant observations, so the chart will render with an empty-state notice. For a meaningful render, launch from an EHR that has PEWS-coded observations loaded.
 
@@ -93,7 +93,7 @@ If the EHR rejects the `code=` query (some EHRs reject unknown code systems like
 
 ## Version pass-back (open - roadmap R61)
 
-There is currently no channel for this app to tell the originating FHIR server which chart version rendered a given view. The app is read-only (`patient/*.read`, no write scope), so it cannot create a `Provenance` resource - the standards-based way to record component provenance. A custom request header (`X-Npews-Chart-Version`) was tried as a scope-free alternative and found unsafe: adding any non-simple header turns a plain GET into a CORS preflight request, and the local sandbox's HAPI server rejects it (confirmed by launching the sandbox end-to-end), so it breaks reads against any FHIR server that has not explicitly allowlisted the header. There is no channel available today that works without either a write-scope grant plus its own safety review, or prior EHR-specific CORS coordination this app cannot assume. See the R61 note in [`spec/fhir.md`](../spec/fhir.md#appendix-future-work-unresolved-mappings).
+There is currently no channel for this app to tell the originating FHIR server which chart version rendered a given view. The app is read-only (`patient/Patient.read` and `patient/Observation.read`, no write scope), so it cannot create a `Provenance` resource - the standards-based way to record component provenance. A custom request header (`X-Npews-Chart-Version`) was tried as a scope-free alternative and found unsafe: adding any non-simple header turns a plain GET into a CORS preflight request, and the local sandbox's HAPI server rejects it (confirmed by launching the sandbox end-to-end), so it breaks reads against any FHIR server that has not explicitly allowlisted the header. There is no channel available today that works without either a write-scope grant plus its own safety review, or prior EHR-specific CORS coordination this app cannot assume. See the R61 note in [`spec/fhir.md`](../spec/fhir.md#appendix-future-work-unresolved-mappings).
 
 ## Configuration
 
@@ -103,7 +103,7 @@ There is currently no channel for this app to tell the originating FHIR server w
 |---|---|---|
 | `CLIENT_ID` | `example-npews-smart-app` | Replace with your real OAuth client id registered with the EHR. |
 | `REDIRECT_URI` | `index.html` next to `launch.html` | Computed from the launch URL. |
-| `SCOPE` | `patient/*.read openid fhirUser` | Read-only patient scope. Add `launch/encounter` etc. when needed. |
+| `SCOPE` | `patient/Patient.read patient/Observation.read launch online_access openid fhirUser` | Explicit, non-wildcard read scopes - Oracle Health's authorisation server rejects `patient/*.read`. See [`spec/oracle-cerner-registration.md`](../spec/oracle-cerner-registration.md). |
 
 ## Regenerating the seed
 
