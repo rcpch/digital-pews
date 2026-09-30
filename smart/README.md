@@ -91,6 +91,10 @@ If the EHR rejects the `code=` query (some EHRs reject unknown code systems like
 - Observations fetched but none match PEWS codes -> "No PEWS-relevant observations found for this patient."
 - OAuth or FHIR fetch failure -> error banner with the message.
 
+## Version pass-back (open - roadmap R61)
+
+There is currently no channel for this app to tell the originating FHIR server which chart version rendered a given view. The app is read-only (`patient/*.read`, no write scope), so it cannot create a `Provenance` resource - the standards-based way to record component provenance. A custom request header (`X-Npews-Chart-Version`) was tried as a scope-free alternative and found unsafe: adding any non-simple header turns a plain GET into a CORS preflight request, and the local sandbox's HAPI server rejects it (confirmed by launching the sandbox end-to-end), so it breaks reads against any FHIR server that has not explicitly allowlisted the header. There is no channel available today that works without either a write-scope grant plus its own safety review, or prior EHR-specific CORS coordination this app cannot assume. See the R61 note in [`spec/fhir.md`](../spec/fhir.md#appendix-future-work-unresolved-mappings).
+
 ## Configuration
 
 `launch.html` exposes three constants at the top of its `<script>`:
