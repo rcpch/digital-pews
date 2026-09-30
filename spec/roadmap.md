@@ -106,3 +106,34 @@ Distribution starts only after the component API and instance model are stable. 
 - [ ] **R32 - Test real package consumers.** Verify package and CDN use from plain HTML and representative framework wrappers.
 - [ ] **R33 - Define the release process and support policy.** Document versioning, artifact provenance, CDN URLs, compatibility, and deprecation expectations.
 - [ ] **R52 - Complete formal clinical safety assurance before clinical release.** Appoint a competent Clinical Safety Officer, determine manufacturer/supplier and regulatory roles, agree a risk method, conduct a multidisciplinary hazard workshop, review control effectiveness, accept or transfer residual risks, define release gates, and create the required Tier 2 hazard log, safety case, and safety plan.
+
+## House-Style Audit
+
+Audit date: 2026-09-30. Standards reviewed: `agents.md`, `new-repos.md`, `ci.md`, `licensing.md`, `security.md`, `scripts.md`, `dependencies.md`, `commits.md`, `specs.md`, `clinical-safety.md`, `repo-presentation.md`, `ui.md`, `testing.md`. Not applicable: `docs.md` (no docs site), `skills.md`, `tauri-gui.md`, `rust-cli.md`, `presentations.md`, `mcp.md`. `library-extraction.md`/`distribution.md` are deliberately deferred by R29-R33, not a current gap.
+
+The repository's strongest compliant patterns: LGPL-3.0-or-later with SPDX headers and a REUSE.toml that keeps the project at 117/117 REUSE-compliant files; `.github/workflows/ci.yml` running tests, REUSE compliance, and `zizmor` with every action SHA-pinned and version-commented; Dependabot grouping and cooldown for both `npm` and `github-actions`; a disciplined `spec/roadmap.md` with a stable `R<n>` code scheme and a checkbox legend; a root `SAFETY.md` with a populated hazard table; and `.env` / patient-derived data correctly excluded from version control.
+
+### P1 - Safety, Supply Chain, Release, And CI
+
+- [ ] **HS-1 - Protect the `main` branch.** `gh api repos/rcpch/digital-pews/branches/main/protection` returns 404 - no branch protection exists despite `ci.yml` now providing a real required-check candidate. house-style `ci.md` sets a Solo-tier baseline (require the CI check, block force pushes and branch deletion) as the minimum for every repository, and this one has accepted external contributor PRs (`rlnet-a11y`, `mbarton` forks), which pushes it toward the Public tier (PRs, one independent approval, CODEOWNERS for high-risk paths). Done when at least the Solo baseline is configured and a deliberate tier decision is recorded here or in `AGENTS.md`.
+- [ ] **HS-2 - Record a structured medical-device applicability assessment.** `SAFETY.md` states in prose that "no ... regulatory assessment has been completed" (line 37) and lists it as future CSO work, but does not carry the dated minimal record `clinical-safety.md` prescribes: decision-maker and role, decision date, next review date, evidence considered, conclusion, actions/owner, and reassessment triggers. Done when `SAFETY.md` (or a linked `MEDICAL-DEVICE-ASSESSMENT.md`) has that record, even if the recorded conclusion is "further advice required."
+
+### P2 - Workflow And Standards Gaps
+
+- [ ] **HS-3 - Add `s/test` (and `s/lint` if a linter is adopted).** `s/` currently has only `up` and `down`; [`AGENTS.md`](../AGENTS.md)'s Workflow section tells contributors to run `npm test` and `npm run generate:scoring:check` directly rather than through a canonical `s/` verb, so `ls s/` does not show the full set of repeated processes as house-style `scripts.md` intends. Done when `s/test` wraps both commands and `AGENTS.md` references it.
+- [ ] **HS-4 - Add `.editorconfig`.** Listed as a new-repo minimum file in `new-repos.md`; absent from the repo root.
+- [ ] **HS-5 - Enable "Automatically delete head branches".** `gh repo view --json deleteBranchOnMerge` reports `false`. House-style `commits.md` recommends enabling it so merged PR branches (dependabot and contributor) are cleaned up without a manual `--delete-branch` on every merge.
+- [ ] **HS-6 - Complete the agent-artefact `.gitignore` block.** The current block only covers `.playwright-mcp/` and a repo-specific `test-output/screenshots/`; `agents.md`'s minimum block also lists `.playwright/`, `playwright-report/`, `blob-report/`, `test-results/`, and `.claude/`. Add the missing entries so a future tool's scratch directory does not silently fail `reuse lint`.
+
+### P3 - Polish And Consistency
+
+- [ ] **HS-7 - Add a hero screenshot and CI/licence badges to `README.md`.** The README has no image of the running chart and no badges. Both are now cheap and genuinely informative: `ci.yml` gives a real CI badge and `LICENSE` gives a real licence badge, and a screenshot directly serves house-style `repo-presentation.md`'s "show, do not tell" principle for a visual clinical-charting product.
+- [ ] **HS-8 - Fix or remove the dead `test-output/VISUAL_COMPARISON.md` reference.** `README.md`'s "Visual reference" section (line 159) points at a file that does not exist in the repository.
+- [ ] **HS-9 - Add `CODE_OF_CONDUCT.md` and a PR template.** `new-repos.md` recommends both once a project is collaborative or public; this repo is public and has merged external contributor PRs, but has neither.
+- [ ] **HS-10 - State the git workflow and branch-protection tier in `AGENTS.md`.** `agents.md`'s "Required content" asks every agent-instructions file to state whether agents commit directly to `main` or use a branch+PR, and to name protected paths/environments. `AGENTS.md` currently covers "Approval Required" but not this.
+
+### Deliberate exceptions and non-findings
+
+- Reference images and PDFs are intentionally licensed as RCPCH-copyrighted redistributions of NHS England material rather than left unannotated; this is already correct in `REUSE.toml` and does not need a separate finding.
+- `docs.md` (Zensical/MkDocs docs-site conventions) does not apply: this repository has no docs site, only the demo harness and `spec/` Markdown.
+- Formal browser/visual-regression evidence (`ui.md`'s verification checklist) is already tracked in depth by roadmap R14-R19 and R55; this audit does not duplicate those items.
