@@ -52,6 +52,7 @@ export const CHART_SHELL_HTML = /* html */ `
       <div class="toolbar__spacer"></div>
 
       <span class="toolbar__chart-identifier" aria-label="Chart age band"></span>
+      <span class="toolbar__version" aria-label="Chart component version"></span>
 
     </div>
   </div>

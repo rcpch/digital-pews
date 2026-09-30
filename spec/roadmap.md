@@ -19,6 +19,7 @@ The immediate priority is requirements traceability and source-derived clinical 
 - [x] **R13 - Make controls survive component updates.** Fixed time-window links use delegated event handling and preserve the selected window when the light-DOM shell is replaced.
 - [x] **R44 - Publish the demo to GitHub Pages.** Artifact-based deployment serves the demo at <https://rcpch.github.io/digital-pews/>.
 - [x] **R45 - Add contributor and reporting routes.** `CONTRIBUTING.md`, issue templates, and `SECURITY.md` provide public, private, clinical-safety, and security reporting paths.
+- [x] **R60 - Display the component version in the chart UI.** [`chart/version.js`](../chart/version.js) exports `CHART_VERSION`, mirroring `package.json`'s `version` field (a drift test in [`test/version.test.js`](../test/version.test.js) keeps them in sync, since native ES modules cannot import JSON without a build step). The toolbar shows it as a small, muted `v0.1.0` marker beside the chart age-band identifier - inconspicuous but easily found by anyone reporting an issue.
 
 ## Chart UI Changes From Clinical Review
 
@@ -92,6 +93,7 @@ See the [Web Component Phase 2 Specification](./web-component-phase2-spec.md) fo
 - [ ] **R37 - Complete FHIR reverse round-trip coverage.** Resolve outstanding `FHIR -> chart -> FHIR` cases for resources, scores, modality changes, skip reasons, and trigger provenance.
 - [ ] **R38 - Resolve FHIR coding and validation scope.** Determine how EPR and FHIR models represent Clinical Intuition, Carer Question, Specific Concern, selected escalation level, and provenance; decide canonical national codes and add strict FHIR R4 and UK Core validation where required.
 - [ ] **R39 - Add SMART-on-FHIR conformance coverage.** Test the adapter and component contract in a representative SMART host after the API is stable.
+- [ ] **R61 - Return the chart version to the originating server in SMART-on-FHIR.** Investigate what structured pass-back channel the SMART sandbox and a representative EHR launch context actually support (e.g. a FHIR `Provenance` or `Device` resource, launch-completion message, or app metadata endpoint) and include `CHART_VERSION` from [`chart/version.js`](../chart/version.js) in it so the originating server can record which component version produced a given view.
 - [ ] **R42 - Create an Oracle Health developer account.** Establish the approved project account, record ownership and credential handling outside the repository, and document local testing without committing secrets.
 
 ## Stage 6 - Distribution And Clinical Release Readiness

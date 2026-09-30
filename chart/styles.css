@@ -320,6 +320,13 @@ npews-chart {
   white-space: nowrap;
 }
 
+.toolbar__version {
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* --- Charts container -------------------------------------- */
 .charts-layout {
   max-width: 1400px;

@@ -22,6 +22,7 @@ import { AGE_BANDS, ESCALATION_META } from './npews-scoring-config.js';
 import { scoreObservationsForPatient } from './npews-scorer.js';
 import { resolveAgeBand, ageBandSegments, completedYears } from './age-band.js';
 import { escalationStatusLabel } from './escalation-presentation.js';
+import { CHART_VERSION } from './version.js';
 
 // ---- Plot geometry -----------------------------------------
 // Horizontal padding inside every chart canvas. These are deliberately
@@ -1280,6 +1281,7 @@ function renderAll() {
   if (!_ageBands) return;
   computeAgeBandView();
   renderChartIdentifier();
+  renderChartVersion();
   const defs = getChartDefs();
   const h = getChartHeight();
   const hCat = getCategoricalHeight();
@@ -1678,6 +1680,12 @@ function renderChartIdentifier() {
   const spanned = spannedAgeBands();
   identifier.textContent = spanned.join(' \u2192 ');
   identifier.setAttribute('aria-label', `Chart age ${spanned.length === 1 ? 'band' : 'bands'}: ${spanned.join(' to ')}`);
+}
+
+function renderChartVersion() {
+  const versionEl = document.querySelector('.toolbar__version');
+  if (!versionEl) return;
+  versionEl.textContent = `v${CHART_VERSION}`;
 }
 
 // ---- Init --------------------------------------------------
