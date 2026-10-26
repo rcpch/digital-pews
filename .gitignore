@@ -39,3 +39,6 @@ test-output/screenshots/
 
 # Patient-derived longitudinal data is treated as identifiable; never commit it
 dummy-pews-data/
+
+# Local-only private workspace
+/.private
