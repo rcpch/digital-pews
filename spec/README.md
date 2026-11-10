@@ -35,6 +35,8 @@ non-negotiable; requirement IDs (`U3.10`, `C3.17`, …) are load-bearing — don
 | Document | What it covers |
 | --- | --- |
 | [`escalation.md`](./escalation.md) | Escalation levels, non-score triggers, "think sepsis", and the ISBAR aide-memoire. |
+| [`ed-pews.md`](./ed-pews.md) | ED source intake, initial differences, unresolved policy and gated implementation plan; not implemented ED support. |
+| [`../reference-sources/README.md`](../reference-sources/README.md) | Provenance and hashes for the four public ED PDFs, alongside the unchanged inpatient baseline. |
 | [`data-model.md`](./data-model.md) | The two component inputs — `Patient` and `Observation` (raw vitals) — plus data-entry reference codes. |
 | [`fhir.md`](./fhir.md) | The FHIR adapter contract (as implemented) and the conformance-testing approach. |
 | [`patient-derived-data-assessment.md`](./patient-derived-data-assessment.md) | Aggregate analysis of the gitignored ED resource, disclosure-risk decision, synthetic replacement strategy, and controlled local-testing constraints. |

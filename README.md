@@ -194,6 +194,8 @@ sidebar hot-reloads on save (live-server).
 
 ## Specs and reference materials
 
+Reader-facing documentation starts at [`docs/index.md`](docs/index.md). The [ED-PEWS development scope](spec/ed-pews.md) tracks the newly collected [NHS England ED charts](reference-sources/README.md); ED support is not yet implemented. The existing inpatient reference PDFs remain unchanged.
+
 Start at [`spec/README.md`](spec/README.md) — the spec index and landing page.
 
 - `spec/spot-npews-ui-spec.md` / `spec/spot-npews-spec.md` - NHS SPOT/NPEWS specification (transcribed from the reference `.xlsx`)

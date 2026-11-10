@@ -4,6 +4,7 @@ version = 1
 path = [
   "*.md",
   "spec/*.md",
+  "docs/*.md",
   "chart/README.md",
   "demo/**/*.md",
   "smart/**/*.md",
