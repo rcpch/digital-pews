@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Called only after auto-tag.yml validates the exact release commit. GitHub
+# provides the source archives; no NPM/bundle publishing is enabled at this stage.
+name: Development prerelease
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: development-releases
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+      - run: node s/release-ci.mjs notes
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+      - name: Publish development source snapshot
+        run: node s/release-ci.mjs publish
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          GH_TOKEN: ${{ github.token }}

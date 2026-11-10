@@ -21,7 +21,7 @@ const refresh = () => {
 };
 const watchers = ['docs', 'spec', 'reference-sources', 'demo', 'chart'].map(directory =>
   watch(path.join(ROOT, directory), { recursive: true }, refresh));
-for (const file of ['README.md', 'SAFETY.md', 'CONTRIBUTING.md', 'SECURITY.md', 'mkdocs.yml']) {
+for (const file of ['README.md', 'SAFETY.md', 'CONTRIBUTING.md', 'SECURITY.md', 'CHANGELOG.md', 'mkdocs.yml']) {
   watchers.push(watch(path.join(ROOT, file), refresh));
 }
 const child = spawn(path.join(ROOT, '.venv-docs/bin/zensical'), ['serve', '-f', '.docs-config.yml', ...process.argv.slice(2)], {

@@ -36,6 +36,7 @@ on:
       - "SAFETY.md"
       - "CONTRIBUTING.md"
       - "SECURITY.md"
+      - "CHANGELOG.md"
       - ".github/workflows/demo.yml"
   workflow_dispatch:
 

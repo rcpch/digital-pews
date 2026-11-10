@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Keep-a-Changelog output from conventional commits. Tool: .git-cliff-version.
+[changelog]
+header = """
+# Changelog
+
+Notable development changes, generated with git-cliff from conventional commits.
+Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+All 0.x releases are development prereleases, not clinical deployment approvals.
+
+"""
+body = """
+{% if version %}## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}## [Unreleased]
+{% endif %}
+{% for group, changes in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for change in changes -%}
+- {% if change.breaking %}**Breaking:** {% endif %}{{ change.message | escape }} ([{{ change.id | truncate(length=7, end="") }}](https://github.com/rcpch/digital-pews/commit/{{ change.id }}))
+{% endfor %}
+{% endfor %}
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+tag_pattern = '^v[0-9]+\.[0-9]+\.[0-9]+$'
+sort_commits = "oldest"
+commit_parsers = [
+  { message = '^chore\(release\):', skip = true },
+  { message = '^chore\(deps[^)]*\):', skip = true },
+  { message = '^ci\(deps\):', skip = true },
+  { message = '^feat', group = "Added" },
+  { message = '^fix', group = "Fixed" },
+  { message = '^perf', group = "Changed" },
+  { message = '^refactor', group = "Changed" },
+  { message = '^docs', group = "Documentation" },
+  { message = '^.*', skip = true },
+]

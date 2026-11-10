@@ -34,7 +34,7 @@ export function prepareDocs(destination = path.join(ROOT, '.docs-source')) {
       sources.set(path.relative(ROOT, file), path.relative(ROOT, file));
     }
   }
-  for (const file of ['SAFETY.md', 'CONTRIBUTING.md', 'SECURITY.md', 'README.md']) {
+  for (const file of ['SAFETY.md', 'CONTRIBUTING.md', 'SECURITY.md', 'README.md', 'CHANGELOG.md']) {
     sources.set(file, file === 'README.md' ? 'project.md' : file);
   }
 

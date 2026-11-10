@@ -17,6 +17,7 @@ packages/*/dist/
 /.venv/
 /.venv-docs/
 /.cache/
+/release-notes.md
 
 
 # Empty scaffold directories - no source files here

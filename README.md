@@ -211,6 +211,10 @@ Start at [`spec/README.md`](spec/README.md) — the spec index and landing page.
 - `reference-sources/images/` - PNG exports of the NHS NPEWS paper charts for each age band
 - `reference-sources/*.pdf` - source PDFs and specifications
 
+## Development versions
+
+The component is currently **0.1.0**, with an experimental API and no clinically approved release. Versions are single-sourced in `package.json`; [release tooling](spec/releases.md) updates its lockfile and browser-visible mirror together. `s/version++ patch --dry-run` shows a proposed bump; after explicit maintainer approval, `s/version++ patch` or `minor` lands the release commit and starts the tested CI tag/prerelease cascade. All 0.x snapshots are development prereleases, not clinical approval. See the [changelog](CHANGELOG.md).
+
 ## Licence
 
 Source code is licensed under [LGPL-3.0-or-later](LICENSE). Documentation and clinical content are licensed under CC-BY-SA-4.0. The NHS SPOT/NPEWS specification and reference chart images remain the property of NHS England.

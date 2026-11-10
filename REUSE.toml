@@ -23,6 +23,7 @@ path = [
   "package.json",
   "package-lock.json",
   "requirements.txt",
+  ".git-cliff-version",
   "vitest.config.js",
   "spec/npews-scoring-spec.json",
   "test/fhir/fixtures/*.json",

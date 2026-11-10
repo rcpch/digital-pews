@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# A landed version bump is the release action. Validate the exact push SHA,
+# create an annotated tag, then call release.yml explicitly: tags created with
+# GITHUB_TOKEN do not themselves trigger another push workflow.
+name: Auto-tag development release
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+permissions:
+  contents: read
+concurrency:
+  group: development-release
+  cancel-in-progress: false
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+      - id: version
+        run: node s/release-ci.mjs detect
+        env:
+          RELEASE_BASE: ${{ github.event.before }}
+  validate:
+    needs: detect
+    if: needs.detect.outputs.tag != ''
+    uses: $/.github/workflows/ci.yml
+  tag:
+    needs: [detect, validate]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+      - run: node s/release-ci.mjs tag
+        env:
+          RELEASE_TAG: ${{ needs.detect.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+  publish:
+    needs: [detect, tag]
+    permissions:
+      contents: write
+    uses: $/.github/workflows/release.yml
+    with:
+      tag: ${{ needs.detect.outputs.tag }}

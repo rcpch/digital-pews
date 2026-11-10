@@ -23,6 +23,7 @@ nav:
       # SCENARIO_NAV
   - Integration: integration.md
   - Clinical safety: SAFETY.md
+  - Changelog: CHANGELOG.md
   - Specifications:
       - Specification index: spec/README.md
       # SPEC_NAV

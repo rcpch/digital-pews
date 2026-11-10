@@ -166,6 +166,7 @@ Start at `spec/README.md` - the spec index and landing page.
 - `s/docs` - preview Zensical docs and generated scenario pages (setup: `s/README.md`).
 - `s/build-site` - build one Pages artifact: existing demo at root, docs under `/docs/`.
 - `s/check-docs-nav` - dependency-free generated navigation check.
+- `s/version++ [patch|minor] --dry-run` - inspect a proposed development release; omit `--dry-run` only with explicit release approval. See `spec/releases.md`. Never tag locally or use a second release command. `package.json` is canonical; the lockfile and `chart/version.js` mirror it.
 - Edit authoritative `docs/`, `spec/`, safety and reference files, never generated `.docs-source/` or `.docs-config.yml`. Never deploy docs separately over the existing demo.
 - `npm run generate:scoring` - regenerate scoring config from the canonical JSON.
 - `npm run generate:scoring:check` - verify generated artifacts are up to date.

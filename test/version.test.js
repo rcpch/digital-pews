@@ -15,5 +15,8 @@ describe('chart/version.js matches package.json', () => {
   it('mirrors the canonical npm package version', () => {
     const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
     expect(CHART_VERSION).toBe(pkg.version);
+    const lock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
+    expect(lock.version).toBe(pkg.version);
+    expect(lock.packages[''].version).toBe(pkg.version);
   });
 });

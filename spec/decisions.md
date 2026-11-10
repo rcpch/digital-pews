@@ -5,6 +5,10 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D21 - Version development snapshots with a single-command CI cascade
+
+**2026-11-10.** Keep `package.json` as the canonical version and update its lockfile and the browser-readable `chart/version.js` mirror together through `s/version++`. Retain 0.1.0 while setting up the tooling; do not fabricate a historical release. Use git-cliff with a pinned tool version for the changelog. Land a conventional release commit by direct push or release PR, run the full CI on its immutable push SHA, then create an annotated tag and explicitly invoke the reusable publication workflow. Publish only GitHub development prereleases with source archives and safety warnings; keep NPM private and distribution bundles deferred. Automatic 1.0 bumps are blocked pending a separate stability/governance decision. Versioning is not clinical approval. See [`releases.md`](releases.md).
+
 ## D20 - Use Zensical as the documentation shell, not a chart runtime
 
 **2026-11-10.** Build documentation under `/docs/` in the same Pages artifact as the existing root demo. Generate scenario pages and sidebar entries from `demo/scenarios.js`, with each chart isolated in an iframe. Zensical retains its header and navigation; embedded demo mode hides the duplicate scenario picker and starts display controls collapsed without changing the stored standalone preference. Keep the standalone URLs and chart's native-module runtime unchanged. Stage authoritative `spec/`, safety and reference files at build time rather than maintaining duplicate clinical documentation. Zensical 0.1.0 was checked against official PyPI metadata (MIT, Python 3.11+, released 2026-11-05); dependencies are documentation-only, pinned with hashes, and tracked by Dependabot. Original Markdown and demo files remain usable if the site generator is later replaced. See [`../s/README.md`](../s/README.md) for build and preview commands.
