@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -9,12 +10,11 @@ import { describe, expect, it } from 'vitest';
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 function markdownFiles(directory) {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.isSymbolicLink() || ['.git', '.venv', 'node_modules'].includes(entry.name)) return [];
-    const path = resolve(directory, entry.name);
-    if (entry.isDirectory()) return markdownFiles(path);
-    return entry.isFile() && path.endsWith('.md') ? [path] : [];
-  });
+  // Test repository sources, including new files, not generated docs, virtual
+  // environments, private materials or dependencies excluded by .gitignore.
+  return execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z', '*.md'], {
+    cwd: directory, encoding: 'utf8',
+  }).split('\0').filter(Boolean).map(file => resolve(directory, file));
 }
 
 function localLinks(markdown) {

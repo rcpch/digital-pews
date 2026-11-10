@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Build the combined Pages artifact. One-time setup: see s/README.md.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ ! -x .venv-docs/bin/zensical ]]; then
+  echo 'Install docs tools: python3 -m venv .venv-docs && .venv-docs/bin/pip install --require-hashes -r requirements.txt' >&2
+  exit 1
+fi
+node s/prepare-docs.mjs
+.venv-docs/bin/zensical build --clean -f .docs-config.yml "$@"
+node s/assemble-site.mjs
+exec python3 s/check-site.py

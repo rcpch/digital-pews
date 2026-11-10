@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Dependency-free staging and nav-orphan check; also exercised by npm test.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+exec node s/prepare-docs.mjs "$@"

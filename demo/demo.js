@@ -21,6 +21,8 @@ import { nearestObservationIndex, observationTimelinePositions } from './playbac
 
 const host = document.getElementById('chart-host');
 const list = document.getElementById('scenario-list');
+// The docs build also hosts a self-contained demo below /docs/_demo/.
+if (location.pathname.includes('/_demo/')) document.getElementById('docs-link').href = '../';
 
 // One chart element for the whole harness; selecting a scenario re-feeds its data.
 const chartEl = document.createElement('npews-chart');
@@ -178,16 +180,18 @@ const controls = document.getElementById('demo-controls');
 const controlsToggle = document.getElementById('controls-toggle');
 const COLLAPSE_KEY = 'npews-demo-controls-collapsed';
 
-function setCollapsed(collapsed) {
+function setCollapsed(collapsed, persist = true) {
   controls.classList.toggle('demo-controls--collapsed', collapsed);
   document.body.classList.toggle('demo--controls-collapsed', collapsed);
   controlsToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-  try { localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0'); } catch (_) { /* private mode */ }
+  if (persist) {
+    try { localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0'); } catch (_) { /* private mode */ }
+  }
 }
 
 let startCollapsed = false;
 try { startCollapsed = localStorage.getItem(COLLAPSE_KEY) === '1'; } catch (_) { /* private mode */ }
-setCollapsed(startCollapsed);
+setCollapsed(document.documentElement.classList.contains('demo-embedded') || startCollapsed, false);
 
 controlsToggle.addEventListener('click', () => {
   setCollapsed(!controls.classList.contains('demo-controls--collapsed'));

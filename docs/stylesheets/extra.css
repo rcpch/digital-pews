@@ -1,0 +1,28 @@
+/* SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+   SPDX-License-Identifier: LGPL-3.0-or-later */
+
+:root {
+  --pews-brand: #0d0d58;
+  --pews-link: #006cb7;
+  --pews-border: #b5c6ce;
+  --pews-surface: #ffffff;
+  --md-primary-fg-color: var(--pews-brand);
+  --md-accent-fg-color: var(--pews-link);
+}
+
+.md-grid { max-width: 100%; }
+.md-header__button.md-logo img { width: 6rem; height: auto; }
+.md-header__button.md-logo { background: var(--pews-surface); border-radius: 0.15rem; }
+.pews-demo {
+  display: block;
+  width: 100%;
+  height: max(38rem, 78vh);
+  border: 1px solid var(--pews-border);
+  margin-block: 1rem;
+}
+
+/* The frame deliberately has its own scroll: fixed playback and chart status
+   must remain anchored to its viewport, not to the documentation document. */
+@media (max-width: 600px) {
+  .pews-demo { height: 80vh; min-height: 32rem; }
+}

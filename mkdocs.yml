@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# s/prepare-docs.mjs expands nav markers and stages authoritative source files.
+site_name: Digital PEWS
+site_description: Open-source paediatric early warning scoring and charting component
+site_url: https://rcpch.github.io/digital-pews/docs/
+repo_url: https://github.com/rcpch/digital-pews
+repo_name: rcpch/digital-pews
+edit_uri: edit/main/
+docs_dir: .docs-source
+site_dir: site
+theme:
+  variant: modern
+  logo: assets/rcpch-logo.svg
+  favicon: assets/rcpch-logo.svg
+  font: false
+extra_css:
+  - stylesheets/extra.css
+nav:
+  - Start here: index.md
+  - Demonstration:
+      - About the demo: demo/index.md
+      # SCENARIO_NAV
+  - Integration: integration.md
+  - Clinical safety: SAFETY.md
+  - Specifications:
+      - Specification index: spec/README.md
+      # SPEC_NAV
+  - NHS reference sources:
+      - Source register: reference-sources/README.md
+      # REFERENCE_NAV
+  - Contributing: CONTRIBUTING.md
+  - Project overview: project.md

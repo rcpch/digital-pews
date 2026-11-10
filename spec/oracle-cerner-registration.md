@@ -8,7 +8,7 @@ This document records how to register the Digital PEWS SMART-on-FHIR app with Or
 
 1. Create a free **CernerCare account** (the developer identity for the whole Oracle Health platform).
 2. Register the app in **code Console** (<https://code-console.cerner.com/>) - this creates a sandbox client ID and lets the app be tested immediately against Oracle's shared sandbox. This step requires no relationship with GESH.
-3. **Registration is not activation.** A registered app only runs against Oracle's sandbox until a specific customer (GESH) opts it into their tenant, which GESH does by logging a Service Request against "Cerner Ignite APIs for Millennium" - see [Per-tenant go-live](#per-tenant-go-live-separate-from-registration) below. This is a GESH-side action we cannot perform ourselves.
+3. **Registration is not activation.** A registered app only runs against Oracle's sandbox until a specific customer (GESH) opts it into their tenant, which GESH does by logging a Service Request against "Cerner Ignite APIs for Millennium" - see [Per-tenant go-live](#3-per-tenant-go-live-separate-from-registration) below. This is a GESH-side action we cannot perform ourselves.
 4. Production/PowerChart access additionally requires joining the **Oracle Health Developer Program**.
 
 ## 1. CernerCare account

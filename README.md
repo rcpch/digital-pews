@@ -39,6 +39,10 @@ A live demo is deployed to GitHub Pages from `main`:
 
 This is the full demo harness with the scenario sidebar. It updates automatically on every push to `main`.
 
+**Documentation and guided scenarios:** <https://rcpch.github.io/digital-pews/docs/>. Scenario pages keep the Zensical header and navigation around an isolated interactive demo. Existing demo URLs are preserved.
+
+For local documentation preview, install the documentation-only tools and run `s/docs`; see [`s/README.md`](s/README.md). The chart itself still has no build step or runtime dependencies.
+
 ### Demo app
 
 - Serves at <http://localhost:8000>

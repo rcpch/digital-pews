@@ -5,6 +5,10 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D20 - Use Zensical as the documentation shell, not a chart runtime
+
+**2026-11-10.** Build documentation under `/docs/` in the same Pages artifact as the existing root demo. Generate scenario pages and sidebar entries from `demo/scenarios.js`, with each chart isolated in an iframe. Zensical retains its header and navigation; embedded demo mode hides the duplicate scenario picker and starts display controls collapsed without changing the stored standalone preference. Keep the standalone URLs and chart's native-module runtime unchanged. Stage authoritative `spec/`, safety and reference files at build time rather than maintaining duplicate clinical documentation. Zensical 0.1.0 was checked against official PyPI metadata (MIT, Python 3.11+, released 2026-11-05); dependencies are documentation-only, pinned with hashes, and tracked by Dependabot. Original Markdown and demo files remain usable if the site generator is later replaced. See [`../s/README.md`](../s/README.md) for build and preview commands.
+
 ## D19 - Develop ED support from explicit national sources, not missing-data heuristics
 
 **2026-11-10.** The newly published NHS England ED charts with GCS provide evidence of distinct clinical semantics, meeting the evidence prerequisite in D16. Preserve the four public PDFs unchanged alongside the original inpatient baseline and reconcile both assessment phases against the current draft digital specification before implementing ED scoring. The public defaults retain BP and define concern-dependent non-measurement scores; missing BP alone must never select an ED profile or imply a normal score. Prefer explicit clinical-profile/phase selection and shared primitives over a forked renderer, with the API decision deferred until the comparison is complete. Existing inpatient behaviour remains unchanged. See [`ed-pews.md`](ed-pews.md) and roadmap R63-R65. Reader documentation starts in [`../docs/index.md`](../docs/index.md); the future Zensical build must share a single Pages artifact with the demo rather than competing for the same deployment (R66).

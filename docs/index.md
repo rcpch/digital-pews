@@ -2,7 +2,7 @@
 
 Digital PEWS is an open-source scoring and observation-chart component for integration into a wider clinical system. It is not a complete PEWS solution or an observation-entry system. **No clinically approved release has been designated.**
 
-This Markdown entry point is the initial documentation home. A Zensical site is planned under roadmap R66; no separate site is built or deployed yet.
+Choose a [demonstration scenario](demo/index.md) to explore the chart with synthetic data, or start with the [integration guide](integration.md). The chart remains an independent, framework-neutral component; Zensical provides this site's header, navigation and search.
 
 ## Try and integrate the component
 
@@ -21,8 +21,8 @@ This Markdown entry point is the initial documentation home. A Zensical site is 
 - [Decision log](../spec/decisions.md)
 - [Roadmap](../spec/roadmap.md)
 
-## Planned documentation site
+## About this documentation
 
-Use Zensical, following house style, with task-oriented navigation for integrators, clinical reviewers and contributors. Retain one authoritative copy of specifications, safety records and source provenance rather than maintaining a second set of clinical rules in `docs/`.
+The site uses Zensical, with navigation for integrators, clinical reviewers and contributors. Specifications, safety records and source provenance are staged from their authoritative repository files rather than maintained twice.
 
-The existing GitHub Pages workflow deploys the demo at the site root. A future Zensical build should be assembled into that same Pages artifact, for example under `/docs/`, with reciprocal links. Two independent Pages deployments would replace each other's content, so do not add a competing docs-only deployment. Preserve existing demo URLs and keep docs tooling separate from the framework-neutral, build-free `chart/` runtime.
+The existing demo URLs remain available at the site root; documentation is built under `/docs/` in the same Pages artifact. Scenario pages preserve the documentation header and sidebar while isolating the chart in an iframe. [Preview and build instructions](../s/README.md) describe the documentation-only toolchain.

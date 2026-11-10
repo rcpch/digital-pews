@@ -9,6 +9,16 @@ packages/*/node_modules/
 dist/
 packages/*/dist/
 
+# Generated documentation, combined Pages artifact and docs-only Python tooling
+/.docs-source/
+/.docs-config.yml
+/site/
+/_site/
+/.venv/
+/.venv-docs/
+/.cache/
+
+
 # Empty scaffold directories - no source files here
 packages/
 

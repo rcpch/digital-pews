@@ -18,6 +18,8 @@ SPDX-License-Identifier: LGPL-3.0-or-later -->
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet" data-npews-chart-fonts />
   <link rel="stylesheet" href="chart/styles.css" data-npews-chart-styles />
   <link rel="stylesheet" href="demo.css" />
+  <!-- Apply before first paint so docs embeds do not flash a duplicate sidebar. -->
+  <script>document.documentElement.classList.toggle('demo-embedded', new URLSearchParams(location.search).get('embed') === '1');</script>
 </head>
 <!-- data-layout is set by chart.js on load (landscape | portrait | mobile) -->
 <body class="demo">
@@ -41,6 +43,7 @@ SPDX-License-Identifier: LGPL-3.0-or-later -->
       <ul class="scenario-list" id="scenario-list" role="tablist"></ul>
 
       <p class="demo-sidebar__foot">
+        <a href="https://rcpch.github.io/digital-pews/docs/" id="docs-link">Documentation and scenario guide</a><br />
         Scores, escalation levels and the applicable age band are computed from
         each patient's date of birth and raw vital signs &mdash; never hand-typed.
       </p>

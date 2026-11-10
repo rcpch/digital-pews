@@ -16,6 +16,12 @@ body.demo {
   --demo-playback-h: 0px;
 }
 
+/* Zensical owns scenario navigation in embedded mode. The chart stays isolated
+   in its own document; this flag changes only the demonstration shell. */
+html.demo-embedded body.demo { --demo-sidebar-w: 0px; }
+html.demo-embedded .demo-sidebar { display: none; }
+.demo-sidebar__foot a { color: inherit; }
+
 .demo-shell {
   display: flex;
   align-items: stretch;

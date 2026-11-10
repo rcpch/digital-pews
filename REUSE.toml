@@ -5,6 +5,8 @@ path = [
   "*.md",
   "spec/*.md",
   "docs/*.md",
+  "docs/**/*.md",
+  "s/README.md",
   "chart/README.md",
   "demo/**/*.md",
   "smart/**/*.md",
@@ -20,6 +22,7 @@ SPDX-License-Identifier = "LGPL-3.0-or-later"
 path = [
   "package.json",
   "package-lock.json",
+  "requirements.txt",
   "vitest.config.js",
   "spec/npews-scoring-spec.json",
   "test/fhir/fixtures/*.json",

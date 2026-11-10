@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Serve Zensical and regenerate scenario/spec pages as sources change.
+# Install docs tools once as described in s/README.md; requires Node 22+.
+# Select a free port across both IP families; -a/--dev-addr overrides it.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ ! -x .venv-docs/bin/zensical ]]; then
+  echo 'Install docs tools: python3 -m venv .venv-docs && .venv-docs/bin/pip install --require-hashes -r requirements.txt' >&2
+  exit 1
+fi
+addr_given=0
+open_given=0
+args=()
+for arg in "$@"; do
+  case "$arg" in
+    -a*|--dev-addr|--dev-addr=*) addr_given=1 ;;
+    --open|-o) open_given=1 ;;
+    --no-open) open_given=1; continue ;;
+  esac
+  args+=("$arg")
+done
+set -- "${args[@]}"
+port_in_use() {
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltnH | awk '{print $4}' | awk -F: '{print $NF}' | grep -qx "$1"
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
+  else
+    (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null
+  fi
+}
+if [[ "$addr_given" -eq 0 ]]; then
+  chosen=''
+  for port in $(seq 8000 8030); do
+    if ! port_in_use "$port"; then chosen="$port"; break; fi
+  done
+  if [[ -z "$chosen" ]]; then
+    echo 'No free docs port in 8000-8030. Supply --dev-addr HOST:PORT.' >&2
+    exit 1
+  fi
+  echo "Serving docs on http://localhost:$chosen/digital-pews/docs/" >&2
+  set -- --dev-addr "localhost:$chosen" "$@"
+fi
+if [[ "$open_given" -eq 0 ]]; then set -- --open "$@"; fi
+exec node s/docs-watch.mjs "$@"

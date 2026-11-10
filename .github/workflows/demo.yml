@@ -1,12 +1,10 @@
 # SPDX-FileCopyrightText: 2026 The Royal College of Paediatrics and Child Health
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-# Builds and deploys the Digital PEWS demo to GitHub Pages.
+# Builds and deploys the Digital PEWS demo and Zensical docs to GitHub Pages.
 #
-# The demo is a static site: HTML/CSS/JS with no build step. The workflow
-# assembles a Pages artifact by copying demo/ (served at root) and chart/
-# (mounted as /chart/ so the demo's ./chart/ module imports resolve over
-# HTTP), then uploads it for deploy-pages.
+# s/build-site assembles one artifact: the unbuilt demo at root, chart/ under
+# /chart/, and Zensical under /docs/. Never deploy docs as a competing artifact.
 #
 # Method: artifact-based deploy (actions/upload-pages-artifact +
 # actions/deploy-pages). The built site is handed straight to GitHub's
@@ -28,6 +26,16 @@ on:
     paths:
       - "chart/**"
       - "demo/**"
+      - "docs/**"
+      - "spec/**"
+      - "reference-sources/**"
+      - "s/**"
+      - "mkdocs.yml"
+      - "requirements.*"
+      - "README.md"
+      - "SAFETY.md"
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
       - ".github/workflows/demo.yml"
   workflow_dispatch:
 
@@ -46,14 +54,16 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-
-      # Assemble the Pages site: demo/ at root, chart/ as /chart/
-      # This mirrors the docker-compose volume mount (demo:/app, chart:/app/chart).
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
       - run: |
-          mkdir -p _site
-          cp -r demo/* _site/
-          mkdir -p _site/chart
-          cp -r chart/* _site/chart/
+          python -m venv .venv-docs
+          .venv-docs/bin/pip install --require-hashes -r requirements.txt
+      - run: s/build-site
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
