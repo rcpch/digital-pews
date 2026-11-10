@@ -22,13 +22,13 @@ class Links(HTMLParser):
 
 
 errors = []
-pages = list((ROOT / 'docs').rglob('*.html'))
+pages = list(ROOT.rglob('*.html'))
 if not pages:
     raise SystemExit('No built documentation found. Run s/build-site first.')
 for page in pages:
     # The mirrored standalone demo contains relative runtime imports and is
     # verified in browser tests; its docs backlink is set by demo.js.
-    if '_demo' in page.relative_to(ROOT / 'docs').parts:
+    if '_demo' in page.relative_to(ROOT).parts:
         continue
     parser = Links()
     parser.feed(page.read_text())

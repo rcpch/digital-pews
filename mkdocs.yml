@@ -3,7 +3,7 @@
 # s/prepare-docs.mjs expands nav markers and stages authoritative source files.
 site_name: Digital PEWS
 site_description: Open-source paediatric early warning scoring and charting component
-site_url: https://rcpch.github.io/digital-pews/docs/
+site_url: https://rcpch.github.io/digital-pews/
 repo_url: https://github.com/rcpch/digital-pews
 repo_name: rcpch/digital-pews
 edit_uri: edit/main/

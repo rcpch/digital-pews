@@ -35,11 +35,11 @@ Press Ctrl+C to stop the services. Docker Compose will automatically clean up co
 
 A live demo is deployed to GitHub Pages from `main`:
 
-**<https://rcpch.github.io/digital-pews/>**
+**<https://rcpch.github.io/digital-pews/demo.html>**
 
 This is the full demo harness with the scenario sidebar. It updates automatically on every push to `main`.
 
-**Documentation and guided scenarios:** <https://rcpch.github.io/digital-pews/docs/>. Scenario pages keep the Zensical header and navigation around an isolated interactive demo. Existing demo URLs are preserved.
+**Documentation and guided scenarios:** <https://rcpch.github.io/digital-pews/>. This is now the default landing page. Scenario pages keep the Zensical header and navigation around an isolated interactive demo. Old `/docs/` pages redirect; the standalone harness and embedding examples keep their existing URLs. The former single-chart root page is available at `/single-chart.html` on the published site.
 
 For local documentation preview, install the documentation-only tools and run `s/docs`; see [`s/README.md`](s/README.md). The chart itself still has no build step or runtime dependencies.
 

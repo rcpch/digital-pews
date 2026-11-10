@@ -3,8 +3,8 @@
 
 # Builds and deploys the Digital PEWS demo and Zensical docs to GitHub Pages.
 #
-# s/build-site assembles one artifact: the unbuilt demo at root, chart/ under
-# /chart/, and Zensical under /docs/. Never deploy docs as a competing artifact.
+# s/build-site assembles one artifact: Zensical at root, the standalone harness
+# at /demo.html, chart/ under /chart/, and redirects from old /docs/ pages.
 #
 # Method: artifact-based deploy (actions/upload-pages-artifact +
 # actions/deploy-pages). The built site is handed straight to GitHub's

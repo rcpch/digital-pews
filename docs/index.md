@@ -7,7 +7,7 @@ Choose a [demonstration scenario](demo/index.md) to explore the chart with synth
 ## Try and integrate the component
 
 - [Project overview and quick start](../README.md)
-- [Online demonstration with synthetic data](https://rcpch.github.io/digital-pews/)
+- [Standalone demonstration with synthetic data](https://rcpch.github.io/digital-pews/demo.html)
 - [Patient and observation data contract](../spec/data-model.md)
 - [FHIR adapter](../spec/fhir.md)
 - [Product boundary and host responsibilities](../spec/product-boundary.md)
@@ -25,4 +25,4 @@ Choose a [demonstration scenario](demo/index.md) to explore the chart with synth
 
 The site uses Zensical, with navigation for integrators, clinical reviewers and contributors. Specifications, safety records and source provenance are staged from their authoritative repository files rather than maintained twice.
 
-The existing demo URLs remain available at the site root; documentation is built under `/docs/` in the same Pages artifact. Scenario pages preserve the documentation header and sidebar while isolating the chart in an iframe. [Preview and build instructions](../s/README.md) describe the documentation-only toolchain.
+Documentation is the site-root landing page. The standalone harness remains at [`demo.html`](https://rcpch.github.io/digital-pews/demo.html), and old `/docs/` pages redirect to their new locations. Scenario pages preserve the documentation header and sidebar while isolating the chart in an iframe. [Preview and build instructions](../s/README.md) describe the documentation-only toolchain.

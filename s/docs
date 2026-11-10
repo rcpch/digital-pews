@@ -40,7 +40,7 @@ if [[ "$addr_given" -eq 0 ]]; then
     echo 'No free docs port in 8000-8030. Supply --dev-addr HOST:PORT.' >&2
     exit 1
   fi
-  echo "Serving docs on http://localhost:$chosen/digital-pews/docs/" >&2
+  echo "Serving docs on http://localhost:$chosen/digital-pews/" >&2
   set -- --dev-addr "localhost:$chosen" "$@"
 fi
 if [[ "$open_given" -eq 0 ]]; then set -- --open "$@"; fi

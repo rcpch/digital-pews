@@ -5,6 +5,10 @@ implemented/documented. Supersedes the old `queries.md` working notes. Newest fi
 
 ---
 
+## D22 - Make documentation the public site-root landing page
+
+**2026-11-10.** Supersedes D20's `/docs/` placement only. Serve Zensical at the GitHub Pages project root, retaining its header and generated scenario navigation. Keep `/demo.html`, `/embed-example.html` and `/chart/` available, and expose the former single-chart root page as `/single-chart.html`. Generate redirects for old `/docs/` HTML pages with query/hash preservation, retaining their static assets and downloads for compatibility. Assemble one Pages artifact and fail on unexpected demo/docs path collisions; never overwrite the Zensical landing page with `demo/index.html`.
+
 ## D21 - Version development snapshots with a single-command CI cascade
 
 **2026-11-10.** Keep `package.json` as the canonical version and update its lockfile and the browser-readable `chart/version.js` mirror together through `s/version++`. Retain 0.1.0 while setting up the tooling; do not fabricate a historical release. Use git-cliff with a pinned tool version for the changelog. Land a conventional release commit by direct push or release PR, run the full CI on its immutable push SHA, then create an annotated tag and explicitly invoke the reusable publication workflow. Publish only GitHub development prereleases with source archives and safety warnings; keep NPM private and distribution bundles deferred. Automatic 1.0 bumps are blocked pending a separate stability/governance decision. Versioning is not clinical approval. See [`releases.md`](releases.md).
